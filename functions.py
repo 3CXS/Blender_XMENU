@@ -1,31 +1,177 @@
 import bpy
+from bpy.props import (StringProperty,
+                       BoolProperty,
+                       FloatVectorProperty,
+                       FloatProperty,
+                       EnumProperty,
+                       IntProperty,
+                       PointerProperty)
+from bl_ui.space_toolsystem_common import ToolSelectPanelHelper
+from bpy.types import Operator, AddonPreferences
+from .icons.icons import load_icons
+from.toolsets import Tools_Sculpt
 
-#/////////////////////////////////////////////////////////////////////////////////////////////////
+#////////////////////////////////////////////////////////////////////////////////////////////#
+def tool_bt(parent, cmd, w=1, h=1, text=False, icon="NONE"):
+    update_toolset()
+    tool_op(parent=parent, cmd=cmd, w=w, h=h, text=text, icon=icon)
+
+
+def tool_grid(parent, col, align, slotmin, slotmax, h=1, w=1, text=False, icon="NONE"):
+    
+    grid = parent.grid_flow(columns=col, align=align)
+    update_toolset()
+
+    for i in range(slotmin,slotmax):
+        col = grid.column()
+        tool_op(parent=col, cmd=i, w=w, h=h, text=text, icon=icon)
+
+
+def tool_op(parent, cmd='cmd', w=1, h=1, small=False, text=False, icon="NONE"):    
+    tool_icon = bpy.context.preferences.addons['XMENU'].preferences.tool_icon
+    tool_text = bpy.context.preferences.addons['XMENU'].preferences.tool_text  
+    icons = load_icons()
+
+    col = parent.column(align=True)
+    col.ui_units_x = w
+    col.scale_y = h
+
+    if tool_icon == True:
+        icon = icon
+    else: 
+        icon = 'OFF'
+    
+    if icon == 'LARGE' or icon =='CUSTOM' or icon =='OFF':
+        if icon == 'LARGE':
+            # using icons from toolpanel
+            icon_id = ToolSelectPanelHelper._icon_value_from_icon_handle(Tools_Sculpt[cmd][2])
+            toollabel = ' '
+        if icon == 'CUSTOM':
+            # using custom icons            
+            ds = icons.get(Tools_Sculpt[cmd][3])
+            if ds != None:
+                icon_id = ds.icon_id
+            else:
+                icon_id = 0
+            toollabel = ' '
+        if icon == 'OFF':
+            icon_id = 0
+            toollabel = Tools_Sculpt[cmd][0]         
+        col.operator('xmenu.settool', text=toollabel, depress=bpy.types.WindowManager.tool_state[cmd], icon_value=icon_id).cmd = Tools_Sculpt[cmd][1]
+
+    if icon != 'LARGE' and icon !='CUSTOM' and icon !='OFF':
+        # using small icons
+        icon_id = icon
+        toollabel = ' '
+        col.operator('xmenu.settool', text=toollabel, depress=bpy.types.WindowManager.tool_state[cmd], icon=icon_id).cmd = Tools_Sculpt[cmd][1]
+  
+    if text == True:
+        if tool_text == True:
+            subcol = col.column()
+            subcol.scale_y = 0.6
+            subcol.label(text=Tools_Sculpt[cmd][0])
+
+def update_toolset():        
+    list = Tools_Sculpt
+    NTools = len(list)
+    bpy.types.WindowManager.tool_state = [False for i in range(NTools)]
+    tool = bpy.context.workspace.tools.from_space_view3d_mode(bpy.context.mode)
+    toolid = str(tool.idname)
+
+    for i in range(NTools):
+        if toolid == Tools_Sculpt[i][1]:
+            bpy.types.WindowManager.tool_state[i] = True
+        else:
+            bpy.types.WindowManager.tool_state[i] = False
+
+class SetTool(bpy.types.Operator):
+    bl_idname = "xmenu.settool"
+    bl_label = "SETTOOL"
+
+    cmd: bpy.props.StringProperty()
+
+    def execute(self, context):
+        area = [area for area in bpy.context.screen.areas if area.type == "VIEW_3D"][0]
+        override_context = bpy.context.copy()
+        override_context['window'] = bpy.context.window
+        override_context['screen'] = bpy.context.screen
+        override_context['area'] = area
+        override_context['region'] = area.regions[-1]
+        override_context['scene'] = bpy.context.scene
+        override_context['space_data'] = area.spaces.active
+        
+        bpy.ops.wm.tool_set_by_id(override_context, name=self.cmd)
+        
+        return {'FINISHED'}
+
+
+def funct_bt(parent, cmd='cmd', tog=False, w=1, h=1, label='', icon="NONE"):    
+    tool_icon = bpy.context.preferences.addons['XMENU'].preferences.tool_icon
+
+    col = parent.column(align=True)
+    col.ui_units_x = w
+    col.scale_y = h
+
+    if tool_icon == True:
+        # using small icons
+        icon_id = icon
+        label = label 
+    else: 
+        label = label 
+    
+    op = 'xmenu.'
+    op += cmd
+
+    dstate = 'bpy.types.WindowManager.'
+    dstate += cmd
+    dstate += '_state'
+
+    if tog==True:
+        if eval(dstate) == True:
+            state = True
+        else:
+            state = False
+        col.operator(op, depress=state, text=label, icon=icon_id)
+    else:
+        col.operator(op, text=label, icon=icon_id)
+
+
+class Overlay(bpy.types.Operator):
+    bl_idname = "xmenu.overlay"
+    bl_label = "Overlay"
+
+    bpy.types.WindowManager.overlay_state = bpy.props.BoolProperty(default = False)   
+
+    def execute(self, context):
+        for area in bpy.context.workspace.screens[0].areas:
+            for space in area.spaces:
+                if space.type == 'VIEW_3D':
+                    space.overlay.show_wireframes = not space.overlay.show_wireframes
+                    bpy.types.WindowManager.overlay_state = space.overlay.show_wireframes
+        return {'FINISHED'}
+
+
 class XRay(bpy.types.Operator):
     bl_idname = "xmenu.xray"
     bl_label = "X-RAY"
     bpy.types.WindowManager.xray_state = bpy.props.BoolProperty(default = False)        
-    def execute(self, context):
-        ct = context.window_manager   
+    def execute(self, context):  
         for window in bpy.context.window_manager.windows:
             screen = window.screen
             for area in screen.areas:
                 if area.type == 'VIEW_3D':
                     shading = area.spaces.active.shading
-                    if shading.show_xray == False:
-                        shading.show_xray = True
-                    else:
-                        shading.show_xray = False  
-                    ct.xray_state = shading.show_xray
-                    break
+                    shading.show_xray = not shading.show_xray
+                    bpy.types.WindowManager.xray_state = shading.show_xray
         return {'FINISHED'}
 
 class Persp(bpy.types.Operator):
     bl_idname = "xmenu.persp"
-    bl_label = "PERSP"
+    label = "PERSP"
+    bl_label = label
+    
     bpy.types.WindowManager.persp_state = bpy.props.BoolProperty(default = False)        
     def execute(self, context):
-        ct = context.window_manager
         for window in bpy.context.window_manager.windows:
             screen = window.screen
             for area in screen.areas:
@@ -33,43 +179,44 @@ class Persp(bpy.types.Operator):
                     space = area.spaces.active
                     if space.region_3d.view_perspective == 'PERSP':
                         space.region_3d.view_perspective = 'ORTHO'
-                        ct.persp_state = 0
+                        bpy.types.WindowManager.persp_state = 0
+                        label = "ORTO"
                     else:
                         space.region_3d.view_perspective = 'PERSP'
-                        ct.persp_state = 1 
+                        bpy.types.WindowManager.persp_state = 1
+                        label = "PERSP"
                     #ct.persp_state = space.region_3d.view_perspective
                     break
         return {'FINISHED'} 
      
 class ViewCam(bpy.types.Operator):
     bl_idname = "xmenu.viewcam"
-    bl_label = "ACTIVE CAM"  
+    bl_label = "ACTIVE CAM" 
+
     bpy.types.WindowManager.viewcam_state = bpy.props.BoolProperty(default = False)        
     def execute(self, context):
-        ct = context.window_manager
         for window in bpy.context.window_manager.windows:
             screen = window.screen
             for area in screen.areas:
                 if area.type == 'VIEW_3D':
                     space = area.spaces.active
                     if space.region_3d.view_perspective == 'CAMERA':
-                        if ct.persp_state == 0:
+                        if bpy.types.WindowManager.persp_state == 0:
                             space.region_3d.view_perspective = 'ORTHO'
                         else:
                             space.region_3d.view_perspective = 'PERSP'
-                        ct.viewcam_state = 0
+                        bpy.types.WindowManager.viewcam_state = 0
                     else:
                         space.region_3d.view_perspective = 'CAMERA'
-                        ct.viewcam_state = 1 
+                        bpy.types.WindowManager.viewcam_state = 1 
                     break
         return {'FINISHED'}  
 
 class LockCam(bpy.types.Operator):
     bl_idname = "xmenu.lockcam"
-    bl_label = "Lock"
+    bl_label = "LOCK"
     bpy.types.WindowManager.lockcam_state = bpy.props.BoolProperty(default = False)        
     def execute(self, context):
-        ct = context.window_manager
         for window in bpy.context.window_manager.windows:
             screen = window.screen
             for area in screen.areas:
@@ -79,7 +226,7 @@ class LockCam(bpy.types.Operator):
                         space.lock_camera = True
                     else:
                         space.lock_camera = False
-                    ct.lockcam_state = space.lock_camera
+                    bpy.types.WindowManager.lockcam_state = space.lock_camera
                     break
         return {'FINISHED'}   
    
@@ -89,7 +236,6 @@ class FrameS(bpy.types.Operator):
     def execute(self, context):
         for window in bpy.context.window_manager.windows:
             screen = window.screen
-
             for area in bpy.context.screen.areas:
                 if area.type == 'VIEW_3D':
                     ctx = bpy.context.copy()
@@ -105,7 +251,6 @@ class FrameA(bpy.types.Operator):
     def execute(self, context):
         for window in bpy.context.window_manager.windows:
             screen = window.screen
-
             for area in bpy.context.screen.areas:
                 if area.type == 'VIEW_3D':
                     ctx = bpy.context.copy()
@@ -115,9 +260,10 @@ class FrameA(bpy.types.Operator):
                     break
         return {'FINISHED'} 
 
-    
-#///////////////////////////////////////////////////////////////////////////////////////////////////
-classes = (XRay, ViewCam, FrameS, FrameA, Persp, LockCam)
+
+#////////////////////////////////////////////////////////////////////////////////////////////#
+
+classes = (XRay, ViewCam, FrameS, FrameA, Persp, LockCam, SetTool, Overlay)
 
 def register():
     for cls in classes:
