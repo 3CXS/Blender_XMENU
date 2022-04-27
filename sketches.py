@@ -1,8 +1,9 @@
-        toprow = layout.row(align=False)
-        topsplit = toprow.split()
+       
 
-        topsubrow = topsplit.row()
-        topsubrow.ui_units_x = 5
+
+
+
+
         if bpy.context.mode == 'EDIT_MESH': 
             topsubrow.template_edit_mode_selection()
         else:      
@@ -71,3 +72,13 @@
         box.operator("object.select_all")
         box.operator("xmenu.xray", icon="XRAY", depress=wm.xray_state)
         box.operator("xmenu.hud", icon="XRAY", depress=wm.hud_state)
+
+
+
+    shades = top_row.row()
+    shades.ui_units_x = 5
+    if bpy.context.mode == 'EDIT_MESH': 
+        shades.template_edit_mode_selection()
+    else:      
+        shades.operator("object.shade_flat")
+        shades.operator("object.shade_smooth")

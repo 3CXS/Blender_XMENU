@@ -9,7 +9,7 @@ bl_info = {
     "category": "Interface",
 }
  
-modulesNames = ['x_panel', 'menus', 'hud', 'functions', 'preferences', 'icons', 'toolsets']
+modulesNames = ['x_panel', 'x_header', 'hud', 'menus', 'menuitems', 'functions', 'preferences', 'icons', 'toolsets'] 
  
 import sys
 import os

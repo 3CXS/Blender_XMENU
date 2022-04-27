@@ -10,8 +10,13 @@ from bl_ui.space_toolsystem_common import ToolSelectPanelHelper
 from bpy.types import Operator, AddonPreferences
 from .icons.icons import load_icons
 from.toolsets import Tools_Sculpt
+from bl_ui.properties_data_modifier import DATA_PT_modifiers
 
 #////////////////////////////////////////////////////////////////////////////////////////////#
+
+
+
+
 def tool_bt(parent, cmd, w=1, h=1, text=False, icon="NONE"):
     update_toolset()
     tool_op(parent=parent, cmd=cmd, w=w, h=h, text=text, icon=icon)
@@ -135,12 +140,24 @@ def funct_bt(parent, cmd='cmd', tog=False, w=1, h=1, label='', icon="NONE"):
     else:
         col.operator(op, text=label, icon=icon_id)
 
+class Detailsize(bpy.types.Operator):
+    bl_idname = "xmenu.detailsize"
+    bl_label = ""
 
-class Overlay(bpy.types.Operator):
-    bl_idname = "xmenu.overlay"
-    bl_label = "Overlay"
+    #bpy.types.WindowManager.detailsize_state = bpy.props.BoolProperty(default = False)
 
-    bpy.types.WindowManager.overlay_state = bpy.props.BoolProperty(default = False)   
+    size: bpy.props.FloatProperty()
+
+    def execute(self, context):
+        context.scene.tool_settings.sculpt.detail_size = self.size
+
+        return {'FINISHED'}
+
+class Wire(bpy.types.Operator):
+    bl_idname = "xmenu.wire"
+    bl_label = "Wireframe"
+
+    bpy.types.WindowManager.wire_state = bpy.props.BoolProperty(default = False)   
 
     def execute(self, context):
         for area in bpy.context.workspace.screens[0].areas:
@@ -260,10 +277,57 @@ class FrameA(bpy.types.Operator):
                     break
         return {'FINISHED'} 
 
+class SetActive(bpy.types.Operator):
+    bl_idname = "xmenu.setactive"
+    bl_label = "SetActiveCam"
+    def execute(self, context):
+        for window in bpy.context.window_manager.windows:
+            screen = window.screen
+            for area in bpy.context.screen.areas:
+                if area.type == 'VIEW_3D':
+                    ctx = bpy.context.copy()
+                    ctx['area'] = area
+                    ctx['region'] = area.regions[-1]
+                    bpy.ops.view3d.object_as_camera(ctx)
+                    bpy.types.WindowManager.viewcam_state = True
+                    break
+        return {'FINISHED'} 
+
+class Mask(bpy.types.Operator):
+    bl_idname = "xmenu.mask"
+    bl_label = ""
+    cmd: bpy.props.StringProperty()
+
+    def execute(self, context):
+        if self.cmd == 'FILL':
+            bpy.ops.paint.mask_flood_fill(mode='VALUE', value=1)
+        elif self.cmd == 'CLEAR':
+            bpy.ops.paint.mask_flood_fill(mode='VALUE', value=0)
+        elif self.cmd == "INVERT":
+            bpy.ops.paint.mask_flood_fill(mode='INVERT')
+        elif self.cmd == "SHRINK":
+            bpy.ops.sculpt.mask_filter(filter_type='SHRINK', auto_iteration_count=True)
+        elif self.cmd == "GROW":
+            bpy.ops.sculpt.mask_filter(filter_type='GROW', auto_iteration_count=True)
+        elif self.cmd == "SHARPEN":
+            bpy.ops.sculpt.mask_filter(filter_type='SHARPEN', auto_iteration_count=True)
+        elif self.cmd == "SMOOTH":
+            bpy.ops.sculpt.mask_filter(filter_type='SMOOTH', auto_iteration_count=True)
+        return {'FINISHED'}
+  
+
+
+def register():
+    bpy.utils.register_class(myModifiersPanel)
+
+def unregister():
+    bpy.utils.unregister_class(myModifiersPanel)
+
+
 
 #////////////////////////////////////////////////////////////////////////////////////////////#
 
-classes = (XRay, ViewCam, FrameS, FrameA, Persp, LockCam, SetTool, Overlay)
+classes = (XRay, ViewCam, FrameS, FrameA, Persp, LockCam, SetTool, Wire, SetActive, Detailsize, Mask)
 
 def register():
     for cls in classes:

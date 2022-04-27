@@ -8,6 +8,7 @@ class MainMenu(bpy.types.Menu):
         layout = self.layout
         layout.operator("wm.open_mainfile")
         layout.operator("wm.save_as_mainfile")
+        layout.operator("object.select_all")
 
 addon_keymaps = []
 
