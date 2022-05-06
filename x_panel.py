@@ -29,7 +29,7 @@ class XPanel(bpy.types.Panel):
         ups = ts.unified_paint_settings
         ptr = ups if ups.use_unified_color else ts.image_paint.brush
         tool_mode = context.mode
-        mesh = context.active_object.data
+        #mesh = context.active_object.data
         brush = context.tool_settings.sculpt.brush
         settings = context.tool_settings.sculpt
 
@@ -106,12 +106,20 @@ class XPanel(bpy.types.Panel):
         col.popover("VIEW3D_PT_tools_brush_texture")
         col.popover("VIEW3D_PT_tools_brush_stroke")
         col.popover("VIEW3D_PT_tools_brush_falloff")   
-        col = main_leftrow.column()
-        col.ui_units_x = 6
-
+        
+        #col = main_leftrow.column()
+        #col.ui_units_x = 4
         subrow = col.row()
         subrow.scale_y = 0.3
         BrushCopy(self, context, parent=subrow)
+
+        col = main_leftrow.column()
+        col.ui_units_x = 10
+        subrow = col.row()
+        subrow.scale_y = 1
+        subrow.menu_contents("VIEW3D_MT_BrushTexture")
+
+
         #main_leftrow.popover("VIEW3D_PT_tools_brush_display")
 
         #MAIN-MID//////////////////////////////////////////////
@@ -173,14 +181,13 @@ class XPanel(bpy.types.Panel):
         #SMOOTH/////////////////
         tool_bt(parent=midrow2_2, cmd=25, w=2.2, h=1, text=False, icon='OFF')
         #EXTRA3/////////////////
-        tool_grid(parent=midrow2_2, col=1
-        , align=True, slotmin=26, slotmax=28, w=1.2, h=1, icon='CUSTOM')
+        tool_grid(parent=midrow2_2, col=1, align=True, slotmin=26, slotmax=28, w=1.2, h=1, icon='CUSTOM')
         #CREASE//////////////     
         tool_grid(parent=midrow2_1, col=2, align=True, slotmin=7, slotmax=9, w=2, h=1.4, text=True, icon='LARGE')
         midrow2_1.separator(factor = 0.2)
         #POLISH////////////     
-        tool_grid(parent=midrow2_1, col=2, align=True, slotmin=9, slotmax=10, w=2, h=1.4, text=True, icon='LARGE')
-        midrow2_1.separator(factor = 9)
+        tool_grid(parent=midrow2_1, col=2, align=True, slotmin=9, slotmax=11, w=2, h=1.4, text=True, icon='LARGE')
+        midrow2_1.separator(factor = 0.2)
         tool_grid(parent=midrow2_2, col=2, align=True, slotmin=11, slotmax=13, w=2, h=1.4, text=True, icon='LARGE')    
         midrow2_2.separator(factor = 0.2)
         #MASK//////////// 
@@ -222,12 +229,13 @@ class XPanel(bpy.types.Panel):
         main_rightrow = main_right.row()
         main_rightrow.alignment = 'RIGHT'
 
-        sym = main_rightrow.column(align=False)
-        sym.menu_contents("VIEW3D_MT_sculpt_sym")
-        dyna = main_rightrow.column(align=False)
-        dyna.menu_contents("VIEW3D_MT_dynamesh")
-        remesh = main_rightrow.column(align=False)
-        remesh.menu_contents("VIEW3D_MT_remesh")
+        if bpy.context.mode == 'SCULPT': 
+            sym = main_rightrow.column(align=False)
+            sym.menu_contents("VIEW3D_MT_sculpt_sym")
+            dyna = main_rightrow.column(align=False)
+            dyna.menu_contents("VIEW3D_MT_dynamesh")
+            remesh = main_rightrow.column(align=False)
+            remesh.menu_contents("VIEW3D_MT_remesh")
 
 
         

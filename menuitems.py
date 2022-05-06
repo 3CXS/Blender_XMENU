@@ -1,17 +1,21 @@
 import bpy
+import os
 from bpy.props import (StringProperty,
                        BoolProperty,
                        FloatVectorProperty,
                        FloatProperty,
                        EnumProperty,
                        IntProperty,
-                       PointerProperty)
-from bl_ui.space_toolsystem_common import ToolSelectPanelHelper
-from bpy.types import Operator, AddonPreferences
+                       PointerProperty,
+                       CollectionProperty)
+#from bpy.types import Operator, AddonPreferences
 from .icons.icons import load_icons
 from.toolsets import Tools_Sculpt
-from bl_ui.properties_data_modifier import DATA_PT_modifiers
-from .functions import tool_grid, tool_bt, funct_bt
+
+#from bl_ui.properties_data_modifier import DATA_PT_modifiers
+
+from .functions import tool_grid, tool_bt, funct_bt, setup_brush_tex, _invert_ramp
+from .brushtexture import texture_path, brush_icons_path
 
 
 def ToolOptions(self, context, parent):
@@ -136,7 +140,7 @@ def SculptBrushSettings(self, context, parent):
     col = row.column()
     col.ui_units_x = 5
     col.scale_y = 0.7
-    col.prop(brush, "normal_radius_factor", slider=True, text='NORM')
+    col.prop(brush, "normal_radius_factor", slider=True, text='NORMAL')
     col.prop(brush, "hardness", slider=True, text='HARD')
 
     col = row.column()
@@ -161,16 +165,24 @@ def SculptBrushSettings(self, context, parent):
         col.prop(brush, "multiplane_scrape_angle", slider=True, text='ANGLE')
     elif sculpt_tool == 'POSE':
         col.prop(brush, "pose_ik_segments", slider=True, text='IK')
-
+    elif sculpt_tool == 'GRAB':
+        col.prop(brush, "normal_weight", slider=True, text='PEAK')
+    elif sculpt_tool == 'ELASTIC_DEFORM':
+        col.prop(brush, "normal_weight", slider=True, text='PEAK')
 
     col = row.column()
     col.ui_units_x = 5
     col.scale_y = 0.7
-    col.active = capabilities.has_plane_offset
-    col.prop(brush, "plane_offset", slider=True, text='OFFSET')
-    sub = col.row(align = True)
-    sub.prop(brush, "use_plane_trim", slider=False, toggle=True, text='TRIM')
-    sub.prop(brush, "plane_trim", slider=True)
+    if capabilities.has_plane_offset:
+        col.prop(brush, "plane_offset", slider=True, text='OFFSET')
+        sub = col.row(align = True)
+        sub.prop(brush, "use_plane_trim", slider=False, toggle=True, text='TRIM')
+        sub.prop(brush, "plane_trim", slider=True)
+    elif sculpt_tool == 'GRAB':
+        col.prop(brush, "use_grab_silhouette",  text='SILHOUETTE', toggle=True)
+        col.prop(brush, "use_grab_active_vertex",  text='VERTEX', toggle=True)
+    else:
+        col.label(text='')
 
     col = row.column()
     col.ui_units_x = 3
@@ -291,10 +303,10 @@ class VIEW3D_MT_dynamesh(bpy.types.Menu):
 
         subrow1 = sub.row(align=True)
         subrow1.scale_y = 0.8
-        subrow1.operator('xmenu.detailsize', text='2').size=2
-        subrow1.operator('xmenu.detailsize', text='4').size=4
-        subrow1.operator('xmenu.detailsize', text='8').size=8
-        subrow1.operator('xmenu.detailsize', text='16').size=16
+        subrow1.operator('xmenu.detailsize', text='3').size=3
+        subrow1.operator('xmenu.detailsize', text='5').size=5
+        subrow1.operator('xmenu.detailsize', text='9').size=9
+        subrow1.operator('xmenu.detailsize', text='17').size=17
 
         subrow3 = sub.row(align=True)
         subrow3.scale_y = 0.8
@@ -357,9 +369,123 @@ class VIEW3D_MT_remesh(bpy.types.Menu):
 
         col.operator("object.voxel_remesh", text="REMESH")
 
+class VIEW3D_MT_BrushTexture(bpy.types.Menu):
+    bl_label = ""
+    def draw(self, context):
+        layout = self.layout
+        wm = context.window_manager
+
+        mode = context.active_object.mode
+        if mode == 'TEXTURE_PAINT':
+            brush = context.tool_settings.image_paint.brush
+        if mode == 'SCULPT':
+            brush = context.tool_settings.sculpt.brush
 
 
-classes = (VIEW3D_MT_dynamesh, VIEW3D_MT_remesh, VIEW3D_MT_sculpt_sym, VIEW3D_MT_sym)
+        col = layout.column()
+        sub = col.row(align=True)
+        sub.prop(brush,"xm_tex_brush_categories",text="")
+        sub = col.row(align=True)
+        sub.scale_y = 0.5
+        sub.template_icon_view(brush,"xm_brush_texture",show_labels=True)
+        subcol = col.column(align=True)
+        sub = subcol.row(align=True)   
+        sub.prop(brush,"xm_use_mask",text="ALPHA",toggle=True)
+        sub.prop(brush,"xm_invert_mask",text="",toggle=True,icon="IMAGE_ALPHA")
+        sub = subcol.row(align=True)
+        sub.active = brush.xm_use_mask
+        sub.scale_y = 0.7
+        sub.prop(brush,"xm_ramp_tonemap_l",text="MapL",slider=True)
+        sub = subcol.row(align=True)
+        sub.active = brush.xm_use_mask
+        sub.scale_y = 0.7
+        sub.prop(brush,"xm_ramp_tonemap_r",text="MapR",slider=True)
+
+        col = layout.column()
+        col.ui_units_x = 12
+        sub = col.row(align=True)
+        sub.scale_y = 0.7
+        brush_texture_settings(col, brush, context.sculpt_object)
+        '''
+        col = layout.column()
+        col.template_icon_view(brush,"xm_stencil_texture",show_labels=True)
+        col.prop(brush,"xm_invert_stencil_mask",text="Invert Mask",toggle=True,icon="IMAGE_ALPHA")
+        '''
+
+def brush_texture_settings(layout, brush, sculpt):
+    tex_slot = brush.texture_slot
+
+    # map_mode
+    layout.prop(tex_slot, "map_mode", text="MAP")
+
+    if tex_slot.map_mode == 'STENCIL':
+        if brush.texture and brush.texture.type == 'IMAGE':
+            layout.operator("brush.stencil_fit_image_aspect")
+        layout.operator("brush.stencil_reset_transform")
+
+    # angle and texture_angle_source
+    if tex_slot.has_texture_angle:
+        col = layout.column()
+        col.prop(tex_slot, "angle", text="Angle")
+        if tex_slot.has_texture_angle_source:
+            sub = col.row(align=True)
+            sub.prop(tex_slot, "use_rake", text="RAKE", toggle=True)
+
+            if brush.brush_capabilities.has_random_texture_angle and tex_slot.has_random_texture_angle:
+                if sculpt:
+                    if brush.sculpt_capabilities.has_random_texture_angle:
+                        sub.prop(tex_slot, "use_random", text="RAND", toggle=True)
+                        if tex_slot.use_random:
+                            sub = col.row()
+                            sub.scale_y = 0.7
+                            sub.prop(tex_slot, "random_angle", text="ANGLE")
+                else:
+                    sub.prop(tex_slot, "use_random", text="RAND", toggle=True)
+                    if tex_slot.use_random:
+                        sub = col.row()
+                        sub.scale_y = 0.7
+                        sub.prop(tex_slot, "random_angle", text="ANGLE")
+
+    # scale and offset
+    row = layout.row()
+    row.scale_y = 0.7
+    row.label(text='OFFSET')
+    row = layout.row()
+    row.scale_y = 0.7
+    row.prop(tex_slot, "offset", text='')
+    row = layout.row()
+    row.scale_y = 0.7
+    row.label(text='SCALE')
+    row = layout.row()
+    row.scale_y = 0.7
+    row.prop(tex_slot, "scale", text='')
+
+    if sculpt:
+        # texture_sample_bias
+        sub = col.row()
+        sub.scale_y = 0.7
+        sub.prop(brush, "texture_sample_bias", slider=True, text="Sample Bias")
+
+
+
+
+
+
+preview_collections = {}
+def unregister_previews():
+    for pcoll in preview_collections.values():
+        bpy.utils.previews.remove(pcoll)
+    preview_collections.clear()
+        
+def register_previews():
+    import bpy.utils.previews
+    pcoll = bpy.utils.previews.new()
+    pcoll.my_previews_dir = ""
+    pcoll.my_previews = ()
+
+    #preview_collections["xm_misc_icons"] = pcoll   
+
+classes = (VIEW3D_MT_dynamesh, VIEW3D_MT_remesh, VIEW3D_MT_sculpt_sym, VIEW3D_MT_sym, VIEW3D_MT_BrushTexture)
 
 def register():
     for cls in classes:

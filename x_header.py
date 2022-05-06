@@ -27,7 +27,7 @@ def draw(self, context):
     ups = ts.unified_paint_settings
     ptr = ups if ups.use_unified_color else ts.image_paint.brush
     tool_mode = context.mode
-    mesh = context.active_object.data
+    #mesh = context.active_object.data
 
     brush = context.tool_settings.sculpt.brush
     direction = not brush.sculpt_capabilities.has_direction

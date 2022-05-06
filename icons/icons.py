@@ -19,9 +19,9 @@ def load_icons():
     NTools = len(list)
 
     for i in range(NTools):
-        if Tools_Sculpt[i][3] != '':
-            Toolname = str(Tools_Sculpt[i][3])
-            Imagename = str(Tools_Sculpt[i][3]) 
+        if Tools_Sculpt[i][4] != '':
+            Toolname = str(Tools_Sculpt[i][4])
+            Imagename = str(Tools_Sculpt[i][4]) 
             Imagename +='.png'
             custom_icons.load(Toolname, os.path.join(icons_dir, Imagename), 'IMAGE')
 
