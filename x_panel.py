@@ -114,7 +114,7 @@ class XPanel(bpy.types.Panel):
         BrushCopy(self, context, parent=subrow)
 
         col = main_leftrow.column()
-        col.ui_units_x = 10
+        col.ui_units_x = 8
         subrow = col.row()
         subrow.scale_y = 1
         subrow.menu_contents("VIEW3D_MT_BrushTexture")

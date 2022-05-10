@@ -9,14 +9,14 @@ bl_info = {
     "category": "Interface",
 }
  
-modulesNames = ['x_panel', 'x_header', 'hud', 'menus', 'menuitems', 'functions', 'preferences', 'icons', 'toolsets', 'brushtexture', 'xm_props'] 
+modulesNames = ['x_panel', 'x_header', 'hud', 'menus', 'menuitems', 'functions', 'preferences', 'icons', 'toolsets', 'brushtexture', 'properties'] 
  
 import sys
 import os
 import bpy
 import importlib
 from .icons.icons import xmenu_clear_icons
-from .import xm_props
+from .import properties
 from .import brushtexture as brushtexture
 from .functions import clear_brush_textures
 from .brushtexture import register_previews, unregister_previews, user_path
@@ -52,6 +52,3 @@ def unregister():
     menuitems.unregister_previews()
 
     xmenu_clear_icons()
-
-
-

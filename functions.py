@@ -474,10 +474,11 @@ def _mute_ramp(self,context):
         else: 
             ramp_node.mute = True
         #ramp_node.mute = not(self.xm_use_mask)
-    
+        #bpy.data.textures["xm_brush_tex"].use_color_ramp
     brush = context.tool_settings.image_paint.brush
     if brush != None:    
         brush.xm_brush_texture = brush.xm_brush_texture
+
 
 
 #////////////////////////////////////////////////////////////////////////////////////////////#

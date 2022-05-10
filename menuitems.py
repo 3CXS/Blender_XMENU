@@ -15,7 +15,7 @@ from.toolsets import Tools_Sculpt
 #from bl_ui.properties_data_modifier import DATA_PT_modifiers
 
 from .functions import tool_grid, tool_bt, funct_bt, setup_brush_tex, _invert_ramp
-from .brushtexture import texture_path, brush_icons_path
+from .brushtexture import brush_icons_path, get_brush_mode
 
 
 def ToolOptions(self, context, parent):
@@ -375,12 +375,7 @@ class VIEW3D_MT_BrushTexture(bpy.types.Menu):
         layout = self.layout
         wm = context.window_manager
 
-        mode = context.active_object.mode
-        if mode == 'TEXTURE_PAINT':
-            brush = context.tool_settings.image_paint.brush
-        if mode == 'SCULPT':
-            brush = context.tool_settings.sculpt.brush
-
+        brush = get_brush_mode(self, context)
 
         col = layout.column()
         sub = col.row(align=True)
@@ -390,7 +385,7 @@ class VIEW3D_MT_BrushTexture(bpy.types.Menu):
         sub.template_icon_view(brush,"xm_brush_texture",show_labels=True)
         subcol = col.column(align=True)
         sub = subcol.row(align=True)   
-        sub.prop(brush,"xm_use_mask",text="ALPHA",toggle=True)
+        sub.prop(brush,"xm_use_mask",text="MASK",toggle=True)
         sub.prop(brush,"xm_invert_mask",text="",toggle=True,icon="IMAGE_ALPHA")
         sub = subcol.row(align=True)
         sub.active = brush.xm_use_mask
@@ -447,18 +442,17 @@ def brush_texture_settings(layout, brush, sculpt):
                         sub.prop(tex_slot, "random_angle", text="ANGLE")
 
     # scale and offset
-    row = layout.row()
-    row.scale_y = 0.7
-    row.label(text='OFFSET')
-    row = layout.row()
-    row.scale_y = 0.7
-    row.prop(tex_slot, "offset", text='')
-    row = layout.row()
-    row.scale_y = 0.7
-    row.label(text='SCALE')
-    row = layout.row()
-    row.scale_y = 0.7
-    row.prop(tex_slot, "scale", text='')
+    row = layout.row(align=True)
+
+    sub = row.column(align=True)
+    sub.scale_y = 0.7
+    sub.label(text='OFFSET')
+    sub.prop(tex_slot, "offset", text='')
+    
+    sub = row.column(align=True)
+    sub.scale_y = 0.7
+    sub.label(text='SCALE')
+    sub.prop(tex_slot, 'scale', text='')
 
     if sculpt:
         # texture_sample_bias
@@ -468,7 +462,7 @@ def brush_texture_settings(layout, brush, sculpt):
 
 
 
-
+#bpy.data.brushes["TexDraw"].texture_slot.scale[0]
 
 
 preview_collections = {}

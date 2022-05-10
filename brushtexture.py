@@ -4,12 +4,25 @@ from bpy.types import AddonPreferences
 
 user_path = os.path.join(os.path.dirname(__file__))
 brush_icons_path = os.path.join(user_path,"icons")
-texture_path = os.path.join(user_path,"textures")
-#user_texture_path = bpy.context.preferences.addons['XMENU'].preferences.tex_path
 
 preview_collections = {}
 
 #/////////////////////////////////////////////////////////////////////#
+def get_tex_path(self, context):
+    user_texture_path = bpy.context.preferences.addons[__package__].preferences.tex_path
+    return user_texture_path
+
+
+def get_brush_mode(self, context):
+    mode = context.active_object.mode
+    if mode == 'TEXTURE_PAINT':
+        brush = context.tool_settings.image_paint.brush
+    if mode == 'SCULPT':
+        brush = context.tool_settings.sculpt.brush
+    if mode == 'VERTEX_PAINT':
+        brush = context.tool_settings.vertex_paint.brush
+    return brush
+
 def get_tex_previews(self, context,tex_type="BRUSH"):  
     misc_icons = preview_collections["xm_misc_icons"]
     icon_id = misc_icons["icon_none"].icon_id
@@ -17,12 +30,9 @@ def get_tex_previews(self, context,tex_type="BRUSH"):
     enum_items = []
     enum_items.append(("None","","None",icon_id,0))    
     
-    mode = context.active_object.mode
-    if mode == 'TEXTURE_PAINT':
-        brush = context.tool_settings.image_paint.brush
-    if mode == 'SCULPT':
-        brush = context.tool_settings.sculpt.brush
+    brush = get_brush_mode(self, context)
 
+    texture_path = get_tex_path(self,context)
     category = brush.xm_tex_brush_categories 
 
     if brush != None:
@@ -130,7 +140,6 @@ def register_previews():
     preview_collections["xm_misc_icons"] = pcoll3
 
 #/////////////////////////////////////////////////////////////////////#
-
 class XM_OT_RefreshPreviews(bpy.types.Operator):
     bl_idname = "xm.refresh_previews"
     bl_label = "Refresh Previews"
@@ -142,34 +151,18 @@ class XM_OT_RefreshPreviews(bpy.types.Operator):
         return True
 
     def execute(self, context):
-        refresh_previews()
+        #refresh_previews()
         context.window_manager.xm_brush_textures_loaded = False
         context.window_manager.xm_stencil_textures_loaded = False
         return {"FINISHED"}
     
-class XM_OT_OpenTextureFolder(bpy.types.Operator):
-    bl_idname = "xm.open_texture_folder"
-    bl_label = "Open Texture Folder"
-    bl_description = ""
-    bl_options = {"REGISTER"}
-
-    @classmethod
-    def poll(cls, context):
-        return True
-
-    def execute(self, context):
-        bpy.ops.wm.path_open(filepath = texture_path)
-        return {"FINISHED"}
-
 #/////////////////////////////////////////////////////////////////////#
-classes = (XM_OT_RefreshPreviews, XM_OT_OpenTextureFolder)
+
 def register():
-    for cls in classes:
-        bpy.utils.register_class(cls)
+    bpy.utils.register_class(XM_OT_RefreshPreviews)
     
 def unregister():
-    for cls in classes:
-        bpy.utils.unregister_class(cls)
+    bpy.utils.unregister_class(XM_OT_RefreshPreviews)
 
 
 
