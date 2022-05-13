@@ -4,7 +4,7 @@ from .functions import tool_grid, tool_bt, funct_bt
 from bpy.types import Operator, AddonPreferences
 from bl_ui.properties_data_modifier import DATA_PT_modifiers
 from bpy.types import Header, Panel
-from .menuitems import SculptBrushSettings, ViewCam, Color, ToolOptions, TopoRake, BrushCopy
+from .menuitems import ViewCam, Color, ToolOptions, BrushCopy, Falloff, SculptBrushSettings, SculptToolSettings, SculptMask, SculptFaceSet, SculptTrim, Stroke, SmoothStroke
 #////////////////////////////////////////////////////////////////////////////////////////////#
 
 class XPanel(bpy.types.Panel):
@@ -33,60 +33,57 @@ class XPanel(bpy.types.Panel):
         brush = context.tool_settings.sculpt.brush
         settings = context.tool_settings.sculpt
 
-
         #LAYOUT-STRUCTURE/////////////////////////////////////////
-        top_row = layout.row(align=False)
-        top_left = top_row.row(align=False)
+        top_row = layout.row()
+        top_left = top_row.row()
         top_left.ui_units_x = 20
-        top_left.alignment = 'LEFT'
-        top_mid = top_row.row(align=False)
+        top_left.alignment = 'RIGHT'
+        top_mid = top_row.row()
         top_mid.alignment = 'CENTER'
-        top_right = top_row.row(align=False)
+        top_right = top_row.row()
         top_right.ui_units_x = 20
-        top_right.alignment = 'RIGHT'
+        top_right.alignment = 'LEFT'
 
         main_row = layout.row()   
         main_left = main_row.column()
         main_left.ui_units_x = 20
-        main_left.alignment = 'LEFT'
+        main_left.alignment = 'RIGHT'
         main_mid = main_row.column()
         main_mid.alignment = 'CENTER'
         main_right = main_row.column()
         main_right.ui_units_x = 20
-        main_right.alignment = 'RIGHT'
+        main_right.alignment = 'LEFT'
 
         #TOP-ROW////////////////////////////////////////////////////////////////////////////////#
-        SculptBrushSettings(self, context, parent=top_mid)
-
         #TOP-LEFT//////////////////////////////////////////// 
-        shades = top_left.row()
-        shades.ui_units_x = 5
+        row = top_left.row()
+        row.ui_units_x = 5
+
         if bpy.context.mode == 'EDIT_MESH': 
-            shades.template_edit_mode_selection()
+            row.template_edit_mode_selection()
         else:      
-            shades.operator("object.shade_flat")
-            shades.operator("object.shade_smooth")
-        top_left.separator(factor = 4)  
+            row.operator("object.shade_flat")
+            row.operator("object.shade_smooth")
 
-        top_left.operator('xmenu.mask', text='FILL').cmd='FILL'
-        top_left.operator('xmenu.mask', text='CLEAR').cmd='CLEAR'
-        top_left.operator('xmenu.mask', text='INV').cmd='INVERT'
-        top_left.operator('xmenu.mask', text='-').cmd='SHRINK'
-        top_left.operator('xmenu.mask', text='+').cmd='GROW'
-        top_left.operator('xmenu.mask', text='SHARP').cmd='SHARPEN'
-        top_left.operator('xmenu.mask', text='SMOOTH').cmd='SMOOTH'
+        top_left.separator(factor = 6)  
+              
         #TOP-MID//////////////////////////////////////////////
+        SculptMask(self, context, parent=top_left)
+        top_mid.separator(factor = 1)
 
+        if bpy.context.mode == 'SCULPT': 
+            SculptBrushSettings(self, context, parent=top_mid)
+        top_mid.separator(factor = 1)
 
+        col = top_right.column(align=True)
+        SculptFaceSet(self, context, parent=col)
         #TOP-RIGHT////////////////////////////////////////////
+        top_right.separator(factor = 6)
+        col = top_right.column(align=True)
+        ToolOptions(self, context, parent=col)
 
-        opt = top_right.column(align=True)
-        ToolOptions(self, context, parent=opt)
-        top_right.separator(factor = 1)  
+        top_right.separator(factor = 2)  
         funct_bt(parent=top_right, cmd='hud', tog=False, w=2, h=1, label='HUD', icon="NONE") 
-        top_right.separator(factor = 4)
-
-
         #MAIN-ROW////////////////////////////////////////////////////////////////////////////////#
         #MAIN-LEFT////////////////////////////////////////////      
         main_leftbox = main_left.box()
@@ -97,18 +94,13 @@ class XPanel(bpy.types.Panel):
         cam = main_leftrow.column(align=True)
         ViewCam(self, context, parent=cam)
 
-
         #color = main_leftrow.column()
         #Color(self, context, parent=color)
 
         col = main_leftrow.column()
         col.ui_units_x = 4
-        col.popover("VIEW3D_PT_tools_brush_texture")
-        col.popover("VIEW3D_PT_tools_brush_stroke")
-        col.popover("VIEW3D_PT_tools_brush_falloff")   
+        #col.popover("VIEW3D_PT_tools_brush_falloff")   
         
-        #col = main_leftrow.column()
-        #col.ui_units_x = 4
         subrow = col.row()
         subrow.scale_y = 0.3
         BrushCopy(self, context, parent=subrow)
@@ -116,9 +108,11 @@ class XPanel(bpy.types.Panel):
         col = main_leftrow.column()
         col.ui_units_x = 8
         subrow = col.row()
-        subrow.scale_y = 1
         subrow.menu_contents("VIEW3D_MT_BrushTexture")
-
+        
+        col = main_leftrow.column()
+        col.ui_units_x = 4
+        Stroke(self, context, parent=col)
 
         #main_leftrow.popover("VIEW3D_PT_tools_brush_display")
 
@@ -128,101 +122,102 @@ class XPanel(bpy.types.Panel):
         main_midrow = main_mid.row()
         main_midrow.alignment = 'CENTER'
 
-        midsubcol1 = main_midrow.column()
-        midsubcol1.alignment = 'LEFT'
-        midrow1_1 = midsubcol1.row()
-        midrow1_1.ui_units_y = 1.7
-        midrow1_1.alignment = 'LEFT' 
-        midrow1_2 = midsubcol1.row()
-        midrow1_2.alignment = 'LEFT' 
-        midrow1_2.ui_units_y = 2.4
-        midrow1_3 = midsubcol1.row()
-        midrow1_3.alignment = 'LEFT'
-        midrow1_3.ui_units_y = 3
-
-        midsubcol2 = main_midrow.column()
-        midsubcol2.alignment = 'CENTER'
-        midrow2_1 = midsubcol2.row()
-        midrow2_1.ui_units_y = 2.4
-        midrow2_1.alignment = 'CENTER' 
-        midrow2_2 = midsubcol2.row()
-        midrow2_2.alignment = 'CENTER' 
-        midrow2_2.ui_units_y = 2.4
-        midrow2_3 = midsubcol2.row()
-        midrow2_3.alignment = 'CENTER'
-        midrow2_3.ui_units_y = 3
-
-        midsubcol3 = main_midrow.column()
-        midsubcol3.alignment = 'RIGHT'
-        midrow3_1 = midsubcol3.row()
-        midrow3_1.ui_units_y = 1.7
-        midrow3_1.alignment = 'RIGHT' 
-        midrow3_2 = midsubcol3.row()
-        midrow3_2.alignment = 'RIGHT' 
-        midrow3_2.ui_units_y = 2.4
-        midrow3_3 = midsubcol3.row()
-        midrow3_3.alignment = 'RIGHT'
-        midrow3_3.ui_units_y = 3
-
         #GRAB/////////////////
-        tool_bt(parent=midrow1_1, cmd=18, w=2, h=1.4, text=False, icon='LARGE')
-        tool_bt(parent=midrow1_1, cmd=0, w=2, h=1.4, text=False, icon='LARGE')
-        midrow1_1.separator(factor = 0.2)
-        midrow1_2.separator(factor = 4)
-        #EXTRA3/////////////////
-        tool_grid(parent=midrow1_2, col=3, align=True, slotmin=19, slotmax=23, w=1.2, h=1, icon='CUSTOM')
-        midrow1_2.separator(factor = 0.2)
+        col = main_midrow.column()
+        col.alignment = 'LEFT'
+        row = col.row(align=True)
+        sub = row.column(align=True)
+        sub.ui_units_x = 2
+        sub.scale_y = 0.7
+        sub.operator('xmenu.mask', text='PVT M').cmd='PMASKED'
+        sub.operator('xmenu.mask', text='RESET').cmd='ORIGIN'
+        tool_bt(parent=row, cmd=18, w=2, h=1.4, text=False, icon='LARGE')
+        row.separator(factor = 1)
+        tool_bt(parent=row, cmd=0, w=2, h=1.4, text=False, icon='LARGE')
+        #EXTRA/////////////////
+        col.separator(factor = 0.4)
+        row = col.row()
+        row.separator(factor = 8)
+        tool_grid(parent=row, col=3, align=True, slotmin=19, slotmax=23, w=1.2, h=1, icon='CUSTOM')
+        #TRIM
+        col.separator(factor = 0.4)
+        row = col.row()
+        row.separator(factor = 4)
+        SculptTrim(self, context, parent=row)
         #CLAY////////////////
-        tool_grid(parent=midrow2_1, col=3, align=True, slotmin=1, slotmax=4, w=2, h=1.4, text=True, icon='LARGE')
-        midrow2_1.separator(factor = 0.2)
-        tool_grid(parent=midrow2_2, col=3, align=True, slotmin=4, slotmax=7, w=2, h=1.4, text=True, icon='LARGE')
-        #EXTRA2/////////////////
-        tool_grid(parent=midrow2_2, col=1, align=True, slotmin=23, slotmax=25, w=1.2, h=1, icon='CUSTOM')
-        #SMOOTH/////////////////
-        tool_bt(parent=midrow2_2, cmd=25, w=2.2, h=1, text=False, icon='OFF')
-        #EXTRA3/////////////////
-        tool_grid(parent=midrow2_2, col=1, align=True, slotmin=26, slotmax=28, w=1.2, h=1, icon='CUSTOM')
-        #CREASE//////////////     
-        tool_grid(parent=midrow2_1, col=2, align=True, slotmin=7, slotmax=9, w=2, h=1.4, text=True, icon='LARGE')
-        midrow2_1.separator(factor = 0.2)
-        #POLISH////////////     
-        tool_grid(parent=midrow2_1, col=2, align=True, slotmin=9, slotmax=11, w=2, h=1.4, text=True, icon='LARGE')
-        midrow2_1.separator(factor = 0.2)
-        tool_grid(parent=midrow2_2, col=2, align=True, slotmin=11, slotmax=13, w=2, h=1.4, text=True, icon='LARGE')    
-        midrow2_2.separator(factor = 0.2)
+        main_midrow.separator(factor = 1)
+        col = main_midrow.column()
+        row = col.row(align=True)
+        tool_grid(parent=row, col=3, align=True, slotmin=1, slotmax=4, w=2, h=1.4, text=True, icon='LARGE')
+        col.separator(factor = 0.4)
+        row = col.row(align=True)
+        tool_grid(parent=row, col=3, align=True, slotmin=4, slotmax=7, w=2, h=1.4, text=True, icon='LARGE')
+        row = col.row(align=True)
+
+        #CREASE///////////////
+        col = main_midrow.column()
+        row = col.row()
+        row.separator(factor = 0.4)
+        tool_grid(parent=row, col=2, align=True, slotmin=7, slotmax=9, w=2, h=1.4, text=True, icon='LARGE')
+        row.separator(factor = 0.4)
+        col.separator(factor = 0.4)
+        row = col.row()
+        tool_grid(parent=row, col=1, align=True, slotmin=23, slotmax=25, w=1.2, h=1, icon='CUSTOM')
+        sub = row.column()
+        tool_bt(parent=sub, cmd=25, w=1.8, h=1, text=False, icon='OFF')
+        sub.menu_contents("VIEW3D_MT_Falloff")
+        tool_grid(parent=row, col=1, align=True, slotmin=26, slotmax=28, w=1.2, h=1, icon='CUSTOM')
+
+        #POLISH//////////// 
+        col = main_midrow.column()
+        row = col.row()
+        tool_grid(parent=row, col=2, align=True, slotmin=9, slotmax=11, w=2, h=1.4, text=True, icon='LARGE')
+        col.separator(factor = 0.4)
+        row = col.row()
+        tool_grid(parent=row, col=2, align=True, slotmin=11, slotmax=13, w=2, h=1.4, text=True, icon='LARGE')    
         #MASK//////////// 
-        tool_grid(parent=midrow3_1, col=2, align=True, slotmin=13, slotmax=14, w=2, h=1.4, icon='LARGE', text=False)
-        mask_col = midrow3_1.column()
-        mask_col.ui_units_x = 3.4
-        mask_label_col = mask_col.column()
-        mask_label_col.scale_y = 0.5
-        mask_label_col.label(text="MASK")
-        mask_grid = mask_col.grid_flow(columns=3, align=True)
-        tool_bt(parent=mask_grid, cmd=28, w=1.2, h=0.8, text=False, icon='CUSTOM')
-        tool_bt(parent=mask_grid, cmd=29, w=1, h=0.8, text=False, icon='CUSTOM')
-        tool_bt(parent=mask_grid, cmd=30, w=1.2, h=0.8, text=False, icon='CUSTOM')
-        #HIDE
-        tool_bt(parent=midrow3_1, cmd=15, w=2.4, h=1.4, text=False, icon='LARGE')
-        #FSETS//////////////
-        tool_bt(parent=midrow3_2, cmd=14, w=2, h=1.4, text=False, icon='LARGE')
-        fset_col = midrow3_2.column()        
-        fset_grid_grid = fset_col.grid_flow(columns=2, align=True)
-        tool_bt(parent=fset_grid_grid, cmd=31, w=1.5, h=0.75, text=False, icon='CUSTOM')
-        tool_bt(parent=fset_grid_grid, cmd=32, w=1.5, h=0.75, text=False, icon='CUSTOM')
-        tool_bt(parent=fset_col, cmd=33, w=1.2, h=0.5, text=False, icon='OFF')
-        #RAKE////////////////
-        TopoRake(self, context, parent=midrow3_3)
-
-
+        main_midrow.separator(factor = 1)
+        col = main_midrow.column()
+        row = col.row()
+        tool_bt(parent=row, cmd=13, w=2, h=1.4, text=False, icon='LARGE') 
+        sub = row.column()
+        sub.ui_units_x = 3.4
+        subsub = sub.column()
+        subsub.scale_y = 0.5
+        subsub.label(text="MASK")
+        grid = sub.grid_flow(columns=3, align=True)
+        tool_bt(parent=grid, cmd=28, w=1.2, h=0.8, text=False, icon='CUSTOM')
+        tool_bt(parent=grid, cmd=29, w=1, h=0.8, text=False, icon='CUSTOM')
+        tool_bt(parent=grid, cmd=30, w=1.2, h=0.8, text=False, icon='CUSTOM')
         #TRIM//////////////// 
-        trim_col = midrow3_2.column()
-        trim_col.ui_units_x = 2.4
-        trim_label_col = trim_col.column()
-        trim_label_col.scale_y = 0.5
-        trim_label_col.label(text="TRIM")
-        trim_grid = trim_col.grid_flow(columns=2, align=True)
-        tool_bt(parent=trim_grid, cmd=16, w=1.2, h=0.8, icon="CUSTOM", text=False)
-        tool_bt(parent=trim_grid, cmd=17, w=1.2, h=0.8, icon="CUSTOM", text=False)
+        sub = row.column()
+        sub.ui_units_x = 2.4
+        subsub = sub.column()
+        subsub.scale_y = 0.5
+        subsub.label(text="TRIM")
+        grid = sub.grid_flow(columns=2, align=True)
+        tool_bt(parent=grid, cmd=16, w=1.2, h=0.8, icon="CUSTOM", text=False)
+        tool_bt(parent=grid, cmd=17, w=1.2, h=0.8, icon="CUSTOM", text=False)
+        #FSETS//////////////
+        col.separator(factor = 0.4)
+        row = col.row()
+        tool_bt(parent=row, cmd=14, w=2, h=1.4, text=False, icon='LARGE')
+        sub = row.column()       
+        grid = sub.grid_flow(columns=2, align=True)
+        tool_bt(parent=grid, cmd=31, w=1.5, h=0.75, text=False, icon='CUSTOM')
+        tool_bt(parent=grid, cmd=32, w=1.5, h=0.75, text=False, icon='CUSTOM')
+        tool_bt(parent=sub, cmd=33, w=1.2, h=0.5, text=False, icon='OFF')
+        #HIDE
+        subcol = row.column()
+        subcol.ui_units_x = 2.4
+        tool_bt(parent=subcol, cmd=15, w=2.4, h=1.4, text=False, icon='LARGE')
+
+        #FILTER//////////////
+        col.separator(factor = 0.4)
+        row = col.row()
+        tool_bt(parent=row, cmd=34, w=2, h=1.4, text=False, icon='OFF')
+        SculptToolSettings(self, context, parent=row)
+
         #MAIN-RIGHT/////////////////////////////////////////////////////////////////////////////////////
         main_rightbox = main_right.box()
         main_rightbox.ui_units_y = 0.6
@@ -236,10 +231,9 @@ class XPanel(bpy.types.Panel):
             dyna.menu_contents("VIEW3D_MT_dynamesh")
             remesh = main_rightrow.column(align=False)
             remesh.menu_contents("VIEW3D_MT_remesh")
-
-
-        
+   
         #//////////////////////////////////////////////////////////////////////////////////#
+
         redraw_regions()
 
         box = layout.box()

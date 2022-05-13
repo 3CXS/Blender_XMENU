@@ -14,6 +14,35 @@ from.toolsets import Tools_Sculpt
 from mathutils import Vector
 
 #////////////////////////////////////////////////////////////////////////////////////////////#
+def paint_settings(context):
+        tool_settings = context.tool_settings
+        mode = context.mode
+        # 3D paint settings
+        if mode == 'SCULPT':
+            return tool_settings.sculpt
+        elif mode == 'PAINT_VERTEX':
+            return tool_settings.vertex_paint
+        elif mode == 'PAINT_WEIGHT':
+            return tool_settings.weight_paint
+        elif mode == 'PAINT_TEXTURE':
+            return tool_settings.image_paint
+        elif mode == 'PARTICLE':
+            return tool_settings.particle_edit
+        # 2D paint settings
+        elif mode == 'PAINT_2D':
+            return tool_settings.image_paint
+        elif mode == 'UV_SCULPT':
+            return tool_settings.uv_sculpt
+        # Grease Pencil settings
+        elif mode == 'PAINT_GPENCIL':
+            return tool_settings.gpencil_paint
+        elif mode == 'SCULPT_GPENCIL':
+            return tool_settings.gpencil_sculpt_paint
+        elif mode == 'WEIGHT_GPENCIL':
+            return tool_settings.gpencil_weight_paint
+        elif mode == 'VERTEX_GPENCIL':
+            return tool_settings.gpencil_vertex_paint
+        return None
 
 def tool_bt(parent, cmd ,w=1, h=1, text=False, icon="NONE"):
     update_toolset()
@@ -320,8 +349,34 @@ class Mask(bpy.types.Operator):
             bpy.ops.sculpt.mask_filter(filter_type='SHARPEN', auto_iteration_count=True)
         elif self.cmd == "SMOOTH":
             bpy.ops.sculpt.mask_filter(filter_type='SMOOTH', auto_iteration_count=True)
+        elif self.cmd == "PMASKED":
+            bpy.ops.sculpt.set_pivot_position(mode='UNMASKED')
+        elif self.cmd == "ORIGIN":
+            bpy.ops.sculpt.set_pivot_position(mode='ORIGIN')
+        elif self.cmd == "DIRTMASK":
+            bpy.ops.sculpt.dirty_mask()
+        elif self.cmd == "SLICEOBJ":
+            bpy.ops.mesh.paint_mask_slice()
         return {'FINISHED'}
 
+def context_override():
+    for window in bpy.context.window_manager.windows:
+        screen = window.screen
+        for area in screen.areas:
+            if area.type == 'VIEW_3D':
+                for region in area.regions:
+                    if region.type == 'WINDOW':
+                        return {'window': window, 'screen': screen, 'area': area, 'region': region, 'scene': bpy.context.scene} 
+
+'''
+bpy.ops.sculpt.face_sets_init(mode='FACE_SET_BOUNDARIES')
+bpy.ops.sculpt.face_sets_init(mode='MATERIALS')
+bpy.ops.sculpt.face_sets_init(mode='UV_SEAMS')
+bpy.ops.sculpt.face_sets_init(mode='CREASES')
+bpy.ops.sculpt.face_sets_init(mode='BEVEL_WEIGHT')
+bpy.ops.sculpt.face_sets_init(mode='SHARP_EDGES')
+bpy.ops.sculpt.face_sets_init(mode='FACE_MAPS')
+'''
 #////////////////////////////////////////////////////////////////////////////////////////////#
 
 #////////////////////////////////////////////////////////////////////////////////////////////#

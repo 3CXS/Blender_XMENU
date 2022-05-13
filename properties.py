@@ -173,7 +173,7 @@ def register():
     bpy.types.Brush.xm_use_mask = BoolProperty(default=False,update=mute_ramp)
 
     bpy.types.Texture.xm_invert_mask = BoolProperty(default=False,update=invert_ramp)
-    bpy.types.Brush.xm_invert_mask = BoolProperty(default=True,update=invert_ramp)
+    bpy.types.Brush.xm_invert_mask = BoolProperty(default=False,update=invert_ramp)
     bpy.types.Texture.xm_invert_stencil_mask = BoolProperty(default=False,update=invert_stencil_ramp)
     bpy.types.Brush.xm_invert_stencil_mask = BoolProperty(default=False,update=invert_stencil_ramp)
 

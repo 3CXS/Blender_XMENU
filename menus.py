@@ -1,4 +1,6 @@
 import bpy
+from .menuitems import ViewCam, Color, ToolOptions, BrushCopy, SculptBrushSettings, SculptToolSettings, SculptMask, SculptFaceSet, SculptTrim, Stroke, SmoothStroke
+
 
 class MainMenu(bpy.types.Menu):
     bl_label = "xmenu.main_menu"
@@ -9,6 +11,8 @@ class MainMenu(bpy.types.Menu):
         layout.operator("wm.open_mainfile")
         layout.operator("wm.save_as_mainfile")
         layout.operator("object.select_all")
+        col = layout.column()
+
 
 addon_keymaps = []
 

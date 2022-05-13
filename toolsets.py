@@ -24,7 +24,7 @@ Tools_Sculpt= [
                 ('THUMB',               'builtin_brush.Thumb',              '',             'brush.sculpt.thumb',               'THUMB'),
                 ('BLOB',                'builtin_brush.Blob',               '',             'brush.sculpt.blob',                'BLOB'), 
                 ('CLAY_THUMB',          'builtin_brush.Clay Thumb',         '',             'brush.sculpt.clay_thumb',          'CLAY_THUMB'),
-                ('SMOOTH',              'builtin_brush.Smooth',             '',             'brush.sculpt.smooth',              'SMOOTH'),
+                ('SMTH',                'builtin_brush.Smooth',             '',             'brush.sculpt.smooth',              'SMOOTH'),
                 ('MULTIPLANE_SCRAPE',   'builtin_brush.Multi-plane Scrape', '',             'brush.sculpt.multiplane_scrape',   'MULTIPLANE_SCRAPE'),
                 ('CLOTH',               'builtin_brush.Cloth',              '',             'brush.sculpt.cloth',               'CLOTH'),                
                 ('BX',                  'builtin.box_mask',                 '',             'ops.sculpt.border_mask',           'BOX_MASK'),
@@ -33,6 +33,7 @@ Tools_Sculpt= [
                 ('BOX_FACESET',         'builtin.box_face_set',             '',             'ops.sculpt.border_face_set',       'BOX_FACESET'),
                 ('LASSO_FACESET',       'builtin.lasso_face_set',           '',             'ops.sculpt.lasso_face_set',        'LASSO_FACESET'),
                 ('EDIT',                'builtin.face_set_edit',            '',             'ops.sculpt.face_set_edit',         'EDIT_FACESET'),
+                ('FILTER',              'builtin.mesh_filter',              '',             'ops.sculpt.mesh_filter',           '')
                 ]   
 
 #bpy.context.workspace.tools.from_space_view3d_mode(bpy.context.mode).idname
