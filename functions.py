@@ -12,7 +12,7 @@ from bpy.types import Operator, AddonPreferences
 from .icons.icons import load_icons
 from.toolsets import Tools_Sculpt
 from mathutils import Vector
-
+from .brushtexture import get_brush_mode
 #////////////////////////////////////////////////////////////////////////////////////////////#
 def paint_settings(context):
         tool_settings = context.tool_settings
@@ -436,6 +436,7 @@ def setup_brush_tex(img_path,tex_type="BRUSH"):
     image_node.location = [0,0]
     image_node.image = brush_img
     
+    '''
     if "ColorRamp" not in node_tree.nodes:    
         ramp_node = node_tree.nodes.new('TextureNodeValToRGB')
         
@@ -460,59 +461,66 @@ def setup_brush_tex(img_path,tex_type="BRUSH"):
         else:    
             ramp_node.color_ramp.elements[0].color = [0,0,0,1]
             ramp_node.color_ramp.elements[1].color = [1,1,1,1]
-                
-    
+    node_tree.links.new(ramp_node.inputs['Fac'],image_node.outputs['Image'])
+    node_tree.links.new(output_node.inputs['Color'],ramp_node.outputs['Color']) 
+    '''
+
     if "Output" not in node_tree.nodes:
         output_node = node_tree.nodes.new('TextureNodeOutput')
     else:
         output_node = node_tree.nodes['Output']
     output_node.location = [500,0]
-    
-    node_tree.links.new(ramp_node.inputs['Fac'],image_node.outputs['Image'])
-    node_tree.links.new(output_node.inputs['Color'],ramp_node.outputs['Color'])   
+
+    node_tree.links.new(output_node.inputs['Color'],image_node.outputs['Image']) 
     
     return brush_tex
 
 #////////////////////////////////////////////////////////////////////////////////////////////#
+
 def _invert_ramp(self,context,tex_type="BRUSH"):
     if ("xm_brush_tex" in bpy.data.textures and tex_type == "BRUSH") or ("xm_stencil_tex" in bpy.data.textures and tex_type == "STENCIL"):
-        
-        if tex_type == "BRUSH":
-            node_tree = bpy.data.textures["xm_brush_tex"].node_tree
-            tmp_color_01 = Vector((1,1,1,1))
-            tmp_color_02 = Vector((1,1,1,0))
-        elif tex_type == "STENCIL":
-            node_tree = bpy.data.textures["xm_stencil_tex"].node_tree
-            tmp_color_01 = Vector((1,1,1,1))
-            tmp_color_02 = Vector((0,0,0,1))
-        
-        if node_tree != None:
-            ramp_node = node_tree.nodes["ColorRamp"]
-            
-            if tex_type == "BRUSH":      
+        if self.xm_use_mask == True:
+            if tex_type == "BRUSH":
+                tmp_color_01 = Vector((1,1,1,1))
+                tmp_color_02 = Vector((1,1,1,0))
                 if self.xm_invert_mask:
-                    ramp_node.color_ramp.elements[0].color = tmp_color_01
-                    ramp_node.color_ramp.elements[1].color = tmp_color_02
+                    bpy.data.textures["xm_brush_tex"].color_ramp.elements[0].color = tmp_color_01
+                    bpy.data.textures["xm_brush_tex"].color_ramp.elements[1].color = tmp_color_02
                 else:
-                    ramp_node.color_ramp.elements[0].color = tmp_color_02
-                    ramp_node.color_ramp.elements[1].color = tmp_color_01    
+                    bpy.data.textures["xm_brush_tex"].color_ramp.elements[0].color = tmp_color_02
+                    bpy.data.textures["xm_brush_tex"].color_ramp.elements[1].color = tmp_color_01
             elif tex_type == "STENCIL":
+                tmp_color_01 = Vector((1,1,1,1))
+                tmp_color_02 = Vector((0,0,0,1))
                 if self.xm_invert_stencil_mask:
-                    ramp_node.color_ramp.elements[0].color = tmp_color_01
-                    ramp_node.color_ramp.elements[1].color = tmp_color_02
+                    bpy.data.textures["xm_brush_tex"].color_ramp.elements[0].color = tmp_color_01
+                    bpy.data.textures["xm_brush_tex"].color_ramp.elements[1].color = tmp_color_02
                 else:
-                    ramp_node.color_ramp.elements[0].color = tmp_color_02
-                    ramp_node.color_ramp.elements[1].color = tmp_color_01   
+                    bpy.data.textures["xm_brush_tex"].color_ramp.elements[0].color = tmp_color_02
+                    bpy.data.textures["xm_brush_tex"].color_ramp.elements[1].color = tmp_color_01   
+    
+
+
 
 def _tonemap(self,context,tex_type="BRUSH"):
-    
+    brush = get_brush_mode(self, context)
     if (tex_type == "BRUSH" and "xm_brush_tex" in bpy.data.textures) or (tex_type == "STENCIL" and "xm_stencil_tex" in bpy.data.textures):
         if tex_type == "BRUSH":
             node_tree = bpy.data.textures["xm_brush_tex"].node_tree
             if node_tree != None:
                 ramp_node = node_tree.nodes["ColorRamp"]
-                ramp_node.color_ramp.elements[0].position = context.tool_settings.image_paint.brush.xm_ramp_tonemap_l
-                ramp_node.color_ramp.elements[1].position = context.tool_settings.image_paint.brush.xm_ramp_tonemap_r
+                if brush == 'TEXTURE_PAINT':
+                    ramp_node.color_ramp.elements[0].position = context.tool_settings.image_paint.brush.xm_ramp_tonemap_l
+                    ramp_node.color_ramp.elements[1].position = context.tool_settings.image_paint.brush.xm_ramp_tonemap_r
+
+                if brush == 'SCULPT':
+                    ramp_node.color_ramp.elements[0].position = context.tool_settings.sculpt.brush.xm_ramp_tonemap_l
+                    ramp_node.color_ramp.elements[1].position = context.tool_settings.sculpt.brush.xm_ramp_tonemap_r
+
+                if brush == 'VERTEX_PAINT':
+                    ramp_node.color_ramp.elements[0].position = context.tool_settings.vertex_paint.brush.xm_ramp_tonemap_l
+                    ramp_node.color_ramp.elements[1].position = context.tool_settings.vertex_paint.brush.xm_ramp_tonemap_r
+
         elif tex_type == "STENCIL":
             node_tree = bpy.data.textures["xm_stencil_tex"].node_tree
             if node_tree != None:
@@ -520,17 +528,14 @@ def _tonemap(self,context,tex_type="BRUSH"):
                 ramp_node.color_ramp.elements[0].position = context.tool_settings.image_paint.brush.xm_stencil_ramp_tonemap_l
                 ramp_node.color_ramp.elements[1].position = context.tool_settings.image_paint.brush.xm_stencil_ramp_tonemap_r
 
-def _mute_ramp(self,context):    
-    if "xm_brush_tex" in bpy.data.textures: 
-        node_tree = bpy.data.textures["xm_brush_tex"].node_tree
-        ramp_node = node_tree.nodes["ColorRamp"]
-        if self.xm_use_mask == True:
-            ramp_node.mute = False
-        else: 
-            ramp_node.mute = True
-        #ramp_node.mute = not(self.xm_use_mask)
-        #bpy.data.textures["xm_brush_tex"].use_color_ramp
-    brush = context.tool_settings.image_paint.brush
+def _mute_ramp(self,context):
+    brush = get_brush_mode(self, context)
+    if "xm_brush_tex" in bpy.data.textures:
+        if self.xm_use_mask == True and self.xm_sculpt == False:
+            bpy.data.textures["xm_brush_tex"].use_color_ramp = True
+        else:
+            bpy.data.textures["xm_brush_tex"].use_color_ramp = False
+
     if brush != None:    
         brush.xm_brush_texture = brush.xm_brush_texture
 

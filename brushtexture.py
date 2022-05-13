@@ -155,7 +155,7 @@ class XM_OT_RefreshPreviews(bpy.types.Operator):
         context.window_manager.xm_brush_textures_loaded = False
         context.window_manager.xm_stencil_textures_loaded = False
         return {"FINISHED"}
-    
+ 
 #/////////////////////////////////////////////////////////////////////#
 
 def register():

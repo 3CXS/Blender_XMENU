@@ -2,7 +2,7 @@ import bpy
 import os
 from .icons.icons import load_icons
 from.toolsets import Tools_Sculpt
-from .functions import tool_grid, tool_bt, funct_bt, setup_brush_tex, _invert_ramp, paint_settings
+from .functions import tool_grid, tool_bt, funct_bt, setup_brush_tex, _invert_ramp, _mute_ramp, paint_settings
 from .brushtexture import brush_icons_path, get_brush_mode
 #from bl_ui.properties_data_modifier import DATA_PT_modifiers
 
@@ -50,22 +50,21 @@ def BrushCopy(self, context, parent):
     settings = context.tool_settings.sculpt
 
     col = parent.column(align=True)     
-    col.ui_units_x = 2
-    col.ui_units_y = 1
-    row1= col.row()
-    #row1.scale_y = 0.16
-    
-    row1.template_ID_preview(settings, "brush", rows=1, cols=4, hide_buttons=True )
-    #row1.template_ID(settings, "brush", new="brush.add")
+    col.ui_units_x = 3.6
+    col.scale_y = 0.15
+    row= col.row()   
+    row.template_ID_preview(settings, "brush", rows=1, cols=4, hide_buttons=True )
+
     '''
-    row2= col.row()
-    row2.menu("VIEW3D_MT_brush_context_menu", icon='DOWNARROW_HLT', text="")
+    row.template_ID(settings, "brush", new="brush.add")
+    row= col.row()
+    row.menu("VIEW3D_MT_brush_context_menu", icon='DOWNARROW_HLT', text="")
 
     if brush is not None:
-        row2.prop(brush, "use_custom_icon", toggle=True, icon='FILE_IMAGE', text="")
+        row.prop(brush, "use_custom_icon", toggle=True, icon='FILE_IMAGE', text="")
 
         if brush.use_custom_icon:
-            row2.prop(brush, "icon_filepath", text="")
+            row.prop(brush, "icon_filepath", text="")
     '''
 #bpy.ops.brush.reset()
 
@@ -190,9 +189,6 @@ class VIEW3D_MT_Falloff(bpy.types.Menu):
             row.use_property_decorate = False
             row.prop(brush, "falloff_shape", expand=True)
         '''
-
-
-
 
 class VIEW3D_MT_StrokeAdv(bpy.types.Menu):
     bl_label = "Settings"
@@ -382,8 +378,9 @@ def SculptToolSettings(self, context, parent):
         row.prop(props, "deform_axis")
         row.prop(props, "orientation", expand=False, text='')
         if props.type == 'SURFACE_SMOOTH':
-            col.prop(props, "surface_smooth_shape_preservation", expand=False, slider=True, text='SHAPE PRES')
-            col.prop(props, "surface_smooth_current_vertex", expand=False, slider=True ,text='VERT DISP')
+            row = col.row(align=True)
+            row.prop(props, "surface_smooth_shape_preservation", expand=False, slider=True, text='SHAPE')
+            row.prop(props, "surface_smooth_current_vertex", expand=False, slider=True ,text='VERT')
         elif props.type == 'SHARPEN':
             col.prop(props, "sharpen_smooth_ratio", expand=False, slider=True ,text='SHRP<>SMTH')
             row = col.row(align=True)
@@ -528,18 +525,23 @@ class VIEW3D_MT_sculpt_sym(bpy.types.Menu):
         mesh = context.active_object.data
 
         box = layout.box()     
-        box.ui_units_x = 5.4
+        box.ui_units_x = 6
         sub = box.column(align=True)
         sub.operator("sculpt.symmetrize", text='SYM')
-        sub.prop(sculpt, "symmetrize_direction", text='')
+        subsub = sub.row(align=True)
+        subsub.scale_y = 0.7
+        subsub.prop(sculpt, "symmetrize_direction", text='')
 
         sub = box.row(align=True)
-        sub.scale_y = 0.7
+        sub.scale_y = 0.3 
         sub.label(text="RADIAL")
-        subsub = sub.column(align=True)
-        
+        sub.label(text="OFFSET")
+        sub = box.row(align=True)
+        sub.scale_y = 0.7
+        subsub = sub.column(align=True)     
         subsub.prop(sculpt, "radial_symmetry", text="")
-
+        subsub = sub.column(align=True)     
+        subsub.prop(sculpt, "tile_offset", text="")
         '''
         row = box.row(align=True, heading="Mirror")
         row.scale_y = 0.7
@@ -665,7 +667,7 @@ class VIEW3D_MT_BrushTexture(bpy.types.Menu):
     def draw(self, context):
         layout = self.layout
         wm = context.window_manager
-
+        mode = context.active_object.mode
         brush = get_brush_mode(self, context)
 
         col = layout.column()
@@ -674,19 +676,27 @@ class VIEW3D_MT_BrushTexture(bpy.types.Menu):
         sub = col.row(align=True)
         sub.scale_y = 0.5
         sub.template_icon_view(brush,"xm_brush_texture",show_labels=True)
-        subcol = col.column(align=True)
-        sub = subcol.row(align=True)   
+        if mode != "SCULPT":
+            bpy.types.Brush.xm_sculpt = False
+            col.prop(brush,"xm_use_mask",text="MASK",toggle=True)
+            col.prop(brush,"xm_invert_mask",text="",toggle=True,icon="IMAGE_ALPHA")
+        if mode == "SCULPT":
+            col.prop(brush,"xm_use_mask",text="MASK",toggle=True)
+            bpy.types.Brush.xm_sculpt = True
+        '''
+        sub = col.row(align=True)
+        subcol = sub.column(align=True)
+        subcol.scale_y = 0.7
+        subcol.prop(brush,"xm_ramp_tonemap_l",text="MapL",slider=True)
+        subcol.prop(brush,"xm_ramp_tonemap_r",text="MapR",slider=True)
+        subcol = sub.column(align=True)
+        subcol.scale_y = 1.4
+        subcol.prop(brush,"xm_invert_mask",text="",toggle=True,icon="IMAGE_ALPHA")
+        sub = col.row(align=True)
+        sub.scale_y = 0.7
         sub.prop(brush,"xm_use_mask",text="MASK",toggle=True)
-        sub.prop(brush,"xm_invert_mask",text="",toggle=True,icon="IMAGE_ALPHA")
-        sub = subcol.row(align=True)
-        sub.active = brush.xm_use_mask
-        sub.scale_y = 0.7
-        sub.prop(brush,"xm_ramp_tonemap_l",text="MapL",slider=True)
-        sub = subcol.row(align=True)
-        sub.active = brush.xm_use_mask
-        sub.scale_y = 0.7
-        sub.prop(brush,"xm_ramp_tonemap_r",text="MapR",slider=True)
-
+        col.separator(factor=0.2)
+        '''
         col = layout.column()
         col.ui_units_x = 12
         sub = col.row(align=True)
@@ -697,7 +707,7 @@ class VIEW3D_MT_BrushTexture(bpy.types.Menu):
         col.template_icon_view(brush,"xm_stencil_texture",show_labels=True)
         col.prop(brush,"xm_invert_stencil_mask",text="Invert Mask",toggle=True,icon="IMAGE_ALPHA")
         '''
-
+        
 def brush_texture_settings(layout, brush, sculpt):
     tex_slot = brush.texture_slot
 

@@ -59,7 +59,7 @@ def draw(self, context):
         else:
             top_row.label(text="XXXX")
         #top_row.prop(brush, "normal_radius_factor", slider=True)
-        top_row.separator(factor = 16)
+        top_row.separator(factor = 1)
         top_row.menu_contents("VIEW3D_MT_sym") 
         funct_bt(parent=top_row, cmd='wire', tog=True, w=2, h=1, label='WIRE', icon="NONE")
         funct_bt(parent=top_row, cmd='xray', tog=True, w=2, h=1, label='XRAY', icon="NONE")

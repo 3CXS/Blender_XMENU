@@ -91,31 +91,27 @@ class XPanel(bpy.types.Panel):
         main_leftrow = main_left.row()
         main_leftrow.alignment = 'LEFT'
 
-        cam = main_leftrow.column(align=True)
-        ViewCam(self, context, parent=cam)
-
-        #color = main_leftrow.column()
-        #Color(self, context, parent=color)
+        col = main_leftrow.column(align=True)
+        ViewCam(self, context, parent=col)
+        col.separator(factor = 1)
+        
+        #Color(self, context, parent=col)
 
         col = main_leftrow.column()
         col.ui_units_x = 4
-        #col.popover("VIEW3D_PT_tools_brush_falloff")   
-        
-        subrow = col.row()
-        subrow.scale_y = 0.3
-        BrushCopy(self, context, parent=subrow)
+        col.popover("VIEW3D_PT_tools_brush_display")
+        BrushCopy(self, context, parent=col)
 
-        col = main_leftrow.column()
-        col.ui_units_x = 8
-        subrow = col.row()
+        box = main_leftrow.box()     
+        box.ui_units_x = 8
+        subrow = box.row()
         subrow.menu_contents("VIEW3D_MT_BrushTexture")
-        
-        col = main_leftrow.column()
-        col.ui_units_x = 4
-        Stroke(self, context, parent=col)
 
-        #main_leftrow.popover("VIEW3D_PT_tools_brush_display")
+        box = main_leftrow.box()     
+        box.ui_units_x = 4
+        Stroke(self, context, parent=box)
 
+    
         #MAIN-MID//////////////////////////////////////////////
         main_midbox = main_mid.box()
         main_midbox.ui_units_y = 1
@@ -137,7 +133,7 @@ class XPanel(bpy.types.Panel):
         #EXTRA/////////////////
         col.separator(factor = 0.4)
         row = col.row()
-        row.separator(factor = 8)
+        row.separator(factor = 11)
         tool_grid(parent=row, col=3, align=True, slotmin=19, slotmax=23, w=1.2, h=1, icon='CUSTOM')
         #TRIM
         col.separator(factor = 0.4)
@@ -145,7 +141,7 @@ class XPanel(bpy.types.Panel):
         row.separator(factor = 4)
         SculptTrim(self, context, parent=row)
         #CLAY////////////////
-        main_midrow.separator(factor = 1)
+        main_midrow.separator(factor = 0.4)
         col = main_midrow.column()
         row = col.row(align=True)
         tool_grid(parent=row, col=3, align=True, slotmin=1, slotmax=4, w=2, h=1.4, text=True, icon='LARGE')
@@ -176,7 +172,7 @@ class XPanel(bpy.types.Panel):
         row = col.row()
         tool_grid(parent=row, col=2, align=True, slotmin=11, slotmax=13, w=2, h=1.4, text=True, icon='LARGE')    
         #MASK//////////// 
-        main_midrow.separator(factor = 1)
+        main_midrow.separator(factor = 0.4)
         col = main_midrow.column()
         row = col.row()
         tool_bt(parent=row, cmd=13, w=2, h=1.4, text=False, icon='LARGE') 
@@ -225,13 +221,17 @@ class XPanel(bpy.types.Panel):
         main_rightrow.alignment = 'RIGHT'
 
         if bpy.context.mode == 'SCULPT': 
-            sym = main_rightrow.column(align=False)
-            sym.menu_contents("VIEW3D_MT_sculpt_sym")
-            dyna = main_rightrow.column(align=False)
-            dyna.menu_contents("VIEW3D_MT_dynamesh")
-            remesh = main_rightrow.column(align=False)
-            remesh.menu_contents("VIEW3D_MT_remesh")
-   
+            col = main_rightrow.column(align=False)
+            col.menu_contents("VIEW3D_MT_sculpt_sym")
+            col = main_rightrow.column(align=False)
+            col.menu_contents("VIEW3D_MT_dynamesh")
+            col = main_rightrow.column(align=False)
+            col.menu_contents("VIEW3D_MT_remesh")
+
+        end = main_rightrow.row()
+        end.ui_units_x = 0.2
+        end.ui_units_y = 7.6
+        end.label(text="")
         #//////////////////////////////////////////////////////////////////////////////////#
 
         redraw_regions()

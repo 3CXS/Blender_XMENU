@@ -12,7 +12,7 @@ from bpy.props import   (
                         IntVectorProperty
                         )
 
-from .functions import _tonemap, _invert_ramp, _mute_ramp, setup_brush_tex 
+from .functions import _tonemap, _invert_ramp, _mute_ramp, setup_brush_tex
 from .brushtexture import get_tex_path, get_tex_previews, get_brush_tex_previews, get_stencil_tex_previews, get_brush_mode
 
 
@@ -40,7 +40,7 @@ def tonemap_stencil(self,context):
     
     _tonemap(self,context,tex_type="STENCIL")
 
-def mute_ramp(self,context): 
+def mute_ramp(self,context):
     context.window_manager.xm_brush_textures_loaded = False
     context.window_manager.xm_stencil_textures_loaded = False
     
@@ -77,7 +77,6 @@ def set_texture(self,context):
     context.window_manager.xm_stencil_textures_loaded = False
 
     texture_path = get_tex_path(self,context)
-
     brush = get_brush_mode(self, context)
 
     if brush != None:  
@@ -127,7 +126,7 @@ def refresh_brush_category(self,context):
     context.window_manager.xm_brush_textures_loaded = False
     context.window_manager.xm_stencil_textures_loaded = False
     texture_path = get_tex_path(self,context)
-    brush = context.tool_settings.image_paint.brush
+    brush = get_brush_mode(self, context)
     
     if brush != None:
         context.scene.xm_active_tex_brush_category = brush.xm_tex_brush_categories
@@ -135,9 +134,23 @@ def refresh_brush_category(self,context):
         if self.xm_brush_texture != "None":
             img_path = os.path.join(texture_path,category,self.xm_brush_texture)
             brush_tex = setup_brush_tex(img_path)
-            context.tool_settings.image_paint.brush.texture = brush_tex  
+            if brush == 'TEXTURE_PAINT':
+                context.tool_settings.image_paint.brush.texture = brush_tex
+                bpy.types.Texture.xm_sculpt.xm_sculpt = False
+            if brush == 'SCULPT':
+                context.tool_settings.sculpt.brush.texture = brush_tex
+                bpy.types.Texture.xm_sculpt.xm_sculpt = False
+            if brush == 'VERTEX_PAINT':
+                context.tool_settings.vertex_paint.brush.texture = brush_tex  
+                bpy.types.Texture.xm_sculpt.xm_sculpt = False
         else:
-            context.tool_settings.image_paint.brush.texture = None  
+            if brush == 'TEXTURE_PAINT':
+                context.tool_settings.image_paint.brush.texture = None
+            if brush == 'SCULPT':
+                context.tool_settings.sculpt.brush.texture = None
+            if brush == 'VERTEX_PAINT':
+                context.tool_settings.vertex_paint.brush.texture = None
+
     bpy.ops.xm.refresh_previews()
 
 def refresh_stencil_category(self,context):
@@ -169,6 +182,8 @@ def register():
     bpy.types.Scene.xm_active_stencil_category = StringProperty(default="None")
     bpy.types.Scene.xm_active_tex_brush = StringProperty(default="None")
 
+
+    bpy.types.Texture.xm_sculpt = BoolProperty(default=False,update=mute_ramp)    
     bpy.types.Texture.xm_use_mask = BoolProperty(default=False,update=mute_ramp)
     bpy.types.Brush.xm_use_mask = BoolProperty(default=False,update=mute_ramp)
 
