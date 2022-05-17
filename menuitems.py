@@ -10,15 +10,157 @@ from bl_ui.space_toolsystem_common import (ToolSelectPanelHelper,ToolDef)
 from bpy.app.translations import contexts as i18n_contexts
 
 
+def ModeSelector(self, context, parent):
+    active = context.active_object
+
+    col = parent.column(align=False)
+    col.ui_units_x = 10
+    col.scale_x = 1.5
+
+    row = col.row(align=True)
+    row.alignment = 'RIGHT'
+
+    if active:
+        if active.type == 'MESH':
+            if context.area.type == "VIEW_3D":
+                sub = row.row(align=True)
+                sub.active = False if context.mode == ' ' else True
+                sub.operator("xm.surface_draw_mode", text="", icon="GREASEPENCIL")
+                if context.active_object.particle_systems:
+                    sub = row.row(align=True)
+                    sub.active = False if context.mode == 'PARTICLE_EDIT' else True
+                    sub.operator("object.mode_set", text="", icon="PARTICLEMODE").mode = 'PARTICLE_EDIT'
+                sub = row.row(align=True)
+                sub.active = False if context.mode == 'PAINT_TEXTURE' else True
+                sub.operator("object.mode_set", text="", icon="TPAINT_HLT").mode = 'TEXTURE_PAINT'
+                sub = row.row(align=True)
+                sub.active = False if context.mode == 'PAINT_WEIGHT' else True
+                sub.operator("object.mode_set", text="", icon="WPAINT_HLT").mode = 'WEIGHT_PAINT'
+                sub = row.row(align=True)
+                sub.active = False if context.mode == 'PAINT_VERTEX' else True
+                sub.operator("object.mode_set", text="", icon="VPAINT_HLT").mode = 'VERTEX_PAINT'
+                sub = row.row(align=True)
+                sub.active = False if context.mode == 'SCULPT' else True
+                sub.operator("object.mode_set", text="", icon="SCULPTMODE_HLT").mode = 'SCULPT'
+                sub = row.row(align=True)
+                sub.active = False if context.mode == 'OBJECT' else True
+                sub.operator("object.mode_set", text="", icon="OBJECT_DATA").mode = 'OBJECT'
+                sub = row.row(align=True)
+                sub.active = False if context.mode == 'EDIT_MESH' else True
+                sub.operator("object.mode_set", text="", icon="EDITMODE_HLT").mode = 'EDIT'
+
+        elif active.type == 'ARMATURE':
+            sub = row.row(align=True)
+            sub.active = False if context.mode == 'EDIT_ARMATURE' else True
+            sub.operator("object.mode_set", text="Edit Mode", icon='EDITMODE_HLT').mode = "EDIT"
+            sub = row.row(align=True)
+            sub.active = False if context.mode == 'POSE' else True
+            sub.operator("object.mode_set", text="Pose", icon='POSE_HLT').mode = "POSE"
+            sub = row.row(align=True)
+            sub.active = False if context.mode == 'OBJECT' else True
+            sub.operator("object.mode_set", text="", icon="OBJECT_DATA").mode = 'OBJECT'
+
+        elif active.type in ['CURVE', 'FONT', 'SURFACE', 'META', 'LATTICE']:
+            sub = row.row(align=True)
+            sub.active = False if context.mode ==  ['EDIT_CURVE', 'EDIT_TEXT', 'EDIT_SURFACE', 'EDIT_METABALL', 'EDIT_LATTICE'] else True
+            sub.operator("object.mode_set", text="Edit Mode", icon='EDITMODE_HLT').mode = "EDIT"
+            sub = row.row(align=True)
+            sub.active = False if context.mode == 'OBJECT' else True
+            sub.operator("object.mode_set", text="", icon="OBJECT_DATA").mode = 'OBJECT'
+
+        elif active.type == 'GPENCIL':
+            sub = row.row(align=True)
+            sub.active = False if context.mode == "WEIGHT_GPENCIL" else True
+            sub.operator("object.mode_set", text="", icon="WPAINT_HLT").mode = 'WEIGHT_GPENCIL'
+            sub = row.row(align=True)
+            sub.active = False if context.mode == "PAINT_GPENCIL" else True
+            sub.operator("object.mode_set", text="", icon="GREASEPENCIL").mode = 'PAINT_GPENCIL'
+            sub = row.row(align=True)
+            sub.active = False if context.mode == "SCULPT_GPENCIL" else True
+            sub.operator("object.mode_set", text="", icon="SCULPTMODE_HLT").mode = 'SCULPT_GPENCIL'
+            sub = row.row(align=True)
+            sub.active = False if context.mode == "OBJECT" else True
+            sub.operator("object.mode_set", text="", icon="OBJECT_DATA").mode = 'OBJECT'
+            sub = row.row(align=True)
+            sub.active = False if context.mode == 'EDIT_GPENCIL' else True
+            sub.operator("object.mode_set", text="", icon="EDITMODE_HLT").mode = 'EDIT_GPENCIL'
+
+        elif active.type == 'EMPTY':
+            sub = row.row(align=True)
+            sub.label(text="NONE")
+    else:
+        sub = row.row(align=True)
+        sub.label(text="NONE")
+
+def Transforms(self, context, parent):
+    ob = context.active_object
+    box = parent.box()
+    row = box.row()
+    if ob != None:
+        col = row.column(align=True)
+        col.ui_units_x = 1.2
+        sub = col.row(align=True)
+        sub.label(text="POS")
+        sub = col.row(align=True)
+        sub.label(text="ROT")
+        sub = col.row(align=True)
+        sub.label(text="SCL")
+
+        col = row.column(align=True)
+        col.ui_units_x = 8
+        sub = col.row(align=True)
+        sub.scale_y = 0.8
+        sub.prop(ob, "location", text="")
+        sub = col.row(align=True)
+        sub.scale_y = 0.8
+        sub.prop(ob, "rotation_euler", text="")
+        sub = col.row(align=True)
+        sub.scale_y = 0.8
+        sub.prop(ob, "scale", text="")
+        col.separator(factor=1)
+        sub = col.row(align=True)
+        sub.operator('object.transform_apply', text='APPLY')
+        col.separator(factor=1)
+        sub = col.row(align=True)
+        sub.scale_y = 0.7 
+        sub.label(text="RESET TRANSFORMS")
+        sub = col.row(align=True)
+        sub.operator('object.location_clear', text='POS').clear_delta=False
+        sub.operator('object.rotation_clear', text='ROT').clear_delta=False
+        sub.operator('object.scale_clear', text='SCL').clear_delta=False
+    else:
+        col = row.column(align=True)
+        col.ui_units_x = 8
+        sub = col.row(align=True)
+        sub.scale_y = 0.8
+        sub.label(text="----")
+
+def SetPivot(self, context, parent):
+    ob = context.active_object
+    box = parent.box()
+    col = box.column(align=True)
+    col.ui_units_x = 4
+    col.label(text="SET PIVOT")
+    
+    op = col.operator('object.origin_set', text='COG')
+    op.type = 'ORIGIN_GEOMETRY'
+    op.center ='MEDIAN'
+    op = col.operator('object.origin_set', text='CURSOR')
+    op.type = 'ORIGIN_CURSOR'
+    op.center ='MEDIAN'
+    col.operator('object.pivotobottom', text='BOTTOM')
+
 def ToolOptions(self, context, parent):
     ts = context.tool_settings
     brush = context.tool_settings.sculpt.brush
 
     layout = parent
     row = parent.row(align=True)   
-
+    row.ui_units_x = 8
     if bpy.context.mode == 'OBJECT': 
-        row.prop(ts, "use_transform_data_origin", toggle=True)
+        row.prop(ts, "use_transform_data_origin", text="Origin", toggle=True)
+        row.prop(ts, "use_transform_pivot_point_align", text="Locations", toggle=True)
+        row.prop(ts, "use_transform_skip_children", text="Parents", toggle=True)
 
     elif bpy.context.mode == 'EDIT_MESH':
         row.prop(ts, "use_mesh_automerge", text="Auto Merge", toggle=True)
@@ -43,6 +185,27 @@ def ToolOptions(self, context, parent):
         split.prop(brush, "use_automasking_boundary_face_sets", text="STP", toggle=True)
         split.prop(brush, "automasking_boundary_edges_propagation_steps", text="",)
         
+def ObjectToolSettings(self, context, parent):
+    layout = parent
+    tool = context.workspace.tools.from_space_view3d_mode(context.mode)
+    toolname = context.workspace.tools.from_space_view3d_mode(bpy.context.mode).idname
+
+    col = layout.column()
+    col.alignment = 'LEFT'
+    col.ui_units_x = 6
+    col.scale_y = 0.7
+
+    if toolname == 'builtin.cursor':
+        props = tool.operator_properties("view3d.cursor3d")
+        sub = col.row(align=True)
+        sub.prop(props, "use_depth")
+        sub = col.row(align=True)
+        sub.prop(props, "orientation")
+
+    else:
+        sub = col.row(align=True)
+        sub.label(text='------')
+
 
 def BrushCopy(self, context, parent):
     layout = parent
@@ -72,7 +235,10 @@ def Color(self, context, parent):
     layout = parent
     ts = context.tool_settings
     ups = ts.unified_paint_settings
-    ptr = ups if ups.use_unified_color else ts.image_paint.brush    
+    if context.mode == 'PAINT_VERTEX':
+        ptr = ts.vertex_paint.brush
+    else:
+        ptr = ups if ups.use_unified_color else ts.image_paint.brush    
     
     col = parent.column()
     col.scale_y = 0.7 
@@ -93,7 +259,8 @@ def ViewCam(self, context, parent):
 
 def Stroke(self, context, parent):
     mode = context.mode
-    brush = context.tool_settings.sculpt.brush
+    #brush = context.tool_settings.sculpt.brush
+    brush = get_brush_mode(self, context)
     settings = paint_settings(context)
 
     col = parent.column()
@@ -122,7 +289,7 @@ def Stroke(self, context, parent):
 
 def SmoothStroke(self, context, parent):
     mode = context.mode
-    brush = context.tool_settings.sculpt.brush
+    brush = get_brush_mode(self, context)
     settings = paint_settings(context)
 
     col = parent.column(align=True)
@@ -197,7 +364,7 @@ class VIEW3D_MT_StrokeAdv(bpy.types.Menu):
         layout = self.layout
 
         mode = context.mode
-        brush = context.tool_settings.sculpt.brush
+        brush = get_brush_mode(self, context)
         settings = paint_settings(context)
 
         col = layout.column()
@@ -284,6 +451,7 @@ def SculptFaceSet(self, context, parent):
 def SculptBrushSettings(self, context, parent):
     layout = parent
     brush = context.tool_settings.sculpt.brush
+    direction = not brush.sculpt_capabilities.has_direction
     settings = context.tool_settings.sculpt
     capabilities = brush.sculpt_capabilities
     sculpt_tool = brush.sculpt_tool
@@ -299,11 +467,12 @@ def SculptBrushSettings(self, context, parent):
     if sculpt_tool == 'GRAB':
         sub.prop(brush, "use_grab_silhouette",  text='SILHOUETTE', toggle=True)
         sub.prop(brush, "use_grab_active_vertex",  text='VERTEX', toggle=True)
-
-    elif (capabilities.has_topology_rake and context.sculpt_object.use_dynamic_topology_sculpting):
-        sub.prop(brush, "topology_rake_factor", slider=True, text='RAKE')
+    if direction:
+        subsub = sub.row()
+        subsub.scale_x = 1.5
+        subsub.prop(brush, "direction", expand=True, text="")
     else:
-        sub.label(text='')
+        sub.label(text="---")
 
     sub = row.row()
     sub.alignment = 'CENTER'
@@ -481,8 +650,17 @@ def SculptTrim(self, context, parent):
         sub = col.row(align=True)
         sub.label(text='')
 
+def SculptRake(self, context, parent):
+    brush = context.tool_settings.sculpt.brush
+    capabilities = brush.sculpt_capabilities
 
-
+    col = parent.column()
+    col.ui_units_x = 4
+    col.scale_y = 0.7
+    if (capabilities.has_topology_rake and context.sculpt_object.use_dynamic_topology_sculpting):
+        col.prop(brush, "topology_rake_factor", slider=True, text='RAKE')
+    else:
+        col.label(text='')
 
 class VIEW3D_MT_sym(bpy.types.Menu):
     bl_label = "Symmetry"
@@ -741,6 +919,12 @@ def brush_texture_settings(layout, brush, sculpt):
                         sub = col.row()
                         sub.scale_y = 0.7
                         sub.prop(tex_slot, "random_angle", text="ANGLE")
+    if sculpt:
+        # texture_sample_bias
+        sub = col.row()
+        sub.scale_y = 0.7
+        sub.prop(brush, "texture_sample_bias", slider=True, text="Sample Bias")
+
     '''
     # scale and offset
     row = layout.row(align=True)
@@ -755,13 +939,6 @@ def brush_texture_settings(layout, brush, sculpt):
     sub.label(text='SCALE')
     sub.prop(tex_slot, 'scale', text='')
     '''
-
-    if sculpt:
-        # texture_sample_bias
-        sub = col.row()
-        sub.scale_y = 0.7
-        sub.prop(brush, "texture_sample_bias", slider=True, text="Sample Bias")
-
 
 preview_collections = {}
 def unregister_previews():

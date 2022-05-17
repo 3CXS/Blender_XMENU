@@ -15,7 +15,6 @@ from bpy.props import   (
 from .functions import _tonemap, _invert_ramp, _mute_ramp, setup_brush_tex
 from .brushtexture import get_tex_path, get_tex_previews, get_brush_tex_previews, get_stencil_tex_previews, get_brush_mode
 
-
 def invert_ramp(self,context):
     context.window_manager.xm_brush_textures_loaded = False
     context.window_manager.xm_stencil_textures_loaded = False
@@ -171,6 +170,8 @@ def refresh_stencil_category(self,context):
     bpy.ops.xm.refresh_previews()
 
 def register():
+    bpy.types.WindowManager.xm_brush = StringProperty()
+
     bpy.types.WindowManager.xm_brush_textures_loaded = BoolProperty(default=False)
     bpy.types.WindowManager.xm_stencil_textures_loaded = BoolProperty(default=False)
 

@@ -2,6 +2,18 @@ import os
 import bpy
 from bpy.types import AddonPreferences
 
+from bpy.props import   (
+                        CollectionProperty, 
+                        StringProperty, 
+                        PointerProperty, 
+                        IntProperty, 
+                        FloatProperty, 
+                        BoolProperty, 
+                        EnumProperty, 
+                        FloatVectorProperty, 
+                        IntVectorProperty
+                        )
+
 user_path = os.path.join(os.path.dirname(__file__))
 brush_icons_path = os.path.join(user_path,"icons")
 
@@ -15,11 +27,12 @@ def get_tex_path(self, context):
 
 def get_brush_mode(self, context):
     mode = context.active_object.mode
-    if mode == 'TEXTURE_PAINT':
+    brush = context.brush
+    if mode == 'PAINT_TEXTURE':
         brush = context.tool_settings.image_paint.brush
     if mode == 'SCULPT':
         brush = context.tool_settings.sculpt.brush
-    if mode == 'VERTEX_PAINT':
+    if mode == 'PAINT_VERTEX':
         brush = context.tool_settings.vertex_paint.brush
     return brush
 

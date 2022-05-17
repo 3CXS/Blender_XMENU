@@ -53,22 +53,31 @@ def polycount():
 
 def mode():
     obj = bpy.context.active_object
-    mode = obj.mode
-    if bpy.context.object.mode == "OBJECT":
-        cmode = "OBJECT MODE"
-    elif bpy.context.object.mode == "EDIT":
-        cmode = "EDIT MODE"
-    elif bpy.context.object.mode == "SCULPT":
-        cmode = "SCULPT MODE"
-    elif bpy.context.object.mode == "VERTEX_PAINT":
-        cmode= "VERTEXPAINT MODE"
-    elif bpy.context.object.mode == "WEIGHT_PAINT":
-        cmode = "WEIGHTPAINT MODE"
-    elif bpy.context.object.mode == "TEXTURE_PAINT":
-        cmode = "TEXTUREPAINT MODE"    
-    elif bpy.context.object.mode == "POSE":
-        cmode = "POSE MODE"   
-    return cmode
+    if obj != None:
+        mode = obj.mode
+        if bpy.context.object.mode == "OBJECT":
+            cmode = "OBJECT MODE"
+        elif bpy.context.object.mode == "EDIT":
+            cmode = "EDIT MODE"
+        elif bpy.context.object.mode == "SCULPT":
+            cmode = "SCULPT MODE"
+        elif bpy.context.object.mode == "VERTEX_PAINT":
+            cmode= "VERTEXPAINT MODE"
+        elif bpy.context.object.mode == "WEIGHT_PAINT":
+            cmode = "WEIGHTPAINT MODE"
+        elif bpy.context.object.mode == "TEXTURE_PAINT":
+            cmode = "TEXTUREPAINT MODE"    
+        elif bpy.context.object.mode == "POSE":
+            cmode = "POSE MODE" 
+        elif bpy.context.object.mode == "PAINT_GPENCIL":
+            cmode = "DRAW" 
+        elif bpy.context.object.mode == "EDIT_GPENCIL":
+            cmode = "GP EDIT" 
+        elif bpy.context.object.mode == "SCULPT_GPENCIL":
+            cmode = "GP SCULPT"
+        elif bpy.context.object.mode == "WEIGHT_GPENCIL":
+            cmode = "GP WEIGHT"
+        return cmode
 
 def material():
     obj = bpy.context.active_object

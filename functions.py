@@ -10,8 +10,8 @@ from bpy.props import (StringProperty,
 from bl_ui.space_toolsystem_common import ToolSelectPanelHelper
 from bpy.types import Operator, AddonPreferences
 from .icons.icons import load_icons
-from.toolsets import Tools_Sculpt
-from mathutils import Vector
+from.toolsets import Toolset
+from mathutils import Vector, Matrix
 from .brushtexture import get_brush_mode
 #////////////////////////////////////////////////////////////////////////////////////////////#
 def paint_settings(context):
@@ -60,6 +60,8 @@ def tool_op(parent, cmd ,w=1, h=1, small=False, text=False, icon="NONE"):
     tool_text = bpy.context.preferences.addons['XMENU'].preferences.tool_text  
     icons = load_icons()
 
+    Tools = Toolset()
+
     col = parent.column(align=True)
     col.ui_units_x = w
     col.scale_y = h
@@ -72,11 +74,11 @@ def tool_op(parent, cmd ,w=1, h=1, small=False, text=False, icon="NONE"):
     if icon == 'LARGE' or icon =='CUSTOM' or icon =='OFF':
         if icon == 'LARGE':
             # using icons from toolpanel
-            icon_id = ToolSelectPanelHelper._icon_value_from_icon_handle(Tools_Sculpt[cmd][3])
+            icon_id = ToolSelectPanelHelper._icon_value_from_icon_handle(Tools[cmd][3])
             toollabel = ' '
         if icon == 'CUSTOM':
             # using custom icons            
-            ds = icons.get(Tools_Sculpt[cmd][4])
+            ds = icons.get(Tools[cmd][4])
             if ds != None:
                 icon_id = ds.icon_id
             else:
@@ -84,7 +86,7 @@ def tool_op(parent, cmd ,w=1, h=1, small=False, text=False, icon="NONE"):
             toollabel = ' '
         if icon == 'OFF':
             icon_id = 0
-            toollabel = Tools_Sculpt[cmd][0]
+            toollabel = Tools[cmd][0]
 
         col.operator('xmenu.settool', text=toollabel, depress=bpy.types.WindowManager.tool_state[cmd], icon_value=icon_id).tool_index = cmd
 
@@ -98,7 +100,7 @@ def tool_op(parent, cmd ,w=1, h=1, small=False, text=False, icon="NONE"):
         if tool_text == True:
             subcol = col.column()
             subcol.scale_y = 0.6
-            subcol.label(text=Tools_Sculpt[cmd][0])
+            subcol.label(text=Tools[cmd][0])
 
 class SetTool(bpy.types.Operator):
     bl_idname = "xmenu.settool"
@@ -116,9 +118,10 @@ class SetTool(bpy.types.Operator):
         override_context['region'] = area.regions[-1]
         override_context['scene'] = bpy.context.scene
         override_context['space_data'] = area.spaces.active
-        
-        Tool = Tools_Sculpt[self.tool_index][1]
-        Brush = Tools_Sculpt[self.tool_index][2]
+
+        Tools = Toolset()
+        Tool = Tools[self.tool_index][1]
+        Brush = Tools[self.tool_index][2]
 
         if Brush == '':
             bpy.ops.wm.tool_set_by_id(override_context, name=Tool)
@@ -129,7 +132,8 @@ class SetTool(bpy.types.Operator):
         return {'FINISHED'}
 
 def update_toolset(): 
-    list = Tools_Sculpt
+    Tools = Toolset()
+    list = Tools
     NTools = len(list)
     bpy.types.WindowManager.tool_state = [False for i in range(NTools)]
 
@@ -138,10 +142,10 @@ def update_toolset():
     brushname = bpy.context.tool_settings.sculpt.brush
 
     for i in range(NTools):
-        if Tools_Sculpt[i][2] == '' and toolid == Tools_Sculpt[i][1]:
+        if Tools[i][2] == '' and toolid == Tools[i][1]:
             bpy.types.WindowManager.tool_state[i] = True
 
-        elif Tools_Sculpt[i][2] != '' and brushname == bpy.data.brushes[Tools_Sculpt[i][2]]:
+        elif Tools[i][2] != '' and brushname == bpy.data.brushes[Tools[i][2]]:
             bpy.types.WindowManager.tool_state[i] = True
 
         else:
@@ -359,14 +363,22 @@ class Mask(bpy.types.Operator):
             bpy.ops.mesh.paint_mask_slice()
         return {'FINISHED'}
 
-def context_override():
-    for window in bpy.context.window_manager.windows:
-        screen = window.screen
-        for area in screen.areas:
-            if area.type == 'VIEW_3D':
-                for region in area.regions:
-                    if region.type == 'WINDOW':
-                        return {'window': window, 'screen': screen, 'area': area, 'region': region, 'scene': bpy.context.scene} 
+
+class SelParent(bpy.types.Operator):
+    bl_idname = "xmenu.sel_parent"
+    bl_label = "Select Parent"
+
+    direction: bpy.props.StringProperty()
+
+    def execute(self, context):
+
+        for screen in bpy.data.screens:
+            for area in (a for a in screen.areas if a.type == 'VIEW_3D'):
+                region = next((region for region in area.regions if region.type == 'WINDOW'), None)
+                if region is not None:
+                    override = {'area': area, 'region': region}
+                    bpy.ops.object.select_hierarchy(override, direction=self.direction, extend=True)
+        return {'FINISHED'}
 
 '''
 bpy.ops.sculpt.face_sets_init(mode='FACE_SET_BOUNDARIES')
@@ -435,7 +447,6 @@ def setup_brush_tex(img_path,tex_type="BRUSH"):
         image_node = node_tree.nodes['Image']
     image_node.location = [0,0]
     image_node.image = brush_img
-    
     '''
     if "ColorRamp" not in node_tree.nodes:    
         ramp_node = node_tree.nodes.new('TextureNodeValToRGB')
@@ -464,7 +475,6 @@ def setup_brush_tex(img_path,tex_type="BRUSH"):
     node_tree.links.new(ramp_node.inputs['Fac'],image_node.outputs['Image'])
     node_tree.links.new(output_node.inputs['Color'],ramp_node.outputs['Color']) 
     '''
-
     if "Output" not in node_tree.nodes:
         output_node = node_tree.nodes.new('TextureNodeOutput')
     else:
@@ -499,9 +509,6 @@ def _invert_ramp(self,context,tex_type="BRUSH"):
                     bpy.data.textures["xm_brush_tex"].color_ramp.elements[0].color = tmp_color_02
                     bpy.data.textures["xm_brush_tex"].color_ramp.elements[1].color = tmp_color_01   
     
-
-
-
 def _tonemap(self,context,tex_type="BRUSH"):
     brush = get_brush_mode(self, context)
     if (tex_type == "BRUSH" and "xm_brush_tex" in bpy.data.textures) or (tex_type == "STENCIL" and "xm_stencil_tex" in bpy.data.textures):
@@ -539,11 +546,91 @@ def _mute_ramp(self,context):
     if brush != None:    
         brush.xm_brush_texture = brush.xm_brush_texture
 
+#////////////////////////////////////////////////////////////////////////////////////////////#
+
+def parent(obj, parentobj):
+    if not parentobj.parent and parentobj.matrix_parent_inverse != Matrix():
+        print("Resetting %s's parent inverse matrix, as no parent is defined." % (parentobj.name))
+        parentobj.matrix_parent_inverse = Matrix()
+
+    p = parentobj
+    while p.parent:
+        p = p.parent
+
+    obj.parent = parentobj
+    obj.matrix_world = p.matrix_parent_inverse @ obj.matrix_world
+
+
+def update_local_view(space_data, states):
+    """
+    states: list of (obj, bool) tuples, True being in local view, False being out
+    """
+    if space_data.local_view:
+        for obj, local in states:
+            obj.local_view_set(space_data, local)
+
+class SurfaceDrawMode(bpy.types.Operator):
+    bl_idname = "xm.surface_draw_mode"
+    bl_label = "MSurface Draw Mode"
+    bl_description = "Surface Draw, create parented, empty GreasePencil object and enter DRAW mode.\nSHIFT: Select the Line tool."
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def invoke(self, context, event):
+        # forcing object mode at the beginning, avoids issues when calling this tool from PAINT_WEIGHT mode
+        bpy.ops.object.mode_set(mode='OBJECT')
+
+        scene = context.scene
+        ts = scene.tool_settings
+        mcol = context.collection
+        view = context.space_data
+        active = context.active_object
+
+        existing_gps = [obj for obj in active.children if obj.type == "GPENCIL"]
+
+        if existing_gps:
+            gp = existing_gps[0]
+
+        else:
+            name = "%s_SurfaceDrawing" % (active.name)
+            gp = bpy.data.objects.new(name, bpy.data.grease_pencils.new(name))
+
+            mcol.objects.link(gp)
+
+            gp.matrix_world = active.matrix_world
+            parent(gp, active)
+
+        update_local_view(view, [(gp, True)])
+
+        gp.data.layers.new(name="SurfaceLayer")
+
+        context.view_layer.objects.active = gp
+        active.select_set(False)
+        gp.select_set(True)
+
+        gp.color = (0, 0, 0, 1)
+
+        bpy.ops.object.mode_set(mode='PAINT_GPENCIL')
+
+        # surface placement
+        ts.gpencil_stroke_placement_view3d = 'SURFACE'
+        gp.data.zdepth_offset = 0.01    
+
+        if not view.show_region_toolbar:
+            view.show_region_toolbar = True
+
+        # optionally select the line tool
+        if event.shift:
+            bpy.ops.wm.tool_set_by_id(name="builtin.line")
+
+        return {'FINISHED'}
+
+
+
 
 
 #////////////////////////////////////////////////////////////////////////////////////////////#
 
-classes = (XRay, ViewCam, FrameS, FrameA, Persp, LockCam, SetTool, Wire, SetActive, Detailsize, Mask)
+classes = (XRay, ViewCam, FrameS, FrameA, Persp, LockCam, SetTool, Wire, SetActive, Detailsize, Mask, SurfaceDrawMode, SelParent)
 
 def register():
     for cls in classes:

@@ -1,3 +1,16 @@
+import bpy
+
+def Toolset():
+    if bpy.context.mode == 'OBJECT':
+        Toolset = Tools_Object
+    if bpy.context.mode == 'SCULPT':
+        Toolset = Tools_Sculpt
+    if bpy.context.mode == 'PAINT_TEXTURE':
+        Toolset = Tools_Texture
+    if bpy.context.mode == 'PAINT_VERTEX':
+        Toolset = Tools_Vertex
+    return Toolset
+
 Tools_Sculpt= [ 
                 ('GRAB',                'builtin_brush.Grab',               '',             'brush.sculpt.grab',                ''),
                 ('SHARP',               'builtin_brush.Draw Sharp',         '',             'brush.sculpt.draw_sharp',          ''),
@@ -35,6 +48,38 @@ Tools_Sculpt= [
                 ('EDIT',                'builtin.face_set_edit',            '',             'ops.sculpt.face_set_edit',         'EDIT_FACESET'),
                 ('FILTER',              'builtin.mesh_filter',              '',             'ops.sculpt.mesh_filter',           '')
                 ]   
+
+Tools_Object= [ 
+                ('TWEAK',               'builtin.select',                   '',             'ops.generic.select',               ''), 
+                ('BOX',                 'builtin.select_box',               '',             'ops.generic.select_box',           ''),
+                ('CIRCLE',              'builtin.select_circle',            '',             'ops.generic.select_circle',        ''),
+                ('LASSO',               'builtin.select_lasso',             '',             'ops.generic.select_lasso',         ''),
+                ('CURSOR',              'builtin.cursor',                   '',             'ops.generic.cursor',               ''),
+                ('MOVE',                'builtin.move',                     '',             'ops.transform.translate',          ''),
+                ('ROTATE',              'builtin.rotate',                   '',             'ops.transform.rotate',             ''),
+                ('SCALE',               'builtin.scale',                    '',             'ops.transform.resize',             ''),
+                ('TRANSFORM',           'builtin.transform',                '',             'ops.transform.transform',          ''),
+                ('ANNOTATE',            'builtin.annotate',                 '',             'ops.gpencil.draw',                 ''),
+                ('LINE',                'builtin.annotate_line',            '',             'ops.gpencil.draw.line',            ''),
+                ('POLY',                'builtin.annotate_polygon',         '',             'ops.gpencil.draw.poly',            ''),
+                ('ERASE',               'builtin.annotate_eraser',          '',             'ops.gpencil.draw.eraser',          ''),
+                ('MEASURE',             'builtin.measure',                  '',             'ops.view3d.ruler',                 ''),
+                ('CUBE_ADD',            'builtin.primitive_cube_add',       '',             'ops.mesh.primitive_cube_add_gizmo','')
+                ] 
+Tools_Texture= [ 
+                ('DRAW',                'builtin_brush.Draw',                   '',             'brush.paint_texture.draw',               ''), 
+                ('SOFTEN',                 'builtin_brush.Soften',               '',             'brush.paint_texture.soften',           ''),
+                ('SMEAR',              'builtin_brush.Smear',            '',             'brush.paint_texture.smear',        ''),
+                ('CLONE',               'builtin_brush.Clone',             '',             'brush.paint_texture.clone',         ''),
+                ('FILL',              'builtin_brush.Fill',                   '',             'brush.paint_texture.fill',               ''),
+                ('MASK',                'builtin_brush.Mask',                     '',             'brush.paint_texture.mask',          '')
+                ]
+Tools_Vertex= [ 
+                ('DRAW',                'builtin_brush.Draw',                   '',             'brush.paint_vertex.draw',               ''), 
+                ('BLUR',                 'builtin_brush.Blur',               '',             'brush.paint_vertex.blur',           ''),
+                ('AVERAGE',              'builtin_brush.Average',            '',             'brush.paint_texture.average',        ''),
+                ('SMEAR',               'builtin_brush.Smear',             '',             'brush.paint_texture.smear',         ''),
+                ] 
 
 #bpy.context.workspace.tools.from_space_view3d_mode(bpy.context.mode).idname
 #bpy.context.tool_settings.sculpt.brush
