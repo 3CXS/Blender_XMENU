@@ -9,6 +9,39 @@ from .brushtexture import brush_icons_path, get_brush_mode
 from bl_ui.space_toolsystem_common import (ToolSelectPanelHelper,ToolDef)
 from bpy.app.translations import contexts as i18n_contexts
 
+from bpy.types import Menu, Panel, UIList
+from rna_prop_ui import PropertyPanel
+from collections import defaultdict
+def Normals(self, context, parent):
+    layout = parent
+    layout.use_property_split = True
+
+    mesh = context.active_object.data
+
+    col = layout.column(align=False, heading="Auto Smooth")
+    col.use_property_decorate = False
+    row = col.row(align=True)
+    sub = row.row(align=True)
+    sub.prop(mesh, "use_auto_smooth", text="")
+    sub = sub.row(align=True)
+    sub.active = mesh.use_auto_smooth and not mesh.has_custom_normals
+    sub.prop(mesh, "auto_smooth_angle", text="")
+    #row.prop_decorator(mesh, "auto_smooth_angle")
+
+def VertexColor(self, context, parent):
+    layout = parent
+
+    #me = context.mesh
+    me = context.active_object.data
+
+    row = layout.row()
+    col = row.column()
+
+    col.template_list("MESH_UL_vcols", "vcols", me, "vertex_colors", me.vertex_colors, "active_index", rows=2)
+
+    col = row.column(align=True)
+    col.operator("mesh.vertex_color_add", icon='ADD', text="")
+    col.operator("mesh.vertex_color_remove", icon='REMOVE', text="")
 
 def ModeSelector(self, context, parent):
     active = context.active_object
@@ -209,14 +242,15 @@ def ObjectToolSettings(self, context, parent):
 
 def BrushCopy(self, context, parent):
     layout = parent
-    brush = context.tool_settings.sculpt.brush
-    settings = context.tool_settings.sculpt
+
+    get_brush_mode(self, context)
+    settings = paint_settings(context)
 
     col = parent.column(align=True)     
     col.ui_units_x = 3.6
     col.scale_y = 0.15
     row= col.row()   
-    row.template_ID_preview(settings, "brush", rows=1, cols=4, hide_buttons=True )
+    row.template_ID_preview(settings, "brush", rows=1, cols=8, hide_buttons=True )
 
     '''
     row.template_ID(settings, "brush", new="brush.add")
@@ -230,6 +264,12 @@ def BrushCopy(self, context, parent):
             row.prop(brush, "icon_filepath", text="")
     '''
 #bpy.ops.brush.reset()
+
+
+
+
+
+
 
 def Color(self, context, parent):
     layout = parent
@@ -928,12 +968,10 @@ def brush_texture_settings(layout, brush, sculpt):
     '''
     # scale and offset
     row = layout.row(align=True)
-
     sub = row.column(align=True)
     sub.scale_y = 0.7
     sub.label(text='OFFSET')
-    sub.prop(tex_slot, "offset", text='')
-    
+    sub.prop(tex_slot, "offset", text='')   
     sub = row.column(align=True)
     sub.scale_y = 0.7
     sub.label(text='SCALE')
@@ -941,6 +979,7 @@ def brush_texture_settings(layout, brush, sculpt):
     '''
 
 preview_collections = {}
+
 def unregister_previews():
     for pcoll in preview_collections.values():
         bpy.utils.previews.remove(pcoll)

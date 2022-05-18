@@ -17,6 +17,7 @@ from .brushtexture import get_brush_mode
 def paint_settings(context):
         tool_settings = context.tool_settings
         mode = context.mode
+        #mesh = context.active_object.dat
         # 3D paint settings
         if mode == 'SCULPT':
             return tool_settings.sculpt
@@ -58,8 +59,8 @@ def tool_grid(parent, col, align, slotmin, slotmax, h=1, w=1, text=False, icon="
 def tool_op(parent, cmd ,w=1, h=1, small=False, text=False, icon="NONE"):    
     tool_icon = bpy.context.preferences.addons['XMENU'].preferences.tool_icon
     tool_text = bpy.context.preferences.addons['XMENU'].preferences.tool_text  
-    icons = load_icons()
 
+    icons = load_icons()
     Tools = Toolset()
 
     col = parent.column(align=True)

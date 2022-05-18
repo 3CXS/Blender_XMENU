@@ -24,16 +24,18 @@ def get_tex_path(self, context):
     user_texture_path = bpy.context.preferences.addons[__package__].preferences.tex_path
     return user_texture_path
 
-
 def get_brush_mode(self, context):
     mode = context.active_object.mode
-    brush = context.brush
-    if mode == 'PAINT_TEXTURE':
+    if mode == 'TEXTURE_PAINT':
         brush = context.tool_settings.image_paint.brush
     if mode == 'SCULPT':
         brush = context.tool_settings.sculpt.brush
-    if mode == 'PAINT_VERTEX':
+    if mode == 'VERTEX_PAINT':
         brush = context.tool_settings.vertex_paint.brush
+    if mode == 'WEIGHT_PAINT':
+        brush = context.tool_settings.weight_paint.brush
+    if mode == 'GEPNCIL_PAINT':
+        brush = context.tool_settings.gpencil_paint.brush
     return brush
 
 def get_tex_previews(self, context,tex_type="BRUSH"):  

@@ -170,7 +170,7 @@ def refresh_stencil_category(self,context):
     bpy.ops.xm.refresh_previews()
 
 def register():
-    bpy.types.WindowManager.xm_brush = StringProperty()
+    #bpy.types.WindowManager.xm_brush = StringProperty()
 
     bpy.types.WindowManager.xm_brush_textures_loaded = BoolProperty(default=False)
     bpy.types.WindowManager.xm_stencil_textures_loaded = BoolProperty(default=False)

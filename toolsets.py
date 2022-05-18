@@ -3,14 +3,79 @@ import bpy
 def Toolset():
     if bpy.context.mode == 'OBJECT':
         Toolset = Tools_Object
+    if bpy.context.mode == 'EDIT_MESH':
+        Toolset = Tools_Edit
     if bpy.context.mode == 'SCULPT':
         Toolset = Tools_Sculpt
     if bpy.context.mode == 'PAINT_TEXTURE':
         Toolset = Tools_Texture
     if bpy.context.mode == 'PAINT_VERTEX':
         Toolset = Tools_Vertex
+    if bpy.context.mode == 'PAINT_WEIGHT':
+        Toolset = Tools_Weight
+    if bpy.context.mode == 'PAINT_GPENCIL':
+        Toolset = Tools_Draw
     return Toolset
 
+Tools_Object= [ 
+                ('TWEAK',               'builtin.select',                   '',             'ops.generic.select',               ''), 
+                ('BOX',                 'builtin.select_box',               '',             'ops.generic.select_box',           ''),
+                ('CIRCLE',              'builtin.select_circle',            '',             'ops.generic.select_circle',        ''),
+                ('LASSO',               'builtin.select_lasso',             '',             'ops.generic.select_lasso',         ''),
+                ('CURSOR',              'builtin.cursor',                   '',             'ops.generic.cursor',               ''),
+                ('MOVE',                'builtin.move',                     '',             'ops.transform.translate',          ''),
+                ('ROTATE',              'builtin.rotate',                   '',             'ops.transform.rotate',             ''),
+                ('SCALE',               'builtin.scale',                    '',             'ops.transform.resize',             ''),
+                ('TRANSFORM',           'builtin.transform',                '',             'ops.transform.transform',          ''),
+                ('ANNOTATE',            'builtin.annotate',                 '',             'ops.gpencil.draw',                 ''),
+                ('LINE',                'builtin.annotate_line',            '',             'ops.gpencil.draw.line',            ''),
+                ('POLY',                'builtin.annotate_polygon',         '',             'ops.gpencil.draw.poly',            ''),
+                ('ERASE',               'builtin.annotate_eraser',          '',             'ops.gpencil.draw.eraser',          ''),
+                ('MEASURE',             'builtin.measure',                  '',             'ops.view3d.ruler',                 ''),
+                ('CUBE_ADD',            'builtin.primitive_cube_add',       '',             'ops.mesh.primitive_cube_add_gizmo','')
+                ] 
+
+Tools_Edit = [ 
+                ('TWEAK',               'builtin.select',                   '',             'ops.generic.select',               ''), 
+                ('BOX',                 'builtin.select_box',               '',             'ops.generic.select_box',           ''),
+                ('CIRCLE',              'builtin.select_circle',            '',             'ops.generic.select_circle',        ''),
+                ('LASSO',               'builtin.select_lasso',             '',             'ops.generic.select_lasso',         ''),
+                ('CURSOR',              'builtin.cursor',                   '',             'ops.generic.cursor',               ''),
+                ('MOVE',                'builtin.move',                     '',             'ops.transform.translate',          ''),
+                ('ROTATE',              'builtin.rotate',                   '',             'ops.transform.rotate',             ''),
+                ('SCALE',               'builtin.scale',                    '',             'ops.transform.resize',             ''),
+                ('TRANSFORM',           'builtin.transform',                '',             'ops.transform.transform',          ''),
+                ('ANNOTATE',            'builtin.annotate',                 '',             'ops.gpencil.draw',                 ''),
+                ('ERASE',               'builtin.annotate_eraser',          '',             'ops.gpencil.draw.eraser',          ''),
+                ('MEASURE',             'builtin.measure',                  '',             'ops.view3d.ruler',                 ''),
+                ('CUBE_ADD',            'builtin.primitive_cube_add',       '',             'ops.mesh.primitive_cube_add_gizmo',''),
+
+                ('EXT_REG',             'builtin.extrude_region',           '',             'ops.mesh.extrude_region_move',     ''),
+                ('EXT MFD',             'builtin.extrude_manifold',         '',             'ops.mesh.extrude_manifold',        ''),
+                ('EXT NORM',            'builtin.extrude_along_normals',    '',             'ops.mesh.extrude_region_shrink_fatten', ''),
+                ('EXT IND',             'builtin.extrude_individual',       '',             'ops.mesh.extrude_faces_move',      ''),
+                ('EXT CRS',             'builtin.extrude_to_cursor',        '',             'ops.mesh.dupli_extrude_cursor',    ''),
+
+                ('INSET',               'builtin.inset_faces',              '',             'ops.mesh.inset',                   ''),
+                ('BEVEL',               'builtin.bevel',                    '',             'ops.mesh.bevel',                   ''),
+                ('LOOP CUT',            'builtin.loop_cut',                 '',             'ops.mesh.loopcut_slide',           ''),
+                ('OFFSET',              'builtin.offset_edge_loop_cut',     '',             'ops.mesh.offset_edge_loops_slide', ''),
+                ('KNIFE',               'builtin.knife',                    '',             'ops.mesh.knife_tool',              ''),
+                ('BISECT',              'builtin.bisect',                   '',             'ops.mesh.bisect',                  ''),
+                ('BUILD',               'builtin.poly_build',               '',             'ops.mesh.polybuild_hover',         ''),
+                ('SPIN',                'builtin.spin',                     '',             'ops.mesh.spin',                    ''),
+                ('SPIN DUB',            'builtin.spin_dublicates',          '',             'ops.mesh.spin.duplicate',          ''),
+                ('SMOOTH',              'builtin.smooth',                   '',             'ops.mesh.vertices_smooth',         ''),
+                ('RAND',                'builtin.randomize',                '',             'ops.transform.vertex_random',      ''),
+                ('SLIDE E',             'builtin.edge_slide',               '',             'ops.transform.edge_slide',         ''),
+                ('SLIDE V',             'builtin.vertex_slide',             '',             'ops.transform.vert_slide',         ''),
+                ('SHRINK',              'builtin.shrink_fatten',            '',             'ops.transform.shrink_fatten',      ''),
+                ('PUSH',                'builtin.push_pull',                '',             'ops.transform.push_pull',          ''),
+                ('SHEAR',               'builtin.shear',                    '',             'ops.transform.shear',              ''),
+                ('TO SPH',              'builtin.to_sphere',                '',             'ops.transform.tosphere',           ''),
+                ('RIP REG',             'builtin.rip_region',               '',             'ops.mesh.rip',                     ''),
+                ('RIP EDGE',            'builtin.rip_edge',                 '',             'ops.mesh.rip_edge',                '')
+                ] 
 Tools_Sculpt= [ 
                 ('GRAB',                'builtin_brush.Grab',               '',             'brush.sculpt.grab',                ''),
                 ('SHARP',               'builtin_brush.Draw Sharp',         '',             'brush.sculpt.draw_sharp',          ''),
@@ -48,38 +113,38 @@ Tools_Sculpt= [
                 ('EDIT',                'builtin.face_set_edit',            '',             'ops.sculpt.face_set_edit',         'EDIT_FACESET'),
                 ('FILTER',              'builtin.mesh_filter',              '',             'ops.sculpt.mesh_filter',           '')
                 ]   
-
-Tools_Object= [ 
-                ('TWEAK',               'builtin.select',                   '',             'ops.generic.select',               ''), 
-                ('BOX',                 'builtin.select_box',               '',             'ops.generic.select_box',           ''),
-                ('CIRCLE',              'builtin.select_circle',            '',             'ops.generic.select_circle',        ''),
-                ('LASSO',               'builtin.select_lasso',             '',             'ops.generic.select_lasso',         ''),
-                ('CURSOR',              'builtin.cursor',                   '',             'ops.generic.cursor',               ''),
-                ('MOVE',                'builtin.move',                     '',             'ops.transform.translate',          ''),
-                ('ROTATE',              'builtin.rotate',                   '',             'ops.transform.rotate',             ''),
-                ('SCALE',               'builtin.scale',                    '',             'ops.transform.resize',             ''),
-                ('TRANSFORM',           'builtin.transform',                '',             'ops.transform.transform',          ''),
-                ('ANNOTATE',            'builtin.annotate',                 '',             'ops.gpencil.draw',                 ''),
-                ('LINE',                'builtin.annotate_line',            '',             'ops.gpencil.draw.line',            ''),
-                ('POLY',                'builtin.annotate_polygon',         '',             'ops.gpencil.draw.poly',            ''),
-                ('ERASE',               'builtin.annotate_eraser',          '',             'ops.gpencil.draw.eraser',          ''),
-                ('MEASURE',             'builtin.measure',                  '',             'ops.view3d.ruler',                 ''),
-                ('CUBE_ADD',            'builtin.primitive_cube_add',       '',             'ops.mesh.primitive_cube_add_gizmo','')
-                ] 
 Tools_Texture= [ 
-                ('DRAW',                'builtin_brush.Draw',                   '',             'brush.paint_texture.draw',               ''), 
-                ('SOFTEN',                 'builtin_brush.Soften',               '',             'brush.paint_texture.soften',           ''),
-                ('SMEAR',              'builtin_brush.Smear',            '',             'brush.paint_texture.smear',        ''),
-                ('CLONE',               'builtin_brush.Clone',             '',             'brush.paint_texture.clone',         ''),
-                ('FILL',              'builtin_brush.Fill',                   '',             'brush.paint_texture.fill',               ''),
-                ('MASK',                'builtin_brush.Mask',                     '',             'brush.paint_texture.mask',          '')
+                ('DRAW',                'builtin_brush.Draw',               '',             'brush.paint_texture.draw',         ''), 
+                ('SOFTEN',              'builtin_brush.Soften',             '',             'brush.paint_texture.soften',       ''),
+                ('SMEAR',               'builtin_brush.Smear',              '',             'brush.paint_texture.smear',        ''),
+                ('CLONE',               'builtin_brush.Clone',              '',             'brush.paint_texture.clone',        ''),
+                ('FILL',                'builtin_brush.Fill',               '',             'brush.paint_texture.fill',         ''),
+                ('MASK',                'builtin_brush.Mask',               '',             'brush.paint_texture.mask',         '')
                 ]
 Tools_Vertex= [ 
-                ('DRAW',                'builtin_brush.Draw',                   '',             'brush.paint_vertex.draw',               ''), 
-                ('BLUR',                 'builtin_brush.Blur',               '',             'brush.paint_vertex.blur',           ''),
-                ('AVERAGE',              'builtin_brush.Average',            '',             'brush.paint_texture.average',        ''),
-                ('SMEAR',               'builtin_brush.Smear',             '',             'brush.paint_texture.smear',         ''),
+                ('DRAW',                'builtin_brush.Draw',               '',             'brush.paint_vertex.draw',          ''), 
+                ('BLUR',                'builtin_brush.Blur',               '',             'brush.paint_vertex.blur',          ''),
+                ('AVERAGE',             'builtin_brush.Average',            '',             'brush.paint_vertex.average',       ''),
+                ('SMEAR',               'builtin_brush.Smear',              '',             'brush.paint_vertex.smear',         '')
                 ] 
+Tools_Weight= [ 
+                ('DRAW',                'builtin_brush.Draw',               '',             'brush.paint_vertex.draw',          ''), 
+                ('BLUR',                'builtin_brush.Blur',               '',             'brush.paint_vertex.blur',          ''),
+                ('AVERAGE',             'builtin_brush.Average',            '',             'brush.paint_vertex.average',       ''),
+                ('SMEAR',               'builtin_brush.Smear',              '',             'brush.paint_vertex.smear',         ''),
+                ('GRADIENT',            'builtin.gradient',                 '',             'ops.paint.weight_gradient',        ''),
+                ('SAMPLE',              'builtin.sample_weight',            '',             'ops.paint.weight_sample',          ''),
+                ('SAMPLE GRP',          'builtin.sample_vertex_group',      '',             'ops.paint.weight_sample_group',    '')
+                ]
+Tools_Draw= [ 
+                ('DRAW',                'builtin_brush.Draw',               '',             'brush.gpencil_draw.draw',           ''), 
+                ('FILL',                'builtin_brush.Fill',               '',             'brush.gpencil_draw.fill',           ''),
+                ('ERASE',               'builtin_brush.Erase',              '',             'brush.gpencil_draw.erase',          ''),
+                ('TINT',                'builtin_brush.Tint',               '',             'brush.gpencil_draw.tint',           ''),
+                ('CUTTER',              'builtin.cutter',                   '',             'ops.gpencil.stroke_cutter',         ''),
+                ('SAMPLE',              'builtin.eyedropper',               '',             'ops.paint.eyedropper_add',          ''),
+                ('LINE',                'builtin.line',                     '',             'ops.gpencil.primitive_line',        '')
+                ]
 
 #bpy.context.workspace.tools.from_space_view3d_mode(bpy.context.mode).idname
 #bpy.context.tool_settings.sculpt.brush
