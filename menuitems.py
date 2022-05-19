@@ -12,10 +12,171 @@ from bpy.app.translations import contexts as i18n_contexts
 from bpy.types import Menu, Panel, UIList
 from rna_prop_ui import PropertyPanel
 from collections import defaultdict
+
+
+def ColorPalette(self, context, parent):
+    layout = parent
+    #settings = self.paint_settings(context)
+    settings = paint_settings(context)
+
+    layout.template_ID(settings, "palette", new="palette.new")
+    if settings.palette:
+        layout.template_palette(settings, "palette", color=True)
+
+def TexSlots(self, context, parent):
+
+    layout = parent
+    layout.use_property_split = True
+    layout.use_property_decorate = False
+
+    settings = context.tool_settings.image_paint
+    ob = context.active_object
+
+    box = parent.box()
+    box.ui_units_x = 8
+
+    box.prop(settings, "mode", text="Mode")
+    box.separator()
+
+    if settings.mode == 'MATERIAL':
+        if len(ob.material_slots) > 1:
+            box.template_list("MATERIAL_UL_matslots", "layers",
+                                    ob, "material_slots",
+                                    ob, "active_material_index", rows=2)
+        mat = ob.active_material
+        if mat and mat.texture_paint_images:
+            row = box.row()
+            row.template_list("TEXTURE_UL_texpaintslots", "",
+                                mat, "texture_paint_images",
+                                mat, "paint_active_slot", rows=2)
+
+            if mat.texture_paint_slots:
+                slot = mat.texture_paint_slots[mat.paint_active_slot]
+            else:
+                slot = None
+
+            have_image = slot is not None
+        else:
+            row = box.row()
+
+            box = row.box()
+            box.label(text="No Textures")
+            have_image = False
+
+        sub = row.column(align=True)
+        sub.operator_menu_enum("paint.add_texture_paint_slot", "type", icon='ADD', text="")
+
+    elif settings.mode == 'IMAGE':
+        mesh = ob.data
+        uv_text = mesh.uv_layers.active.name if mesh.uv_layers.active else ""
+        box.template_ID(settings, "canvas", new="image.new", open="image.open")
+        if settings.missing_uvs:
+            box.operator("paint.add_simple_uvs", icon='ADD', text="Add UVs")
+        else:
+            box.menu("VIEW3D_MT_tools_projectpaint_uvlayer", text=uv_text, translate=False)
+        have_image = settings.canvas is not None
+
+        box.prop(settings, "interpolation", text="")
+
+    if settings.missing_uvs:
+        box.separator()
+        split = box.split()
+        split.label(text="UV Map Needed", icon='INFO')
+        split.operator("paint.add_simple_uvs", icon='ADD', text="Add Simple UVs")
+    elif have_image:
+        box.separator()
+        box.operator("image.save_all_modified", text="Save All Images", icon='FILE_TICK')
+
+
+
+def VertexGroups(self, context, parent):
+    layout = parent
+    ob = context.active_object
+    group = ob.vertex_groups.active
+
+    row = layout.row()
+    row.ui_units_x = 8
+    col = row.column()
+
+    rows = 3
+    if group:
+        rows = 5
+
+    row = layout.row()
+    row.template_list("MESH_UL_vgroups", "", ob, "vertex_groups", ob.vertex_groups, "active_index", rows=rows)
+
+    col = row.column(align=True)
+
+    col.operator("xmenu.override", icon='ADD', text="").cmd ='object.vertex_group_add'
+    col.operator("xmenu.override", icon='REMOVE', text="").cmd='object.vertex_group_remove'
+    #props = col.operator(override, "object.vertex_group_remove", icon='REMOVE', text="")
+    #props.all_unlocked = props.all = False
+
+    col.separator()
+
+    #col.menu("MESH_MT_vertex_group_context_menu", icon='DOWNARROW_HLT', text="")
+    
+    if group:
+        col.separator()
+        #col.operator("object.vertex_group_move", icon='TRIA_UP', text="").direction = 'UP'
+        op = col.operator("xmenu.override", icon='TRIA_UP', text="")
+        op.cmd='object.vertex_group_move'
+        op.prop1 ='direction="UP"'
+
+        op = col.operator("xmenu.override", icon='TRIA_DOWN', text="")
+        op.cmd='object.vertex_group_move'
+        op.prop1 ='direction="DOWN"'
+
+    if (
+            ob.vertex_groups and
+            (ob.mode == 'EDIT' or
+                (ob.mode == 'WEIGHT_PAINT' and ob.type == 'MESH' and ob.data.use_paint_mask_vertex))
+    ):
+        row = layout.row()
+        sub = row.row(align=True)
+        sub.operator("xmenu.override", text="Assign").cmd ='object.vertex_group_assign'
+        sub.operator("xmenu.override", text="Remove").cmd ='object.vertex_group_remove_from'
+
+        sub = row.row(align=True)
+        sub.operator("xmenu.override", text="Select").cmd ='object.vertex_group_select'
+        sub.operator("xmenu.override", text="Deselect").cmd ='object.vertex_group_deselect'
+
+        layout.prop(context.tool_settings, "vertex_group_weight", text="Weight")
+        row = layout.row()
+        sub = row.row(align=True)
+        sub.operator("xmenu.override", text="COPY").cmd ='object.vertex_group_copy'
+        sub.operator("xmenu.override", text="COPY TO").cmd ='object.vertex_group_copy_to_selected'
+        sub = row.row(align=True)
+        op = sub.operator("xmenu.override", text="MIRROR")
+        op.cmd = 'object.vertex_group_mirror'
+        op.prop1 = 'use_topology=False'
+
+
+def UVTexture(self, context, parent):
+    layout = parent
+    me = context.active_object.data
+
+    row = layout.row()
+    col = row.column()
+    col.template_list("MESH_UL_uvmaps", "uvmaps", me, "uv_layers", me.uv_layers, "active_index", rows=2)
+    col = row.column(align=True)
+    col.operator("xmenu.override", icon='ADD', text="").cmd='mesh.uv_texture_add'
+    col.operator("xmenu.override", icon='REMOVE', text="").cmd='mesh.uv_texture_remove'
+
+def VertexColor(self, context, parent):
+    layout = parent
+    me = context.active_object.data
+
+    row = layout.row()
+    col = row.column()
+    col.template_list("MESH_UL_vcols", "vcols", me, "vertex_colors", me.vertex_colors, "active_index", rows=2)
+    col = row.column(align=True)
+    col.operator("xmenu.override", icon='ADD', text="").cmd='mesh.vertex_color_add'
+    col.operator("xmenu.override", icon='REMOVE', text="").cmd='mesh.vertex_color_remove'
+
 def Normals(self, context, parent):
     layout = parent
     layout.use_property_split = True
-
     mesh = context.active_object.data
 
     col = layout.column(align=False, heading="Auto Smooth")
@@ -27,21 +188,6 @@ def Normals(self, context, parent):
     sub.active = mesh.use_auto_smooth and not mesh.has_custom_normals
     sub.prop(mesh, "auto_smooth_angle", text="")
     #row.prop_decorator(mesh, "auto_smooth_angle")
-
-def VertexColor(self, context, parent):
-    layout = parent
-
-    #me = context.mesh
-    me = context.active_object.data
-
-    row = layout.row()
-    col = row.column()
-
-    col.template_list("MESH_UL_vcols", "vcols", me, "vertex_colors", me.vertex_colors, "active_index", rows=2)
-
-    col = row.column(align=True)
-    col.operator("mesh.vertex_color_add", icon='ADD', text="")
-    col.operator("mesh.vertex_color_remove", icon='REMOVE', text="")
 
 def ModeSelector(self, context, parent):
     active = context.active_object
@@ -265,12 +411,6 @@ def BrushCopy(self, context, parent):
     '''
 #bpy.ops.brush.reset()
 
-
-
-
-
-
-
 def Color(self, context, parent):
     layout = parent
     ts = context.tool_settings
@@ -299,7 +439,6 @@ def ViewCam(self, context, parent):
 
 def Stroke(self, context, parent):
     mode = context.mode
-    #brush = context.tool_settings.sculpt.brush
     brush = get_brush_mode(self, context)
     settings = paint_settings(context)
 

@@ -34,7 +34,7 @@ def get_brush_mode(self, context):
         brush = context.tool_settings.vertex_paint.brush
     if mode == 'WEIGHT_PAINT':
         brush = context.tool_settings.weight_paint.brush
-    if mode == 'GEPNCIL_PAINT':
+    if mode == 'PAINT_GPENCIL':
         brush = context.tool_settings.gpencil_paint.brush
     return brush
 

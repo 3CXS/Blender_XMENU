@@ -247,7 +247,7 @@ class HUD(bpy.types.Operator):
     def execute(self, context):
         handler1 = bpy.app.driver_namespace.get('draw1')
         handler2 = bpy.app.driver_namespace.get('draw2')
-        hud_activate = bpy.context.preferences.addons['XMENU'].preferences.hud_activate
+        #hud_activate = bpy.context.preferences.addons[__package__].preferences.hud_activate
         #if hud_activate == True:
         if context.window_manager.hud_state == False:
             context.window_manager.hud_state = True

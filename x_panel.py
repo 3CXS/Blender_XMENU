@@ -7,6 +7,8 @@ from bpy.app.translations import contexts as i18n_contexts
 from bpy.types import Header, Panel
 from .menuitems import *
 from .brushtexture import get_brush_mode
+
+
 #////////////////////////////////////////////////////////////////////////////////////////////#
 
 class XPanel(bpy.types.Panel):
@@ -127,8 +129,11 @@ class XPanel(bpy.types.Panel):
             sub.operator('object.select_linked', text='LIB').type='LIBRARY_OBDATA'
             col.separator(factor = 2)
             sub = col.row(align=True)
-            sub.operator('xmenu.sel_parent', text='PARENT').direction='PARENT'
-            sub.operator('xmenu.sel_parent', text='CHILD').direction='CHILD'
+
+            op = sub.operator("xmenu.override", text="HIERARCHY")
+            op.cmd ='object.select_hierarchy'
+            op.prop1 ='direction="CHILD"'
+            op.prop2 ='extend=True'
 
             #MAIN-MID//////////////////////////////////////////////
             col = main_midrow.column(align=False)
@@ -166,6 +171,9 @@ class XPanel(bpy.types.Panel):
             SetPivot(self, context, parent=col)
             col = main_rightrow.column(align=False)
             Transforms(self, context, parent=col)
+            col = main_rightrow.column(align=False)
+            col.popover("DATA_PT_modifiers", text='XX')
+            #col.menu_contents("VIEW3D_MT_sculpt_sym")
 
         if bpy.context.mode == 'EDIT_MESH':
             #TOP-ROW////////////////////////////////////////////////////////////////////////////////#
@@ -267,8 +275,9 @@ class XPanel(bpy.types.Panel):
             col = main_rightrow.column(align=False)
             row = col.row(align=True)
             Normals(self, context, parent=row)
-
-
+            col = main_rightrow.column(align=False)
+            UVTexture(self, context, parent=col)
+            VertexGroups(self, context, parent=col)
 
         if bpy.context.mode == 'SCULPT':
             #TOP-ROW////////////////////////////////////////////////////////////////////////////////#
@@ -525,6 +534,7 @@ class XPanel(bpy.types.Panel):
             col = main_midrow.column()
             col.ui_units_x = 4
             Color(self, context, parent=col)
+            ColorPalette(self, context, parent=col)
 
             col = main_midrow.column()
             col.ui_units_x = 4
@@ -543,6 +553,9 @@ class XPanel(bpy.types.Panel):
             main_midrow.separator(factor = 24)
             #MAIN-RIGHT/////////////////////////////////////////////////////////////////////////////////////
             col = main_rightrow.column(align=False)
+            TexSlots(self, context, parent=col)
+
+
 
         if bpy.context.mode == 'PAINT_WEIGHT':
 
@@ -570,7 +583,9 @@ class XPanel(bpy.types.Panel):
 
             #MAIN-ROW////////////////////////////////////////////////////////////////////////////////#
             #MAIN-LEFT////////////////////////////////////////////           
-
+            box = main_leftrow.box()     
+            box.ui_units_x = 4
+            Stroke(self, context, parent=box)
             #MAIN-MID//////////////////////////////////////////////
 
             col = main_midrow.column()
@@ -611,7 +626,9 @@ class XPanel(bpy.types.Panel):
 
             #MAIN-ROW////////////////////////////////////////////////////////////////////////////////#
             #MAIN-LEFT////////////////////////////////////////////           
-
+            box = main_leftrow.box()     
+            box.ui_units_x = 4
+            #Stroke(self, context, parent=box)
             #MAIN-MID//////////////////////////////////////////////
 
             col = main_midrow.column()

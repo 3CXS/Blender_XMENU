@@ -365,31 +365,42 @@ class Mask(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class SelParent(bpy.types.Operator):
-    bl_idname = "xmenu.sel_parent"
-    bl_label = "Select Parent"
+class Override(bpy.types.Operator):
+    bl_idname = "xmenu.override"
+    bl_label = "Operator Override"
 
-    direction: bpy.props.StringProperty()
+    cmd: bpy.props.StringProperty()
+    prop1: bpy.props.StringProperty()
+    prop2: bpy.props.StringProperty()
 
     def execute(self, context):
+        op = 'bpy.ops.'
+        op += self.cmd
+        op += '(override'
+        if self.prop1:
+            prop1 = self.prop1
+            keyword1 = prop1.split('=')
+            op += ', '
+            op += keyword1[0]
+            op += '='
+            op += keyword1[1]
+        if self.prop2:
+            prop2 = self.prop2
+            keyword2 = prop2.split('=')
+            op += ', '
+            op += keyword2[0]
+            op += '='
+            op += keyword2[1]
+        op += ')'
 
         for screen in bpy.data.screens:
             for area in (a for a in screen.areas if a.type == 'VIEW_3D'):
                 region = next((region for region in area.regions if region.type == 'WINDOW'), None)
                 if region is not None:
                     override = {'area': area, 'region': region}
-                    bpy.ops.object.select_hierarchy(override, direction=self.direction, extend=True)
-        return {'FINISHED'}
+                    eval(op)
+                    return {'FINISHED'}
 
-'''
-bpy.ops.sculpt.face_sets_init(mode='FACE_SET_BOUNDARIES')
-bpy.ops.sculpt.face_sets_init(mode='MATERIALS')
-bpy.ops.sculpt.face_sets_init(mode='UV_SEAMS')
-bpy.ops.sculpt.face_sets_init(mode='CREASES')
-bpy.ops.sculpt.face_sets_init(mode='BEVEL_WEIGHT')
-bpy.ops.sculpt.face_sets_init(mode='SHARP_EDGES')
-bpy.ops.sculpt.face_sets_init(mode='FACE_MAPS')
-'''
 #////////////////////////////////////////////////////////////////////////////////////////////#
 
 #////////////////////////////////////////////////////////////////////////////////////////////#
@@ -626,12 +637,9 @@ class SurfaceDrawMode(bpy.types.Operator):
         return {'FINISHED'}
 
 
-
-
-
 #////////////////////////////////////////////////////////////////////////////////////////////#
 
-classes = (XRay, ViewCam, FrameS, FrameA, Persp, LockCam, SetTool, Wire, SetActive, Detailsize, Mask, SurfaceDrawMode, SelParent)
+classes = (XRay, ViewCam, FrameS, FrameA, Persp, LockCam, SetTool, Wire, SetActive, Detailsize, Mask, SurfaceDrawMode, Override)
 
 def register():
     for cls in classes:
