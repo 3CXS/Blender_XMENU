@@ -135,6 +135,7 @@ def unregister_previews():
         bpy.utils.previews.remove(pcoll)
     preview_collections.clear()
 
+
 def register_previews():
     import bpy.utils.previews
     pcoll = bpy.utils.previews.new()

@@ -151,7 +151,18 @@ def update_toolset():
 
     tool = bpy.context.workspace.tools.from_space_view3d_mode(bpy.context.mode)    
     toolid = str(tool.idname)
-    brushname = bpy.context.tool_settings.sculpt.brush
+
+    mode = bpy.context.active_object.mode
+    if mode == 'TEXTURE_PAINT':
+        brushname = bpy.context.tool_settings.image_paint.brush
+    if mode == 'SCULPT':
+        brushname = bpy.context.tool_settings.sculpt.brush
+    if mode == 'VERTEX_PAINT':
+        brushname = bpy.context.tool_settings.vertex_paint.brush
+    if mode == 'WEIGHT_PAINT':
+        brushname = bpy.context.tool_settings.weight_paint.brush
+    if mode == 'PAINT_GPENCIL':
+       brushname = bpy.context.tool_settings.gpencil_paint.brush
 
     for i in range(NTools):
         if Tools[i][2] == '' and toolid == Tools[i][1]:
@@ -608,6 +619,8 @@ class SurfaceDrawMode(bpy.types.Operator):
         view = context.space_data
         active = context.active_object
 
+
+        
         existing_gps = [obj for obj in active.children if obj.type == "GPENCIL"]
 
         if existing_gps:
@@ -629,22 +642,24 @@ class SurfaceDrawMode(bpy.types.Operator):
         context.view_layer.objects.active = gp
         active.select_set(False)
         gp.select_set(True)
-
+        
         gp.color = (0, 0, 0, 1)
+
+        #ts.use_keyframe_insert_auto = True
 
         bpy.ops.object.mode_set(mode='PAINT_GPENCIL')
 
-        # surface placement
         ts.gpencil_stroke_placement_view3d = 'SURFACE'
-        gp.data.zdepth_offset = 0.01    
+        gp.data.zdepth_offset = 0.01 
+
 
         if not view.show_region_toolbar:
             view.show_region_toolbar = True
-
+        ''' 
         # optionally select the line tool
         if event.shift:
             bpy.ops.wm.tool_set_by_id(name="builtin.line")
-
+        '''
         return {'FINISHED'}
 
 

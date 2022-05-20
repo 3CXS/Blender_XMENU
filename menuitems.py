@@ -149,6 +149,7 @@ def ModeSelector(self, context, parent):
                 sub = row.row(align=True)
                 sub.active = False if context.mode == ' ' else True
                 sub.operator("xm.surface_draw_mode", text="", icon="GREASEPENCIL")
+
                 if context.active_object.particle_systems:
                     sub = row.row(align=True)
                     sub.active = False if context.mode == 'PARTICLE_EDIT' else True
@@ -191,7 +192,7 @@ def ModeSelector(self, context, parent):
             sub.active = False if context.mode == 'OBJECT' else True
             sub.operator("object.mode_set", text="", icon="OBJECT_DATA").mode = 'OBJECT'
 
-        elif active.type == 'GPENCIL':
+        elif active.type == 'GPENCIL':                
             sub = row.row(align=True)
             sub.active = False if context.mode == "WEIGHT_GPENCIL" else True
             sub.operator("object.mode_set", text="", icon="WPAINT_HLT").mode = 'WEIGHT_GPENCIL'

@@ -137,21 +137,20 @@ Tools_Weight= [
                 ('SAMPLE GRP',          'builtin.sample_vertex_group',      '',             'ops.paint.weight_sample_group',    '')
                 ]
 Tools_Draw= [ 
-                ('PEN',                'builtin_brush.Draw',               'Pen',             'brush.gpencil_draw.draw',     ''),
-                ('PENCIL',                'builtin_brush.Draw',               'Pencil',             'brush.gpencil_draw.draw',     ''),
-                ('PENCIL SOFT',                'builtin_brush.Draw',               'Pencil Soft',             'brush.gpencil_draw.draw',     ''),
-                ('MARKER',                'builtin_brush.Draw',               'Marker Chisel',             'brush.gpencil_draw.draw',     ''),
-                ('MARKER BOLD',                'builtin_brush.Draw',               'Marker Bold',             'brush.gpencil_draw.draw',     ''),
-                ('INK PEN',                'builtin_brush.Draw',               'Ink Pen',             'brush.gpencil_draw.draw',     ''),
-                ('INK RGH',                'builtin_brush.Draw',               'Ink Pen Rough',             'brush.gpencil_draw.draw',     ''),
-                ('AIRBRUSH',                'builtin_brush.Draw',               'Airbrush',             'brush.gpencil_draw.draw',     ''),
+                ('PEN',                 'builtin_brush.Draw',               'Pen',          'brush.gpencil_draw.draw',     ''),
+                ('PENCIL',              'builtin_brush.Draw',               'Pencil',       'brush.gpencil_draw.draw',     ''),
+                ('PENCIL SOFT',         'builtin_brush.Draw',               'Pencil Soft',  'brush.gpencil_draw.draw',     ''),
+                ('MARKER',              'builtin_brush.Draw',               'Marker Chisel','brush.gpencil_draw.draw',     ''),
+                ('MARKER BOLD',         'builtin_brush.Draw',               'Marker Bold',  'brush.gpencil_draw.draw',     ''),
+                ('INK PEN',             'builtin_brush.Draw',               'Ink Pen',      'brush.gpencil_draw.draw',     ''),
+                ('INK RGH',             'builtin_brush.Draw',               'Ink Pen Rough','brush.gpencil_draw.draw',     ''),
+                ('AIRBRUSH',            'builtin_brush.Draw',               'Airbrush',     'brush.gpencil_draw.draw',     ''),
                 ('FILL',                'builtin_brush.Fill',               '',             'brush.gpencil_draw.fill',           ''),
                 ('ERASE',               'builtin_brush.Erase',              '',             'brush.gpencil_draw.erase',          ''),
                 ('TINT',                'builtin_brush.Tint',               '',             'brush.gpencil_draw.tint',           ''),
                 ('CUTTER',              'builtin.cutter',                   '',             'ops.gpencil.stroke_cutter',         ''),
                 ('SAMPLE',              'builtin.eyedropper',               '',             'ops.paint.eyedropper_add',          ''),
-                ('LINE',                'builtin.line',                     '',             'ops.gpencil.primitive_line',        ''),
-
+                ('LINE',                'builtin.line',                     '',             'ops.gpencil.primitive_line',        '')
                 ]
 
 #bpy.context.workspace.tools.from_space_view3d_mode(bpy.context.mode).idname

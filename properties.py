@@ -170,8 +170,6 @@ def refresh_stencil_category(self,context):
     bpy.ops.xm.refresh_previews()
 
 def register():
-    #bpy.types.WindowManager.xm_brush = StringProperty()
-
     bpy.types.WindowManager.xm_brush_textures_loaded = BoolProperty(default=False)
     bpy.types.WindowManager.xm_stencil_textures_loaded = BoolProperty(default=False)
 
@@ -182,9 +180,7 @@ def register():
     bpy.types.Scene.xm_active_tex_brush_category = StringProperty(default="None")
     bpy.types.Scene.xm_active_stencil_category = StringProperty(default="None")
     bpy.types.Scene.xm_active_tex_brush = StringProperty(default="None")
-
-
-    bpy.types.Texture.xm_sculpt = BoolProperty(default=False,update=mute_ramp)    
+ 
     bpy.types.Texture.xm_use_mask = BoolProperty(default=False,update=mute_ramp)
     bpy.types.Brush.xm_use_mask = BoolProperty(default=False,update=mute_ramp)
 

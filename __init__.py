@@ -47,8 +47,7 @@ def unregister():
         if currentModuleName in sys.modules:
             if hasattr(sys.modules[currentModuleName], 'unregister'):
                 sys.modules[currentModuleName].unregister()
-
-    unregister_previews()
+  
     menuitems.unregister_previews()
-
+    unregister_previews()
     xmenu_clear_icons()
