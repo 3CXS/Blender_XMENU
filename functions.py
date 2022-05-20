@@ -128,8 +128,19 @@ class SetTool(bpy.types.Operator):
             bpy.ops.wm.tool_set_by_id(override_context, name=Tool)
         else:
             bpy.ops.wm.tool_set_by_id(override_context, name=Tool)
-            context.tool_settings.sculpt.brush = bpy.data.brushes[Brush]
-        
+
+            mode = context.active_object.mode
+            if mode == 'TEXTURE_PAINT':
+                context.tool_settings.image_paint.brush = bpy.data.brushes[Brush]
+            if mode == 'SCULPT':
+                context.tool_settings.sculpt.brush = bpy.data.brushes[Brush]
+            if mode == 'VERTEX_PAINT':
+                context.tool_settings.vertex_paint.brush = bpy.data.brushes[Brush]
+            if mode == 'WEIGHT_PAINT':
+                context.tool_settings.weight_paint.brush = bpy.data.brushes[Brush]
+            if mode == 'PAINT_GPENCIL':
+                context.tool_settings.gpencil_paint.brush = bpy.data.brushes[Brush]
+       
         return {'FINISHED'}
 
 def update_toolset(): 

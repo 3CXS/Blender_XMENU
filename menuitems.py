@@ -13,88 +13,11 @@ from bpy.types import Menu, Panel, UIList
 from rna_prop_ui import PropertyPanel
 from collections import defaultdict
 
-
-def ColorPalette(self, context, parent):
-    layout = parent
-    #settings = self.paint_settings(context)
-    settings = paint_settings(context)
-
-    layout.template_ID(settings, "palette", new="palette.new")
-    if settings.palette:
-        layout.template_palette(settings, "palette", color=True)
-
-def TexSlots(self, context, parent):
-
-    layout = parent
-    layout.use_property_split = True
-    layout.use_property_decorate = False
-
-    settings = context.tool_settings.image_paint
-    ob = context.active_object
-
-    box = parent.box()
-    box.ui_units_x = 8
-
-    box.prop(settings, "mode", text="Mode")
-    box.separator()
-
-    if settings.mode == 'MATERIAL':
-        if len(ob.material_slots) > 1:
-            box.template_list("MATERIAL_UL_matslots", "layers",
-                                    ob, "material_slots",
-                                    ob, "active_material_index", rows=2)
-        mat = ob.active_material
-        if mat and mat.texture_paint_images:
-            row = box.row()
-            row.template_list("TEXTURE_UL_texpaintslots", "",
-                                mat, "texture_paint_images",
-                                mat, "paint_active_slot", rows=2)
-
-            if mat.texture_paint_slots:
-                slot = mat.texture_paint_slots[mat.paint_active_slot]
-            else:
-                slot = None
-
-            have_image = slot is not None
-        else:
-            row = box.row()
-
-            box = row.box()
-            box.label(text="No Textures")
-            have_image = False
-
-        sub = row.column(align=True)
-        sub.operator_menu_enum("paint.add_texture_paint_slot", "type", icon='ADD', text="")
-
-    elif settings.mode == 'IMAGE':
-        mesh = ob.data
-        uv_text = mesh.uv_layers.active.name if mesh.uv_layers.active else ""
-        box.template_ID(settings, "canvas", new="image.new", open="image.open")
-        if settings.missing_uvs:
-            box.operator("paint.add_simple_uvs", icon='ADD', text="Add UVs")
-        else:
-            box.menu("VIEW3D_MT_tools_projectpaint_uvlayer", text=uv_text, translate=False)
-        have_image = settings.canvas is not None
-
-        box.prop(settings, "interpolation", text="")
-
-    if settings.missing_uvs:
-        box.separator()
-        split = box.split()
-        split.label(text="UV Map Needed", icon='INFO')
-        split.operator("paint.add_simple_uvs", icon='ADD', text="Add Simple UVs")
-    elif have_image:
-        box.separator()
-        box.operator("image.save_all_modified", text="Save All Images", icon='FILE_TICK')
-
-
-
 def VertexGroups(self, context, parent):
-    layout = parent
     ob = context.active_object
     group = ob.vertex_groups.active
 
-    row = layout.row()
+    row = parent.row()
     row.ui_units_x = 8
     col = row.column()
 
@@ -102,7 +25,7 @@ def VertexGroups(self, context, parent):
     if group:
         rows = 5
 
-    row = layout.row()
+    row = parent.row()
     row.template_list("MESH_UL_vgroups", "", ob, "vertex_groups", ob.vertex_groups, "active_index", rows=rows)
 
     col = row.column(align=True)
@@ -132,7 +55,7 @@ def VertexGroups(self, context, parent):
             (ob.mode == 'EDIT' or
                 (ob.mode == 'WEIGHT_PAINT' and ob.type == 'MESH' and ob.data.use_paint_mask_vertex))
     ):
-        row = layout.row()
+        row = parent.row()
         sub = row.row(align=True)
         sub.operator("xmenu.override", text="Assign").cmd ='object.vertex_group_assign'
         sub.operator("xmenu.override", text="Remove").cmd ='object.vertex_group_remove_from'
@@ -141,8 +64,8 @@ def VertexGroups(self, context, parent):
         sub.operator("xmenu.override", text="Select").cmd ='object.vertex_group_select'
         sub.operator("xmenu.override", text="Deselect").cmd ='object.vertex_group_deselect'
 
-        layout.prop(context.tool_settings, "vertex_group_weight", text="Weight")
-        row = layout.row()
+        parent.prop(context.tool_settings, "vertex_group_weight", text="Weight")
+        row = parent.row()
         sub = row.row(align=True)
         sub.operator("xmenu.override", text="COPY").cmd ='object.vertex_group_copy'
         sub.operator("xmenu.override", text="COPY TO").cmd ='object.vertex_group_copy_to_selected'
@@ -153,10 +76,9 @@ def VertexGroups(self, context, parent):
 
 
 def UVTexture(self, context, parent):
-    layout = parent
     me = context.active_object.data
 
-    row = layout.row()
+    row = parent.row()
     col = row.column()
     col.template_list("MESH_UL_uvmaps", "uvmaps", me, "uv_layers", me.uv_layers, "active_index", rows=2)
     col = row.column(align=True)
@@ -164,11 +86,11 @@ def UVTexture(self, context, parent):
     col.operator("xmenu.override", icon='REMOVE', text="").cmd='mesh.uv_texture_remove'
 
 def VertexColor(self, context, parent):
-    layout = parent
     me = context.active_object.data
 
-    row = layout.row()
+    row = parent.row()
     col = row.column()
+    col.ui_units_x = 8
     col.template_list("MESH_UL_vcols", "vcols", me, "vertex_colors", me.vertex_colors, "active_index", rows=2)
     col = row.column(align=True)
     col.operator("xmenu.override", icon='ADD', text="").cmd='mesh.vertex_color_add'
@@ -188,6 +110,28 @@ def Normals(self, context, parent):
     sub.active = mesh.use_auto_smooth and not mesh.has_custom_normals
     sub.prop(mesh, "auto_smooth_angle", text="")
     #row.prop_decorator(mesh, "auto_smooth_angle")
+
+def GPLayers(self, context, parent):
+    gpd = context.active_object.data
+    gpl = gpd.layers.active
+
+    row = parent.row()
+    row.ui_units_x = 11
+    layer_rows = 4
+
+    col = row.column()
+    col.template_list("GPENCIL_UL_layer", "", gpd, "layers", gpd.layers, "active_index",
+                    rows=layer_rows, sort_reverse=True, sort_lock=True)
+    if gpl:
+        sub = col.column(align=True)
+        sub.prop(gpl, "blend_mode", text="Blend")
+        sub.prop(gpl, "opacity", text="Opacity", slider=True)
+        sub.prop(gpl, "use_lights")
+
+    col = row.column()
+    sub = col.column(align=True)
+    sub.operator("gpencil.layer_add", icon='ADD', text="")
+    sub.operator("gpencil.layer_remove", icon='REMOVE', text="")
 
 def ModeSelector(self, context, parent):
     active = context.active_object
@@ -210,11 +154,11 @@ def ModeSelector(self, context, parent):
                     sub.active = False if context.mode == 'PARTICLE_EDIT' else True
                     sub.operator("object.mode_set", text="", icon="PARTICLEMODE").mode = 'PARTICLE_EDIT'
                 sub = row.row(align=True)
-                sub.active = False if context.mode == 'PAINT_TEXTURE' else True
-                sub.operator("object.mode_set", text="", icon="TPAINT_HLT").mode = 'TEXTURE_PAINT'
-                sub = row.row(align=True)
                 sub.active = False if context.mode == 'PAINT_WEIGHT' else True
                 sub.operator("object.mode_set", text="", icon="WPAINT_HLT").mode = 'WEIGHT_PAINT'
+                sub = row.row(align=True)
+                sub.active = False if context.mode == 'PAINT_TEXTURE' else True
+                sub.operator("object.mode_set", text="", icon="TPAINT_HLT").mode = 'TEXTURE_PAINT'
                 sub = row.row(align=True)
                 sub.active = False if context.mode == 'PAINT_VERTEX' else True
                 sub.operator("object.mode_set", text="", icon="VPAINT_HLT").mode = 'VERTEX_PAINT'
@@ -330,9 +274,7 @@ def SetPivot(self, context, parent):
     col.operator('object.pivotobottom', text='BOTTOM')
 
 def ToolOptions(self, context, parent):
-    ts = context.tool_settings
-    brush = context.tool_settings.sculpt.brush
-
+    ts = context.tool_settings   
     layout = parent
     row = parent.row(align=True)   
     row.ui_units_x = 8
@@ -345,8 +287,7 @@ def ToolOptions(self, context, parent):
         row.prop(ts, "use_mesh_automerge", text="Auto Merge", toggle=True)
 
     elif bpy.context.mode == 'SCULPT':
-        capabilities = brush.sculpt_capabilities
-        sculpt_tool = brush.sculpt_tool
+        brush = ts.sculpt.brush
 
         col = row.column(align=True)
         col.ui_units_x = 4
@@ -363,6 +304,21 @@ def ToolOptions(self, context, parent):
         split = sub.split(factor=0.4, align=True)
         split.prop(brush, "use_automasking_boundary_face_sets", text="STP", toggle=True)
         split.prop(brush, "automasking_boundary_edges_propagation_steps", text="",)
+
+    elif bpy.context.mode == 'PAINT_TEXTURE':
+        ipaint = ts.image_paint
+        
+        col = row.column(align=True)
+        col.ui_units_x = 3
+        col.scale_y = 0.7
+        col.prop(ipaint, "use_occlude",  text="Occlude", toggle=True)
+        col.prop(ipaint, "use_backface_culling",  text="FrontFace", toggle=True)
+
+        col = row.column(align=True)
+        col.ui_units_x = 5
+        col.scale_y = 0.7
+        col.prop(ipaint, "seam_bleed",  text="Bleed")
+        col.prop(ipaint, "dither",  text="Dither")  
         
 def ObjectToolSettings(self, context, parent):
     layout = parent
@@ -385,6 +341,248 @@ def ObjectToolSettings(self, context, parent):
         sub = col.row(align=True)
         sub.label(text='------')
 
+def SculptToolSettings(self, context, parent):
+    layout = parent
+    tool = context.workspace.tools.from_space_view3d_mode(bpy.context.mode).idname
+    #if tool.find('brush') != -1:
+
+    col = layout.column()
+    col.alignment = 'LEFT'
+    col.ui_units_x = 6.4
+    col.scale_y = 0.7
+
+    if tool == 'builtin.mesh_filter':
+        tool = context.workspace.tools.from_space_view3d_mode(context.mode)
+        props = tool.operator_properties("sculpt.mesh_filter")
+        sub = col.row(align=True)
+        sub.ui_units_x = 5
+        sub.prop(props, "type", text='', expand=False)
+        sub.prop(props, "strength")
+        row = col.row(align=True)
+        row.prop(props, "deform_axis")
+        row.prop(props, "orientation", expand=False, text='')
+        if props.type == 'SURFACE_SMOOTH':
+            row = col.row(align=True)
+            row.prop(props, "surface_smooth_shape_preservation", expand=False, slider=True, text='SHAPE')
+            row.prop(props, "surface_smooth_current_vertex", expand=False, slider=True ,text='VERT')
+        elif props.type == 'SHARPEN':
+            col.prop(props, "sharpen_smooth_ratio", expand=False, slider=True ,text='SHRP<>SMTH')
+            row = col.row(align=True)
+            row.prop(props, "sharpen_intensify_detail_strength", expand=False, slider=True ,text='DETAIL')
+            row.prop(props, "sharpen_curvature_smooth_iterations", expand=False, text='ITERATION')
+
+    if tool == 'builtin.box_mask':
+        tool = context.workspace.tools.from_space_view3d_mode(context.mode)
+        props = tool.operator_properties("paint.mask_box_gesture")
+        sub = col.row(align=True)
+        sub.ui_units_x = 5
+        sub.prop(props, "use_front_faces_only", expand=False, text='FrontFaces')
+
+    if tool == 'builtin.lasso_mask':
+        tool = context.workspace.tools.from_space_view3d_mode(context.mode)
+        props = tool.operator_properties("paint.mask_lasso_gesture")
+        sub = col.row(align=True)
+        sub.ui_units_x = 5
+        sub.prop(props, "use_front_faces_only", expand=False, text='FrontFaces')
+
+    if tool == 'builtin.line_mask':
+        tool = context.workspace.tools.from_space_view3d_mode(context.mode)
+        props = tool.operator_properties("paint.mask_line_gesture")
+        sub = col.column(align=True)
+        sub.ui_units_x = 5
+        sub.prop(props, "use_front_faces_only", expand=False, text='FrontFaces')
+        sub.prop(props, "use_limit_to_segment", expand=False, text='LimitSegment')
+
+    if tool == 'builtin.box_face_set':
+        tool = context.workspace.tools.from_space_view3d_mode(context.mode)
+        props = tool.operator_properties("sculpt.face_set_box_gesture")
+        sub = col.row(align=True)
+        sub.ui_units_x = 5
+        sub.prop(props, "use_front_faces_only", expand=False, text='FrontFaces')
+
+    if tool == 'builtin.lasso_face_set':
+        tool = context.workspace.tools.from_space_view3d_mode(context.mode)
+        props = tool.operator_properties("sculpt.face_set_lasso_gesture")
+        sub = col.row(align=True)
+        sub.ui_units_x = 5
+        sub.prop(props, "use_front_faces_only", expand=False, text='FrontFaces')
+
+    if tool == 'builtin.face_set_edit':
+        tool = context.workspace.tools.from_space_view3d_mode(context.mode)
+        props = tool.operator_properties("sculpt.face_set_edit")
+        sub = col.column(align=True)
+        sub.ui_units_x = 5
+        sub.prop(props, "mode", expand=False, text='')
+        sub.prop(props, "modify_hidden")
+
+    if tool == 'builtin.box_trim':
+        tool = context.workspace.tools.from_space_view3d_mode(context.mode)
+        props = tool.operator_properties("sculpt.trim_box_gesture")
+        sub = col.column(align=True)
+        sub.ui_units_x = 5
+        sub.prop(props, "trim_mode", expand=False, text='')
+        sub.prop(props, "use_cursor_depth", text='Cursor Depth', expand=False)
+
+    if tool == 'builtin.lasso_trim':
+        tool = context.workspace.tools.from_space_view3d_mode(context.mode)
+        props = tool.operator_properties("sculpt.trim_lasso_gesture")
+        sub = col.column(align=True)
+        sub.ui_units_x = 5
+        sub.prop(props, "trim_mode", expand=False, text='')
+        sub.prop(props, "use_cursor_depth", text='Cursor Depth', expand=False)
+        sub.prop(props, "trim_orientation", text='ORIENT', expand=False)
+
+    if tool == 'builtin.transform':
+        scene = context.scene
+        orient_slot = scene.transform_orientation_slots[0]
+        sub = col.column(align=True)
+        sub.ui_units_x = 5
+        sub.prop(orient_slot, "type")
+
+    else:
+        sub = col.row(align=True)
+        sub.label(text='')
+
+def SculptBrushSettings(self, context, parent):
+    layout = parent
+    brush = context.tool_settings.sculpt.brush
+    direction = not brush.sculpt_capabilities.has_direction
+    settings = context.tool_settings.sculpt
+    capabilities = brush.sculpt_capabilities
+    sculpt_tool = brush.sculpt_tool
+
+    col = layout.column()
+    col.ui_units_x = 17
+    col.scale_y = 0.7
+    #ROW1#################################################
+    row = col.row()
+    sub = row.row(align=True)
+    sub.alignment = 'LEFT'
+    sub.ui_units_x = 5
+    if sculpt_tool == 'GRAB':
+        sub.prop(brush, "use_grab_silhouette",  text='SILHOUETTE', toggle=True)
+        sub.prop(brush, "use_grab_active_vertex",  text='VERTEX', toggle=True)
+    if direction:
+        subsub = sub.row()
+        subsub.scale_x = 1.5
+        subsub.prop(brush, "direction", expand=True, text="")
+    else:
+        sub.label(text="---")
+
+    sub = row.row()
+    sub.alignment = 'CENTER'
+    sub.ui_units_x = 5
+    if sculpt_tool == 'CLAY_STRIPS':
+        sub.prop(brush, "tip_roundness", slider=True, text='ROUND')
+    elif sculpt_tool == 'LAYER':
+        sub.prop(brush, "height", slider=True, text='HEIGHT')
+    elif sculpt_tool == 'CREASE':
+        sub.prop(brush, "crease_pinch_factor", slider=True, text='PINCH')
+    elif sculpt_tool == 'SCRAPE':
+        sub.prop(brush, "area_radius_factor", slider=True, text='AREA')
+    elif sculpt_tool == 'FILL':
+        sub.prop(brush, "area_radius_factor", slider=True, text='AREA')
+    elif sculpt_tool == 'MULTIPLANE_SCRAPE':
+        sub.prop(brush, "multiplane_scrape_angle", slider=True, text='ANGLE')
+    elif sculpt_tool == 'POSE':
+        sub.prop(brush, "pose_ik_segments", slider=True, text='IK')
+    elif sculpt_tool == 'GRAB':
+        sub.prop(brush, "normal_weight", slider=True, text='PEAK')
+    elif sculpt_tool == 'ELASTIC_DEFORM':
+        sub.prop(brush, "normal_weight", slider=True, text='PEAK')
+    else:
+        sub.label(text="")
+    
+    sub = row.row()
+    sub.alignment = 'RIGHT'
+    sub.ui_units_x = 5
+    if capabilities.has_accumulate:
+        sub.prop(brush, "use_accumulate", text="ACCU", toggle=True)
+    else:
+        sub.label(text='')
+    row.separator(factor = 2)
+    #ROW2#################################################
+    row = col.row()
+    sub = row.row()
+
+    sub.ui_units_x = 5
+    sub.prop(brush, "normal_radius_factor", slider=True, text='NORMAL')
+    sub = row.row()
+
+    sub.ui_units_x = 5
+    sub.prop(brush, "hardness", slider=True, text='HARD')
+    sub = row.row()
+
+    sub.ui_units_x = 5
+    if sculpt_tool == 'MASK':
+        sub.prop(brush, "mask_tool", expand=True)
+    else:
+        sub.prop(brush, "auto_smooth_factor", slider=True, text='SMTH')
+    row.separator(factor = 2) 
+
+def TextureBrushSettings(self, context, parent):
+    brush = context.tool_settings.image_paint.brush
+    settings = context.tool_settings.image_paint
+    capabilities = brush.image_paint_capabilities
+    use_accumulate = capabilities.has_accumulate
+    mode = context.mode
+
+    row = parent.row()
+
+    col = row.column()
+    col.ui_units_x = 4
+    col.scale_y = 0.7
+    col.prop(brush, "use_accumulate", text="ACCU", toggle=True)
+    if mode == 'PAINT_2D':
+        col.prop(brush, "use_paint_antialiasing")
+    else:
+        col.prop(brush, "use_alpha", text="ALPHA", toggle=True)
+
+    # Tool specific settings
+    col = row.column()
+    col.ui_units_x = 6
+    col.scale_y = 0.7
+    if brush.image_tool == 'SOFTEN':
+        col.row().prop(brush, "direction", expand=True)
+        col.prop(brush, "threshold")
+        #if mode == 'PAINT_2D':
+            #col.prop(brush, "blur_kernel_radius")
+        #col.prop(brush, "blur_mode")
+
+    elif brush.image_tool == 'MASK':
+        col.prop(brush, "weight", text="Mask Value", slider=True)
+
+    elif brush.image_tool == 'CLONE':
+        if mode == 'PAINT_2D':
+            col.prop(brush, "clone_image", text="Image")
+            col.prop(brush, "clone_alpha", text="Alpha")
+        else:
+            col.label(text='')
+    else:
+        col.label(text='')
+
+def VertexBrushSettings(self, context, parent):
+    brush = context.tool_settings.vertex_paint.brush
+    settings = context.tool_settings.vertex_paint
+
+    row = parent.row()
+    col = row.column()
+    col.ui_units_x = 4
+    col.scale_y = 0.7
+    col.prop(brush, "use_frontface", text="Front", toggle=True)
+    col.prop(brush, "use_alpha", text="ALPHA", toggle=True)
+
+    col = row.column()
+    col.ui_units_x = 4
+    col.scale_y = 0.7
+    if brush.vertex_tool != 'SMEAR':
+        col.prop(brush, "use_accumulate", text="ACCU", toggle=True)
+    else:
+        col.label(text="")
+
+    col = row.column()
+    col.ui_units_x = 1.7
+    col.label(text="")
 
 def BrushCopy(self, context, parent):
     layout = parent
@@ -393,8 +591,9 @@ def BrushCopy(self, context, parent):
     settings = paint_settings(context)
 
     col = parent.column(align=True)     
-    col.ui_units_x = 3.6
-    col.scale_y = 0.15
+    col.ui_units_x = 4.4
+    col.scale_x = 0.2
+    col.scale_y = 0.2
     row= col.row()   
     row.template_ID_preview(settings, "brush", rows=1, cols=8, hide_buttons=True )
 
@@ -411,6 +610,123 @@ def BrushCopy(self, context, parent):
     '''
 #bpy.ops.brush.reset()
 
+def Materials(self, context, parent):
+    mat = context.material
+    ob = context.active_object
+    slot = context.material_slot
+    space = context.space_data
+
+    box = parent.box()
+    box.ui_units_x = 8
+
+    if ob:
+        is_sortable = len(ob.material_slots) > 1
+        rows = 3
+        if is_sortable:
+            rows = 5
+
+        row = box.row()
+
+        row.template_list("MATERIAL_UL_matslots", "", ob, "material_slots", ob, "active_material_index", rows=rows)
+
+        col = row.column(align=True)
+        col.operator("object.material_slot_add", icon='ADD', text="")
+        col.operator("object.material_slot_remove", icon='REMOVE', text="")
+
+        col.separator()
+
+        col.menu("MATERIAL_MT_context_menu", icon='DOWNARROW_HLT', text="")
+
+        if is_sortable:
+            col.separator()
+
+            col.operator("object.material_slot_move", icon='TRIA_UP', text="").direction = 'UP'
+            col.operator("object.material_slot_move", icon='TRIA_DOWN', text="").direction = 'DOWN'
+
+    row = box.row()
+
+    if ob:
+        row.template_ID(ob, "active_material", new="material.new")
+
+        if slot:
+            icon_link = 'MESH_DATA' if slot.link == 'DATA' else 'OBJECT_DATA'
+            row.prop(slot, "link", icon=icon_link, icon_only=True)
+
+        if ob.mode == 'EDIT':
+            row = layout.row(align=True)
+            row.operator("object.material_slot_assign", text="Assign")
+            row.operator("object.material_slot_select", text="Select")
+            row.operator("object.material_slot_deselect", text="Deselect")
+
+    elif mat:
+        row.template_ID(space, "pin_id")
+
+
+def TexSlots(self, context, parent):
+    layout = parent
+    layout.use_property_split = True
+    layout.use_property_decorate = False
+
+    settings = context.tool_settings.image_paint
+    ob = context.active_object
+
+    box = parent.box()
+    box.ui_units_x = 8
+
+    box.prop(settings, "mode", text="Mode")
+    box.separator()
+
+    if settings.mode == 'MATERIAL':
+        if len(ob.material_slots) > 1:
+            box.template_list("MATERIAL_UL_matslots", "layers",
+                                    ob, "material_slots",
+                                    ob, "active_material_index", rows=2)
+        mat = ob.active_material
+        if mat and mat.texture_paint_images:
+            row = box.row()
+            row.template_list("TEXTURE_UL_texpaintslots", "",
+                                mat, "texture_paint_images",
+                                mat, "paint_active_slot", rows=2)
+
+            if mat.texture_paint_slots:
+                slot = mat.texture_paint_slots[mat.paint_active_slot]
+            else:
+                slot = None
+
+            have_image = slot is not None
+        else:
+            row = box.row()
+
+            box = row.box()
+            box.label(text="No Textures")
+            have_image = False
+
+        sub = row.column(align=True)
+        sub.operator_menu_enum("paint.add_texture_paint_slot", "type", icon='ADD', text="")
+
+    elif settings.mode == 'IMAGE':
+        mesh = ob.data
+        uv_text = mesh.uv_layers.active.name if mesh.uv_layers.active else ""
+        box.template_ID(settings, "canvas", new="image.new", open="image.open")
+        if settings.missing_uvs:
+            box.operator("paint.add_simple_uvs", icon='ADD', text="Add UVs")
+        else:
+            box.menu("VIEW3D_MT_tools_projectpaint_uvlayer", text=uv_text, translate=False)
+        have_image = settings.canvas is not None
+
+        box.prop(settings, "interpolation", text="")
+
+    if settings.missing_uvs:
+        box.separator()
+        split = box.split()
+        split.label(text="UV Map Needed", icon='INFO')
+        split.operator("paint.add_simple_uvs", icon='ADD', text="Add Simple UVs")
+    elif have_image:
+        box.separator()
+        box.operator("image.save_all_modified", text="Save All Images", icon='FILE_TICK')
+
+
+
 def Color(self, context, parent):
     layout = parent
     ts = context.tool_settings
@@ -422,11 +738,37 @@ def Color(self, context, parent):
     
     col = parent.column()
     col.scale_y = 0.7 
-    col.ui_units_x = 4
+    col.ui_units_x = 6
     col.template_color_picker(ptr, 'color', value_slider=True)
-    colsub = col.row(align=True)
-    colsub.prop(ptr, 'color', text="")
-    colsub.prop(ptr, 'secondary_color', text="")
+
+def ColorHud(self, context, parent):
+    ts = context.tool_settings
+    ups = ts.unified_paint_settings
+    if context.mode == 'PAINT_VERTEX':
+        ptr = ts.vertex_paint.brush
+    else:
+        ptr = ups if ups.use_unified_color else ts.image_paint.brush    
+    
+    row = parent.row(align=True)
+
+    sub = row.row(align=True)
+    sub.ui_units_x = 4
+    sub.prop(ptr, 'color', text="")
+    sub.prop(ptr, 'secondary_color', text="")
+
+    sub = row.row(align=True)
+    sub.ui_units_x = 1.2
+    #sub.operator("xmenu.override", icon='EYEDROPPER').cmd ='ui.eyedropper_color'
+    sub.operator("paint.brush_colors_flip", icon='FILE_REFRESH', text="")
+
+
+def ColorPalette(self, context, parent):
+    settings = paint_settings(context)
+
+    col = parent.column()
+    col.template_ID(settings, "palette", new="palette.new")
+    if settings.palette:
+        col.template_palette(settings, "palette", color=True)
 
 def ViewCam(self, context, parent):
     layout = parent
@@ -626,186 +968,6 @@ def SculptFaceSet(self, context, parent):
     subrow.operator("sculpt.face_sets_init", text='EDGE').mode = 'SHARP_EDGES'
     subrow.operator("sculpt.face_set_edit", text='Grow').mode = 'GROW'
     '''
-
-def SculptBrushSettings(self, context, parent):
-    layout = parent
-    brush = context.tool_settings.sculpt.brush
-    direction = not brush.sculpt_capabilities.has_direction
-    settings = context.tool_settings.sculpt
-    capabilities = brush.sculpt_capabilities
-    sculpt_tool = brush.sculpt_tool
-
-    col = layout.column()
-    col.ui_units_x = 17
-    col.scale_y = 0.7
-    #ROW1#################################################
-    row = col.row()
-    sub = row.row(align=True)
-    sub.alignment = 'LEFT'
-    sub.ui_units_x = 5
-    if sculpt_tool == 'GRAB':
-        sub.prop(brush, "use_grab_silhouette",  text='SILHOUETTE', toggle=True)
-        sub.prop(brush, "use_grab_active_vertex",  text='VERTEX', toggle=True)
-    if direction:
-        subsub = sub.row()
-        subsub.scale_x = 1.5
-        subsub.prop(brush, "direction", expand=True, text="")
-    else:
-        sub.label(text="---")
-
-    sub = row.row()
-    sub.alignment = 'CENTER'
-    sub.ui_units_x = 5
-    if sculpt_tool == 'CLAY_STRIPS':
-        sub.prop(brush, "tip_roundness", slider=True, text='ROUND')
-    elif sculpt_tool == 'LAYER':
-        sub.prop(brush, "height", slider=True, text='HEIGHT')
-    elif sculpt_tool == 'CREASE':
-        sub.prop(brush, "crease_pinch_factor", slider=True, text='PINCH')
-    elif sculpt_tool == 'SCRAPE':
-        sub.prop(brush, "area_radius_factor", slider=True, text='AREA')
-    elif sculpt_tool == 'FILL':
-        sub.prop(brush, "area_radius_factor", slider=True, text='AREA')
-    elif sculpt_tool == 'MULTIPLANE_SCRAPE':
-        sub.prop(brush, "multiplane_scrape_angle", slider=True, text='ANGLE')
-    elif sculpt_tool == 'POSE':
-        sub.prop(brush, "pose_ik_segments", slider=True, text='IK')
-    elif sculpt_tool == 'GRAB':
-        sub.prop(brush, "normal_weight", slider=True, text='PEAK')
-    elif sculpt_tool == 'ELASTIC_DEFORM':
-        sub.prop(brush, "normal_weight", slider=True, text='PEAK')
-    else:
-        sub.label(text="")
-    
-    sub = row.row()
-    sub.alignment = 'RIGHT'
-    sub.ui_units_x = 5
-    if capabilities.has_accumulate:
-        sub.prop(brush, "use_accumulate", text="ACCU", toggle=True)
-    else:
-        sub.label(text='')
-    row.separator(factor = 2)
-    #ROW2#################################################
-    row = col.row()
-    sub = row.row()
-
-    sub.ui_units_x = 5
-    sub.prop(brush, "normal_radius_factor", slider=True, text='NORMAL')
-    sub = row.row()
-
-    sub.ui_units_x = 5
-    sub.prop(brush, "hardness", slider=True, text='HARD')
-    sub = row.row()
-
-    sub.ui_units_x = 5
-    if sculpt_tool == 'MASK':
-        sub.prop(brush, "mask_tool", expand=True)
-    else:
-        sub.prop(brush, "auto_smooth_factor", slider=True, text='SMTH')
-    row.separator(factor = 2) 
-
-
-def SculptToolSettings(self, context, parent):
-    layout = parent
-    tool = context.workspace.tools.from_space_view3d_mode(bpy.context.mode).idname
-    #if tool.find('brush') != -1:
-
-    col = layout.column()
-    col.alignment = 'LEFT'
-    col.ui_units_x = 6.4
-    col.scale_y = 0.7
-
-    if tool == 'builtin.mesh_filter':
-        tool = context.workspace.tools.from_space_view3d_mode(context.mode)
-        props = tool.operator_properties("sculpt.mesh_filter")
-        sub = col.row(align=True)
-        sub.ui_units_x = 5
-        sub.prop(props, "type", text='', expand=False)
-        sub.prop(props, "strength")
-        row = col.row(align=True)
-        row.prop(props, "deform_axis")
-        row.prop(props, "orientation", expand=False, text='')
-        if props.type == 'SURFACE_SMOOTH':
-            row = col.row(align=True)
-            row.prop(props, "surface_smooth_shape_preservation", expand=False, slider=True, text='SHAPE')
-            row.prop(props, "surface_smooth_current_vertex", expand=False, slider=True ,text='VERT')
-        elif props.type == 'SHARPEN':
-            col.prop(props, "sharpen_smooth_ratio", expand=False, slider=True ,text='SHRP<>SMTH')
-            row = col.row(align=True)
-            row.prop(props, "sharpen_intensify_detail_strength", expand=False, slider=True ,text='DETAIL')
-            row.prop(props, "sharpen_curvature_smooth_iterations", expand=False, text='ITERATION')
-
-    if tool == 'builtin.box_mask':
-        tool = context.workspace.tools.from_space_view3d_mode(context.mode)
-        props = tool.operator_properties("paint.mask_box_gesture")
-        sub = col.row(align=True)
-        sub.ui_units_x = 5
-        sub.prop(props, "use_front_faces_only", expand=False, text='FrontFaces')
-
-    if tool == 'builtin.lasso_mask':
-        tool = context.workspace.tools.from_space_view3d_mode(context.mode)
-        props = tool.operator_properties("paint.mask_lasso_gesture")
-        sub = col.row(align=True)
-        sub.ui_units_x = 5
-        sub.prop(props, "use_front_faces_only", expand=False, text='FrontFaces')
-
-    if tool == 'builtin.line_mask':
-        tool = context.workspace.tools.from_space_view3d_mode(context.mode)
-        props = tool.operator_properties("paint.mask_line_gesture")
-        sub = col.column(align=True)
-        sub.ui_units_x = 5
-        sub.prop(props, "use_front_faces_only", expand=False, text='FrontFaces')
-        sub.prop(props, "use_limit_to_segment", expand=False, text='LimitSegment')
-
-    if tool == 'builtin.box_face_set':
-        tool = context.workspace.tools.from_space_view3d_mode(context.mode)
-        props = tool.operator_properties("sculpt.face_set_box_gesture")
-        sub = col.row(align=True)
-        sub.ui_units_x = 5
-        sub.prop(props, "use_front_faces_only", expand=False, text='FrontFaces')
-
-    if tool == 'builtin.lasso_face_set':
-        tool = context.workspace.tools.from_space_view3d_mode(context.mode)
-        props = tool.operator_properties("sculpt.face_set_lasso_gesture")
-        sub = col.row(align=True)
-        sub.ui_units_x = 5
-        sub.prop(props, "use_front_faces_only", expand=False, text='FrontFaces')
-
-    if tool == 'builtin.face_set_edit':
-        tool = context.workspace.tools.from_space_view3d_mode(context.mode)
-        props = tool.operator_properties("sculpt.face_set_edit")
-        sub = col.column(align=True)
-        sub.ui_units_x = 5
-        sub.prop(props, "mode", expand=False, text='')
-        sub.prop(props, "modify_hidden")
-
-    if tool == 'builtin.box_trim':
-        tool = context.workspace.tools.from_space_view3d_mode(context.mode)
-        props = tool.operator_properties("sculpt.trim_box_gesture")
-        sub = col.column(align=True)
-        sub.ui_units_x = 5
-        sub.prop(props, "trim_mode", expand=False, text='')
-        sub.prop(props, "use_cursor_depth", text='Cursor Depth', expand=False)
-
-    if tool == 'builtin.lasso_trim':
-        tool = context.workspace.tools.from_space_view3d_mode(context.mode)
-        props = tool.operator_properties("sculpt.trim_lasso_gesture")
-        sub = col.column(align=True)
-        sub.ui_units_x = 5
-        sub.prop(props, "trim_mode", expand=False, text='')
-        sub.prop(props, "use_cursor_depth", text='Cursor Depth', expand=False)
-        sub.prop(props, "trim_orientation", text='ORIENT', expand=False)
-
-    if tool == 'builtin.transform':
-        scene = context.scene
-        orient_slot = scene.transform_orientation_slots[0]
-        sub = col.column(align=True)
-        sub.ui_units_x = 5
-        sub.prop(orient_slot, "type")
-
-    else:
-        sub = col.row(align=True)
-        sub.label(text='')
 
 def SculptTrim(self, context, parent):
     layout = parent
@@ -1033,13 +1195,10 @@ class VIEW3D_MT_BrushTexture(bpy.types.Menu):
         sub = col.row(align=True)
         sub.scale_y = 0.5
         sub.template_icon_view(brush,"xm_brush_texture",show_labels=True)
-        if mode != "SCULPT":
-            bpy.types.Brush.xm_sculpt = False
-            col.prop(brush,"xm_use_mask",text="MASK",toggle=True)
-            col.prop(brush,"xm_invert_mask",text="",toggle=True,icon="IMAGE_ALPHA")
-        if mode == "SCULPT":
-            col.prop(brush,"xm_use_mask",text="MASK",toggle=True)
-            bpy.types.Brush.xm_sculpt = True
+        sub = col.row(align=True)
+        sub.prop(brush,"xm_use_mask",text="MASK",toggle=True)
+        sub.prop(brush,"xm_invert_mask",text="",toggle=True,icon="IMAGE_ALPHA")
+
         '''
         sub = col.row(align=True)
         subcol = sub.column(align=True)

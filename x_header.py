@@ -4,7 +4,7 @@ from .functions import tool_grid, tool_bt, funct_bt
 from bpy.types import Operator, AddonPreferences
 from bl_ui.properties_data_modifier import DATA_PT_modifiers
 from bpy.types import Header, Panel, Menu
-from .menuitems import BrushCopy, ModeSelector
+from .menuitems import BrushCopy, ModeSelector, ColorHud
 
 from bl_ui.space_toolsystem_common import (
     ToolSelectPanelHelper,
@@ -57,12 +57,14 @@ def draw(self, context):
         paint_hud(mid, brush, self, context)
     if context.mode == 'PAINT_VERTEX':
         brush = context.tool_settings.vertex_paint.brush
+        ColorHud(self, context, parent=mid)
         paint_hud(mid, brush, self, context)
     if context.mode == 'PAINT_WEIGHT':
         brush = context.tool_settings.weight_paint.brush
         paint_hud(mid, brush, self, context) 
     if context.mode == 'PAINT_TEXTURE':
         brush = context.tool_settings.image_paint.brush
+        ColorHud(self, context, parent=mid)
         paint_hud(mid, brush, self, context)
     if context.mode == 'PAINT_GPENCIL':
         brush = context.tool_settings.gpencil_paint.brush
