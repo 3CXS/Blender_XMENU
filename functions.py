@@ -151,18 +151,18 @@ def update_toolset():
 
     tool = bpy.context.workspace.tools.from_space_view3d_mode(bpy.context.mode)    
     toolid = str(tool.idname)
-
-    mode = bpy.context.active_object.mode
-    if mode == 'TEXTURE_PAINT':
-        brushname = bpy.context.tool_settings.image_paint.brush
-    if mode == 'SCULPT':
-        brushname = bpy.context.tool_settings.sculpt.brush
-    if mode == 'VERTEX_PAINT':
-        brushname = bpy.context.tool_settings.vertex_paint.brush
-    if mode == 'WEIGHT_PAINT':
-        brushname = bpy.context.tool_settings.weight_paint.brush
-    if mode == 'PAINT_GPENCIL':
-       brushname = bpy.context.tool_settings.gpencil_paint.brush
+    if bpy.context.active_object != None:
+        mode = bpy.context.active_object.mode
+        if mode == 'TEXTURE_PAINT':
+            brushname = bpy.context.tool_settings.image_paint.brush
+        if mode == 'SCULPT':
+            brushname = bpy.context.tool_settings.sculpt.brush
+        if mode == 'VERTEX_PAINT':
+            brushname = bpy.context.tool_settings.vertex_paint.brush
+        if mode == 'WEIGHT_PAINT':
+            brushname = bpy.context.tool_settings.weight_paint.brush
+        if mode == 'PAINT_GPENCIL':
+            brushname = bpy.context.tool_settings.gpencil_paint.brush
 
     for i in range(NTools):
         if Tools[i][2] == '' and toolid == Tools[i][1]:
