@@ -13,7 +13,16 @@ from .icons.icons import load_icons
 from.toolsets import Toolset
 from mathutils import Vector, Matrix
 from .brushtexture import get_brush_mode
+
 #////////////////////////////////////////////////////////////////////////////////////////////#
+# Construct context
+def context(window=None, screen=None, area=None, region=None):
+    if window is None: window = C.window
+    if screen is None: screen = window.screen
+    if area is None: area = screen.areas[0]
+    if region is None: region = area.regions[0]
+    return {'window': window, 'screen': screen, 'area': area, 'region': region}
+
 def paint_settings(context):
         tool_settings = context.tool_settings
         mode = context.mode
@@ -392,27 +401,38 @@ class Override(bpy.types.Operator):
     bl_label = "Operator Override"
 
     cmd: bpy.props.StringProperty()
-    prop1: bpy.props.StringProperty()
-    prop2: bpy.props.StringProperty()
 
     def execute(self, context):
         op = 'bpy.ops.'
         op += self.cmd
+        op += '(override)'
+
+        for screen in bpy.data.screens:
+            for area in (a for a in screen.areas if a.type == 'VIEW_3D'):
+                region = next((region for region in area.regions if region.type == 'WINDOW'), None)
+                if region is not None:
+                    override = {'area': area, 'region': region}
+                    eval(op)
+                    return {'FINISHED'}
+
+class Override1(bpy.types.Operator):
+    bl_idname = "xmenu.override1"
+    bl_label = "Operator Override"
+
+    cmd: bpy.props.StringProperty()
+    prop1: bpy.props.StringProperty()
+
+    def execute(self, context):
+
+        prop1 = self.prop1
+        keyword1 = prop1.split('=')
+        op = 'bpy.ops.'
+        op += self.cmd
         op += '(override'
-        if self.prop1:
-            prop1 = self.prop1
-            keyword1 = prop1.split('=')
-            op += ', '
-            op += keyword1[0]
-            op += '='
-            op += keyword1[1]
-        if self.prop2:
-            prop2 = self.prop2
-            keyword2 = prop2.split('=')
-            op += ', '
-            op += keyword2[0]
-            op += '='
-            op += keyword2[1]
+        op += ', '
+        op += keyword1[0]
+        op += '='
+        op += keyword1[1]
         op += ')'
 
         for screen in bpy.data.screens:
@@ -423,6 +443,39 @@ class Override(bpy.types.Operator):
                     eval(op)
                     return {'FINISHED'}
 
+class Override2(bpy.types.Operator):
+    bl_idname = "xmenu.override2"
+    bl_label = "Operator Override"
+
+    cmd: bpy.props.StringProperty()
+    prop1: bpy.props.StringProperty()
+    prop2: bpy.props.StringProperty()
+    def execute(self, context):
+
+        prop1 = self.prop1
+        keyword1 = prop1.split('=')
+        prop2 = self.prop1
+        keyword2 = prop2.split('=')
+        op = 'bpy.ops.'
+        op += self.cmd
+        op += '(override'
+        op += ', '
+        op += keyword1[0]
+        op += '='
+        op += keyword1[1]
+        op += ', '
+        op += keyword2[0]
+        op += '='
+        op += keyword2[1]
+        op += ')'
+
+        for screen in bpy.data.screens:
+            for area in (a for a in screen.areas if a.type == 'VIEW_3D'):
+                region = next((region for region in area.regions if region.type == 'WINDOW'), None)
+                if region is not None:
+                    override = {'area': area, 'region': region}
+                    eval(op)
+                    return {'FINISHED'}
 #////////////////////////////////////////////////////////////////////////////////////////////#
 
 #////////////////////////////////////////////////////////////////////////////////////////////#
@@ -663,9 +716,10 @@ class SurfaceDrawMode(bpy.types.Operator):
         return {'FINISHED'}
 
 
+
 #////////////////////////////////////////////////////////////////////////////////////////////#
 
-classes = (XRay, ViewCam, FrameS, FrameA, Persp, LockCam, SetTool, Wire, SetActive, Detailsize, Mask, SurfaceDrawMode, Override)
+classes = (XRay, ViewCam, FrameS, FrameA, Persp, LockCam, SetTool, Wire, SetActive, Detailsize, Mask, SurfaceDrawMode, Override, Override1, Override2)
 
 def register():
     for cls in classes:

@@ -193,3 +193,5 @@ def register():
     bpy.types.Brush.xm_ramp_tonemap_r = FloatProperty(default=1.0,min=0.0,max=1.0,update=tonemap)
     bpy.types.Brush.xm_stencil_ramp_tonemap_l = FloatProperty(default=0.0,min=0.0,max=1.0,update=tonemap_stencil)
     bpy.types.Brush.xm_stencil_ramp_tonemap_r = FloatProperty(default=1.0,min=0.0,max=1.0,update=tonemap_stencil)
+
+

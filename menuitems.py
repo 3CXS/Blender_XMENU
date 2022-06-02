@@ -13,40 +13,36 @@ from bpy.types import Menu, Panel, UIList
 from rna_prop_ui import PropertyPanel
 from collections import defaultdict
 
+
 def VertexGroups(self, context, parent):
     ob = context.active_object
     group = ob.vertex_groups.active
-
-    row = parent.row()
-    row.ui_units_x = 8
+    box = parent.box()
+    box.ui_units_x = 10
+    row = box.row()
     col = row.column()
-
     rows = 3
     if group:
-        rows = 5
+        rows = 3
 
-    row = parent.row()
+    row = box.row()
     row.template_list("MESH_UL_vgroups", "", ob, "vertex_groups", ob.vertex_groups, "active_index", rows=rows)
 
     col = row.column(align=True)
 
     col.operator("xmenu.override", icon='ADD', text="").cmd ='object.vertex_group_add'
     col.operator("xmenu.override", icon='REMOVE', text="").cmd='object.vertex_group_remove'
-    #props = col.operator(override, "object.vertex_group_remove", icon='REMOVE', text="")
-    #props.all_unlocked = props.all = False
-
     col.separator()
 
     #col.menu("MESH_MT_vertex_group_context_menu", icon='DOWNARROW_HLT', text="")
     
     if group:
         col.separator()
-        #col.operator("object.vertex_group_move", icon='TRIA_UP', text="").direction = 'UP'
-        op = col.operator("xmenu.override", icon='TRIA_UP', text="")
+        op = col.operator("xmenu.override1", icon='TRIA_UP', text="")
         op.cmd='object.vertex_group_move'
         op.prop1 ='direction="UP"'
 
-        op = col.operator("xmenu.override", icon='TRIA_DOWN', text="")
+        op = col.operator("xmenu.override1", icon='TRIA_DOWN', text="")
         op.cmd='object.vertex_group_move'
         op.prop1 ='direction="DOWN"'
 
@@ -55,7 +51,7 @@ def VertexGroups(self, context, parent):
             (ob.mode == 'EDIT' or
                 (ob.mode == 'WEIGHT_PAINT' and ob.type == 'MESH' and ob.data.use_paint_mask_vertex))
     ):
-        row = parent.row()
+        row = box.row()
         sub = row.row(align=True)
         sub.operator("xmenu.override", text="Assign").cmd ='object.vertex_group_assign'
         sub.operator("xmenu.override", text="Remove").cmd ='object.vertex_group_remove_from'
@@ -64,21 +60,70 @@ def VertexGroups(self, context, parent):
         sub.operator("xmenu.override", text="Select").cmd ='object.vertex_group_select'
         sub.operator("xmenu.override", text="Deselect").cmd ='object.vertex_group_deselect'
 
-        parent.prop(context.tool_settings, "vertex_group_weight", text="Weight")
-        row = parent.row()
+        box.prop(context.tool_settings, "vertex_group_weight", text="Weight")
+        row = box.row()
         sub = row.row(align=True)
         sub.operator("xmenu.override", text="COPY").cmd ='object.vertex_group_copy'
         sub.operator("xmenu.override", text="COPY TO").cmd ='object.vertex_group_copy_to_selected'
         sub = row.row(align=True)
-        op = sub.operator("xmenu.override", text="MIRROR")
+        op = sub.operator("xmenu.override1", text="MIRROR")
         op.cmd = 'object.vertex_group_mirror'
         op.prop1 = 'use_topology=False'
 
+def Materials(self, context, parent):
+
+    #context = bpy.context.copy()
+    mat = context.material
+    ob = context.active_object
+    #ob = context.object
+    slot = context.material_slot
+    space = context.space_data
+
+    box = parent.box()
+    box.ui_units_x = 10
+
+    if ob:
+        is_sortable = len(ob.material_slots) > 1
+        rows = 3
+        if is_sortable:
+            rows = 3
+        row = box.row()
+        row.template_list("MATERIAL_UL_matslots", "", ob, "material_slots", ob, "active_material_index", rows=rows)
+        col = row.column(align=True)
+        col.operator("xmenu.override", icon='ADD', text="").cmd='object.material_slot_add'
+        col.operator("xmenu.override", icon='REMOVE', text="").cmd='object.material_slot_remove'
+        col.separator()
+        col.menu("MATERIAL_MT_context_menu", icon='DOWNARROW_HLT', text="")
+        if is_sortable:
+            col.separator()
+            op = col.operator("xmenu.override1", icon='TRIA_UP', text="")
+            op.cmd='object.material_slot_move'
+            op.prop1 ='direction="UP"'
+            op = col.operator("xmenu.override1", icon='TRIA_DOWN', text="")
+            op.cmd='object.material_slot_move'
+            op.prop1 ='direction="DOWN"'
+
+        row = box.row()
+        row.template_ID(ob, "active_material", new="material.new")
+        if slot:
+            icon_link = 'MESH_DATA' if slot.link == 'DATA' else 'OBJECT_DATA'
+            row.prop(slot, "link", icon=icon_link, icon_only=True)
+        if ob.mode == 'EDIT':
+            row = box.row(align=True)
+            row.operator("xmenu.override", text="Assign").cmd='object.material_slot_assign'
+            row.operator("object.material_slot_select", text="Select")
+            row.operator("object.material_slot_deselect", text="Deselect")
+
+    elif mat:
+        row.template_ID(space, "pin_id")
 
 def UVTexture(self, context, parent):
     me = context.active_object.data
 
-    row = parent.row()
+    box = parent.box()
+    box.ui_units_x = 8
+
+    row = box.row()
     col = row.column()
     col.template_list("MESH_UL_uvmaps", "uvmaps", me, "uv_layers", me.uv_layers, "active_index", rows=2)
     col = row.column(align=True)
@@ -112,26 +157,27 @@ def Normals(self, context, parent):
     #row.prop_decorator(mesh, "auto_smooth_angle")
 
 def GPLayers(self, context, parent):
-    gpd = context.active_object.data
-    gpl = gpd.layers.active
+    if context.active_object.type == "GPENCIL":
+        gpd = context.active_object.data
+        gpl = gpd.layers.active
 
-    row = parent.row()
-    row.ui_units_x = 11
-    layer_rows = 4
+        row = parent.row()
+        row.ui_units_x = 11
+        layer_rows = 4
 
-    col = row.column()
-    col.template_list("GPENCIL_UL_layer", "", gpd, "layers", gpd.layers, "active_index",
-                    rows=layer_rows, sort_reverse=True, sort_lock=True)
-    if gpl:
+        col = row.column()
+        col.template_list("GPENCIL_UL_layer", "", gpd, "layers", gpd.layers, "active_index",
+                        rows=layer_rows, sort_reverse=True, sort_lock=True)
+        if gpl:
+            sub = col.column(align=True)
+            sub.prop(gpl, "blend_mode", text="Blend")
+            sub.prop(gpl, "opacity", text="Opacity", slider=True)
+            sub.prop(gpl, "use_lights")
+
+        col = row.column()
         sub = col.column(align=True)
-        sub.prop(gpl, "blend_mode", text="Blend")
-        sub.prop(gpl, "opacity", text="Opacity", slider=True)
-        sub.prop(gpl, "use_lights")
-
-    col = row.column()
-    sub = col.column(align=True)
-    sub.operator("gpencil.layer_add", icon='ADD', text="")
-    sub.operator("gpencil.layer_remove", icon='REMOVE', text="")
+        sub.operator("gpencil.layer_add", icon='ADD', text="")
+        sub.operator("gpencil.layer_remove", icon='REMOVE', text="")
 
 def ModeSelector(self, context, parent):
     active = context.active_object
@@ -217,28 +263,24 @@ def ModeSelector(self, context, parent):
         sub.label(text="NONE")
 
 def Transforms(self, context, parent):
+    layout = parent
+    layout.use_property_split = True
+    layout.use_property_decorate = False
+
     ob = context.active_object
     box = parent.box()
     row = box.row()
     if ob != None:
         col = row.column(align=True)
-        col.ui_units_x = 1.2
-        sub = col.row(align=True)
-        sub.label(text="POS")
-        sub = col.row(align=True)
-        sub.label(text="ROT")
-        sub = col.row(align=True)
-        sub.label(text="SCL")
-
-        col = row.column(align=True)
         col.ui_units_x = 8
-        sub = col.row(align=True)
+        subrow = col.row(align=True)
+        sub = subrow.column(align=True)
         sub.scale_y = 0.8
         sub.prop(ob, "location", text="")
-        sub = col.row(align=True)
+        sub = subrow.column(align=True)
         sub.scale_y = 0.8
-        sub.prop(ob, "rotation_euler", text="")
-        sub = col.row(align=True)
+        sub.prop(ob, "rotation_euler", text="", expand=False)
+        sub = subrow.column(align=True)
         sub.scale_y = 0.8
         sub.prop(ob, "scale", text="")
         col.separator(factor=1)
@@ -246,12 +288,23 @@ def Transforms(self, context, parent):
         sub.operator('object.transform_apply', text='APPLY')
         col.separator(factor=1)
         sub = col.row(align=True)
-        sub.scale_y = 0.7 
-        sub.label(text="RESET TRANSFORMS")
-        sub = col.row(align=True)
+        #sub.scale_y = 0.7 
+        #sub.label(text="RESET")
+        #sub = col.row(align=True)
         sub.operator('object.location_clear', text='POS').clear_delta=False
         sub.operator('object.rotation_clear', text='ROT').clear_delta=False
         sub.operator('object.scale_clear', text='SCL').clear_delta=False
+        sub = col.row(align=True)
+        #sub.scale_y = 0.7 
+        #sub.label(text="PIVOT")
+        #sub = col.row(align=True) 
+        op = sub.operator('object.origin_set', text='COG')
+        op.type = 'ORIGIN_GEOMETRY'
+        op.center ='MEDIAN'
+        op = sub.operator('object.origin_set', text='CURSOR')
+        op.type = 'ORIGIN_CURSOR'
+        op.center ='MEDIAN'
+        sub.operator('object.pivotobottom', text='BOTTOM')
     else:
         col = row.column(align=True)
         col.ui_units_x = 8
@@ -264,8 +317,7 @@ def SetPivot(self, context, parent):
     box = parent.box()
     col = box.column(align=True)
     col.ui_units_x = 4
-    col.label(text="SET PIVOT")
-    
+    col.label(text="SET PIVOT")   
     op = col.operator('object.origin_set', text='COG')
     op.type = 'ORIGIN_GEOMETRY'
     op.center ='MEDIAN'
@@ -610,57 +662,6 @@ def BrushCopy(self, context, parent):
             row.prop(brush, "icon_filepath", text="")
     '''
 #bpy.ops.brush.reset()
-
-def Materials(self, context, parent):
-    mat = context.material
-    ob = context.active_object
-    slot = context.material_slot
-    space = context.space_data
-
-    box = parent.box()
-    box.ui_units_x = 8
-
-    if ob:
-        is_sortable = len(ob.material_slots) > 1
-        rows = 3
-        if is_sortable:
-            rows = 5
-
-        row = box.row()
-
-        row.template_list("MATERIAL_UL_matslots", "", ob, "material_slots", ob, "active_material_index", rows=rows)
-
-        col = row.column(align=True)
-        col.operator("object.material_slot_add", icon='ADD', text="")
-        col.operator("object.material_slot_remove", icon='REMOVE', text="")
-
-        col.separator()
-
-        col.menu("MATERIAL_MT_context_menu", icon='DOWNARROW_HLT', text="")
-
-        if is_sortable:
-            col.separator()
-
-            col.operator("object.material_slot_move", icon='TRIA_UP', text="").direction = 'UP'
-            col.operator("object.material_slot_move", icon='TRIA_DOWN', text="").direction = 'DOWN'
-
-    row = box.row()
-
-    if ob:
-        row.template_ID(ob, "active_material", new="material.new")
-
-        if slot:
-            icon_link = 'MESH_DATA' if slot.link == 'DATA' else 'OBJECT_DATA'
-            row.prop(slot, "link", icon=icon_link, icon_only=True)
-
-        if ob.mode == 'EDIT':
-            row = layout.row(align=True)
-            row.operator("object.material_slot_assign", text="Assign")
-            row.operator("object.material_slot_select", text="Select")
-            row.operator("object.material_slot_deselect", text="Deselect")
-
-    elif mat:
-        row.template_ID(space, "pin_id")
 
 
 def TexSlots(self, context, parent):

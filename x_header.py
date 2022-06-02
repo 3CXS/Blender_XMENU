@@ -36,8 +36,10 @@ def draw(self, context):
     row.alignment = 'CENTER'
 
     left = row.row()   
-    left.ui_units_x = 20
-    left.separator(factor = 10)  
+    left.ui_units_x = 30
+    left.separator(factor = 20)
+    funct_bt(parent=left, cmd='float_cam', tog=False, w=3, h=1, label='CAM', icon="NONE")
+    left.separator(factor = 1)
     ModeSelector(self, context, left)
     left.separator(factor = 2)
     sub = left.row()
@@ -118,7 +120,7 @@ def draw(self, context):
     row.separator(factor = 2)
 
     right = row.row()
-    right.ui_units_x = 20
+    right.ui_units_x = 30
     sub = right.row()
     subsub = sub.row()
     subsub.ui_units_x = 6
@@ -139,8 +141,16 @@ def draw(self, context):
     funct_bt(parent=sub, cmd='xray', tog=True, w=2, h=1, label='XRAY', icon="NONE")
     sub.separator(factor = 1) 
     funct_bt(parent=sub, cmd='persp', tog=True, w=2, h=1, label='PERSP', icon="NONE")
-    #sub.label(text="XXXX")
-    sub.separator(factor = 55)
+
+    subsub = sub.row(align=True)
+    funct_bt(parent=subsub, cmd='float_outliner', tog=False, w=3, h=1, label='OUTLINER', icon="NONE")
+    funct_bt(parent=subsub, cmd='float_props', tog=False, w=3, h=1, label='PROP', icon="NONE")
+    funct_bt(parent=subsub, cmd='float_shader', tog=False, w=3, h=1, label='SHADER', icon="NONE")
+    funct_bt(parent=subsub, cmd='float_uv', tog=False, w=3, h=1, label='UV', icon="NONE")
+    funct_bt(parent=subsub, cmd='float_image', tog=False, w=3, h=1, label='IMAGE', icon="NONE")
+
+
+    #sub.separator(factor = 55)
 
 def paint_hud(parent, brush,  self, context):
     ts = context.tool_settings

@@ -14,7 +14,7 @@ class XPrefs(bpy.types.AddonPreferences):
     tool_icon: BoolProperty(name="TOOL ICON", default=True)
     tool_text: BoolProperty(name="TOOL TEXT", default=True)
     tex_path: StringProperty(name="Folder Path",subtype='DIR_PATH',default="")
-
+    float_alpha: IntProperty(name="FLOAT ALPHA", default=100)
     #///////////////////////////MENU/////////////////////////////////#
 
     def draw(self, context):
@@ -27,7 +27,7 @@ class XPrefs(bpy.types.AddonPreferences):
         box.prop(self, "tool_icon", toggle=False)
         box.prop(self, "tool_text", toggle=False)
         box.prop(self, "tex_path", text="")
-
+        box.prop(self, "float_alpha")
 #////////////////////////////////////////////////////////////////////////////////////////////#
 
 def register() :

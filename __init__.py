@@ -9,7 +9,7 @@ bl_info = {
     "category": "Interface",
 }
  
-modulesNames = ['x_panel', 'x_header', 'hud', 'menus', 'menuitems', 'functions', 'preferences', 'icons', 'toolsets', 'brushtexture', 'properties'] 
+modulesNames = ['x_panel', 'x_header', 'hud', 'menus', 'menuitems', 'functions', 'preferences', 'icons', 'toolsets', 'brushtexture', 'properties', 'editorfloat'] 
  
 import sys
 import os
@@ -21,6 +21,9 @@ from .import brushtexture as brushtexture
 from .functions import clear_brush_textures
 from .brushtexture import register_previews, unregister_previews, user_path
 from .import menuitems
+
+
+
 
 modulesFullNames = {}
 for currentModuleName in modulesNames:
@@ -34,6 +37,7 @@ for currentModuleFullName in modulesFullNames.values():
         setattr(globals()[currentModuleFullName], 'modulesNames', modulesFullNames)
 
 def register():
+
     for currentModuleName in modulesFullNames.values():
         if currentModuleName in sys.modules:
             if hasattr(sys.modules[currentModuleName], 'register'):

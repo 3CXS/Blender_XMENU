@@ -1,6 +1,6 @@
 import bpy
 from bpy.types import Menu
-from .menuitems import ModeSelector
+from .menuitems import ModeSelector, Materials, VertexGroups
 
 
 class MainMenu(bpy.types.Menu):
@@ -13,6 +13,8 @@ class MainMenu(bpy.types.Menu):
         layout.operator("wm.save_as_mainfile")
         layout.operator("object.select_all")
         col = layout.column()
+        #ModeSelector(self, context, col)
+        #VertexGroups(self, context, parent=col)
 
 class VIEW3D_MT_PIE_modes(Menu):
     bl_label = "MODES"
@@ -25,6 +27,7 @@ class VIEW3D_MT_PIE_modes(Menu):
         row = pie.column()
         row.scale_y = 1.5
         ModeSelector(self, context, row)
+
 
 addon_keymaps = []
 classes = (MainMenu, VIEW3D_MT_PIE_modes)
