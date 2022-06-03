@@ -296,34 +296,48 @@ class FloatOutliner(bpy.types.Operator):
     bl_idname = "xmenu.float_outliner"
     bl_label = "EDITOR"
 
+    bpy.types.WindowManager.float_outliner_init = bpy.props.BoolProperty(default = False) 
+    bpy.types.WindowManager.float_outliner_state = bpy.props.BoolProperty(default = False)  
+
     def execute(self, context):
+        if bpy.types.WindowManager.float_outliner_init == False:
+            alpha = bpy.context.preferences.addons[__package__].preferences.float_alpha
+            loc = (1700,200)
+            size = (300,500)
+            label = ""
+            ui_type = 'OUTLINER'
 
-        alpha = bpy.context.preferences.addons[__package__].preferences.float_alpha
-        loc = (1700,200)
-        size = (300,500)
-        label = ""
-        ui_type = 'OUTLINER'
+            bpy.ops.screen.area_dupli('INVOKE_DEFAULT')
+            new_window = bpy.context.window_manager.windows[-1]
+            area = new_window.screen.areas[-1]
+            space_data = bpy.context.space_data
 
-        bpy.ops.screen.area_dupli('INVOKE_DEFAULT')
-        new_window = bpy.context.window_manager.windows[-1]
-        area = new_window.screen.areas[-1]
-        space_data = bpy.context.space_data
+            C_dict = gen_C_dict(bpy.context, new_window, area_type='VIEW_3D')
+            C_dict.update(space_data=space_data)
 
-        C_dict = gen_C_dict(bpy.context, new_window, area_type='VIEW_3D')
-        C_dict.update(space_data=space_data)
+            hWnd = get_active_win()
 
-        hWnd = get_active_win()
+            set_win_transforms(hWnd, location=loc, size=size, )
+            set_win_text(hWnd, label,)
+            if (alpha!=100):
+                set_win_transparency(hWnd, percentage=alpha, )
+            area.ui_type = ui_type
+                
+            #sv3d = area.spaces.active
 
-        set_win_transforms(hWnd, location=loc, size=size, )
-        set_win_text(hWnd, label,)
-        if (alpha!=100):
-            set_win_transparency(hWnd, percentage=alpha, )
-        area.ui_type = ui_type
-            
-        #sv3d = area.spaces.active
+            bpy.types.WindowManager.float_outliner_init = True
+            bpy.types.WindowManager.float_outliner_state = True
 
-        bpy.types.WindowManager.float_outliner_init = True
-        bpy.types.WindowManager.float_outliner_state = True
+        else:
+            for area in bpy.context.screen.areas:
+                if area.ui_type == 'OUTLINER':
+                    hWnd = get_active_win()
+                    if bpy.types.WindowManager.float_outliner_state == True:
+                        show_win(hWnd, show=False)
+                        bpy.types.WindowManager.float_outliner_state = False
+                    else:
+                        show_win(hWnd, show=True)
+                        bpy.types.WindowManager.float_outliner_state = True
 
         return {'FINISHED'}
 
@@ -530,6 +544,9 @@ def register():
     if platform.system() != 'Windows':
         print("This plugin is for window OS only")
         return None
+
+    bpy.types.WindowManager.float_outliner_init = False
+    bpy.types.WindowManager.float_outliner_state = False
 
     for cls in classes:
         bpy.utils.register_class(cls)
