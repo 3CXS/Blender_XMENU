@@ -2,14 +2,14 @@ import os
 import bpy
 from ..toolsets import Tools_Sculpt
  
-epm_icon_collections = {}
-epm_icons_loaded = False
+xm_icon_collections = {}
+xm_icons_loaded = False
  
 def load_icons():
-    global epm_icon_collections
-    global epm_icons_loaded
+    global xm_icon_collections
+    global xm_icons_loaded
  
-    if epm_icons_loaded: return epm_icon_collections["main"]
+    if xm_icons_loaded: return xm_icon_collections["main"]
  
     custom_icons = bpy.utils.previews.new()
  
@@ -25,15 +25,15 @@ def load_icons():
             Imagename +='.png'
             custom_icons.load(Toolname, os.path.join(icons_dir, Imagename), 'IMAGE')
 
-    epm_icon_collections["main"] = custom_icons
-    epm_icons_loaded = True
+    xm_icon_collections["main"] = custom_icons
+    xm_icons_loaded = True
  
-    return epm_icon_collections["main"]
+    return xm_icon_collections["main"]
 
 
 def xmenu_clear_icons():
-    global epm_icons_loaded
-    for icon in epm_icon_collections.values():
+    global xm_icons_loaded
+    for icon in xm_icon_collections.values():
         bpy.utils.previews.remove(icon)
-    epm_icon_collections.clear()
-    epm_icons_loaded = False
+    xm_icon_collections.clear()
+    xm_icons_loaded = False
