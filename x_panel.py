@@ -639,15 +639,15 @@ class XPanel(bpy.types.Panel):
             col = main_midrow.column()
 
             row = col.row()
-            tool_bt(parent=row, cmd=0, w=2.2, h=1.4, text=True, icon='LARGE')
-            tool_bt(parent=row, cmd=1, w=2.2, h=1.4, text=True, icon='LARGE')
-            tool_bt(parent=row, cmd=3, w=2.2, h=1.4, text=True, icon='LARGE')
-            tool_bt(parent=row, cmd=4, w=2.2, h=1.4, text=True, icon='LARGE')
-            tool_bt(parent=row, cmd=5, w=2.2, h=1.4, text=True, icon='LARGE')
-            tool_bt(parent=row, cmd=6, w=2.2, h=1.4, text=True, icon='LARGE')
-            tool_bt(parent=row, cmd=7, w=2.2, h=1.4, text=True, icon='LARGE')
-            tool_bt(parent=row, cmd=8, w=2.2, h=1.4, text=True, icon='LARGE')
-
+            tool_bt(parent=row, cmd=0, w=2.4, h=1.4, text=False, icon='OFF')
+            tool_bt(parent=row, cmd=1, w=2.4, h=1.4, text=False, icon='OFF')
+            tool_bt(parent=row, cmd=2, w=2.4, h=1.4, text=False, icon='OFF')
+            tool_bt(parent=row, cmd=3, w=2.4, h=1.4, text=False, icon='OFF')
+            tool_bt(parent=row, cmd=4, w=2.4, h=1.4, text=False, icon='OFF')
+            tool_bt(parent=row, cmd=5, w=2.4, h=1.4, text=False, icon='OFF')
+            tool_bt(parent=row, cmd=6, w=2.4, h=1.4, text=False, icon='OFF')
+            tool_bt(parent=row, cmd=7, w=2.4, h=1.4, text=False, icon='OFF')
+            col.separator(factor = 2)
             row = col.row(align=True)
             tool_grid(parent=row, col=8, align=True, slotmin=8, slotmax=14, w=2, h=1.4, text=True, icon='LARGE')
             row = col.row(align=True)
@@ -807,6 +807,7 @@ class XPanel(bpy.types.Panel):
 
             row = col.row()
             tool_bt(parent=row, cmd=0, w=2.2, h=1.4, text=True, icon='LARGE')
+            row.separator(factor = 80)
 
             #MAIN-RIGHT/////////////////////////////////////////////////////////////////////////////////////
             col = main_rightrow.column(align=False)

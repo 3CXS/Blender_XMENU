@@ -240,6 +240,10 @@ def ModeSelector(self, context, parent):
 
         elif active.type == 'GPENCIL':                
             sub = row.row(align=True)
+            subsub = sub.box()
+            #subsub.ui_units_x = 1
+            subsub.label(text=' GP ')
+            subsub.label(text="NONE")
             sub.active = False if context.mode == "WEIGHT_GPENCIL" else True
             sub.operator("object.mode_set", text="", icon="WPAINT_HLT").mode = 'WEIGHT_GPENCIL'
             sub = row.row(align=True)
@@ -742,27 +746,6 @@ def Color(self, context, parent):
     col.scale_y = 0.7 
     col.ui_units_x = 6
     col.template_color_picker(ptr, 'color', value_slider=True)
-
-def ColorHud(self, context, parent):
-    ts = context.tool_settings
-    ups = ts.unified_paint_settings
-    if context.mode == 'PAINT_VERTEX':
-        ptr = ts.vertex_paint.brush
-    else:
-        ptr = ups if ups.use_unified_color else ts.image_paint.brush    
-    
-    row = parent.row(align=True)
-
-    sub = row.row(align=True)
-    sub.ui_units_x = 4
-    sub.prop(ptr, 'color', text="")
-    sub.prop(ptr, 'secondary_color', text="")
-
-    sub = row.row(align=True)
-    sub.ui_units_x = 1.2
-    #sub.operator("xmenu.override", icon='EYEDROPPER').cmd ='ui.eyedropper_color'
-    sub.operator("paint.brush_colors_flip", icon='FILE_REFRESH', text="")
-
 
 def ColorPalette(self, context, parent):
     settings = paint_settings(context)

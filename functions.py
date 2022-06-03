@@ -194,7 +194,8 @@ def funct_bt(parent, cmd='cmd', tog=False, w=1, h=1, label='', icon="NONE"):
         # using small icons
         icon_id = icon
         label = label 
-    else: 
+    else:
+        icon_id = 'NONE'
         label = label 
     
     op = 'xmenu.'

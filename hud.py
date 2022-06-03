@@ -41,15 +41,17 @@ font_info = {
 def polycount():
     verts, edges, polys = 0, 0, 0
     dg = bpy.context.evaluated_depsgraph_get()  # Getting the dependency graph
-    for obj in bpy.context.selected_objects:
+    obj = bpy.context.active_object
+    count = '---'
+    if obj != None:
+        if obj.type in ['MESH', 'CURVE', 'FONT']:
+            for obj in bpy.context.selected_objects:
+                obj = obj.evaluated_get(dg)
+                # This gives the evaluated version of the object. Aka with all modifiers  
+                mesh = obj.to_mesh()  # Turn it into the mesh data block we want
+                count = '{0:,}'.format(len(mesh.polygons))
 
-        obj = obj.evaluated_get(dg)
-        # This gives the evaluated version of the object. Aka with all modifiers  
-        mesh = obj.to_mesh()  # Turn it into the mesh data block we want
-
-        count = len(mesh.polygons)
-        #total += len(mesh.polygons)
-        return count      
+    return count      
 
 def mode():
     obj = bpy.context.active_object
@@ -144,45 +146,45 @@ def draw_callback_2d(self, context):
     dpi = bpy.context.preferences.addons[__package__].preferences.hud_dpi
     dpi_scale = 0.014*dpi
 
-    blf.position(font_id, tools_width+20*dpi_scale, view_height-90*dpi_scale, 0)
-    blf.size(font_id, 28, dpi)
+    blf.position(font_id, (view_width/2)-650*dpi_scale, 40*dpi_scale, 0)
+    blf.size(font_id, 20, dpi)
     blf.color(font_id, 1, 1, 1, 1)
     cmode = mode()
     blf.draw(font_id, cmode)
 
     if obj.type in ['MESH', 'CURVE', 'FONT']:
         if obj.material_slots:
-            blf.position(font_id, tools_width+20*dpi_scale, view_height-120*dpi_scale, 0)
-            blf.size(font_id, 12, dpi)
+            blf.position(font_id, (view_width/2)+900*dpi_scale, 25*dpi_scale, 0)
+            blf.size(font_id, 10, dpi)
             blf.color(font_id, 1, 1, 1, 1)
             blf.draw(font_id, "MAT:")
             if obj.active_material:
-                blf.position(font_id, tools_width+20*dpi_scale, view_height-140*dpi_scale, 0)
-                blf.size(font_id, 16, dpi)
+                blf.position(font_id, (view_width/2)+900*dpi_scale, 10*dpi_scale, 0)
+                blf.size(font_id, 12, dpi)
                 blf.color(font_id, 0, 0.6, 1, 1)
                 mat = material()
                 blf.draw(font_id, str(mat[0]))
 
-                blf.position(font_id, tools_width+40*dpi_scale, view_height-140*dpi_scale, 0)
-                blf.size(font_id, 16, dpi)
+                blf.position(font_id, (view_width/2)+920*dpi_scale, 10*dpi_scale, 0)
+                blf.size(font_id, 12, dpi)
                 blf.color(font_id, 1, 1, 1, 1)  
                 mat = material()
                 blf.draw(font_id, str(mat[1]))
         if obj.type == 'MESH':
             if obj.data.uv_layers:
-                blf.position(font_id, tools_width+20*dpi_scale, view_height-160*dpi_scale, 0)
-                blf.size(font_id, 12, dpi)
+                blf.position(font_id, (view_width/2)+1000*dpi_scale, 25*dpi_scale, 0)
+                blf.size(font_id, 10, dpi)
                 blf.color(font_id, 1, 1, 1, 1)
                 blf.draw(font_id, "UV:")
 
-                blf.position(font_id, tools_width+20*dpi_scale, view_height-180*dpi_scale, 0)
-                blf.size(font_id, 16, dpi)
+                blf.position(font_id, (view_width/2)+1000*dpi_scale, 10*dpi_scale, 0)
+                blf.size(font_id, 12, dpi)
                 blf.color(font_id, 0, 0.6, 1, 1)
                 uv = uvcord()
                 blf.draw(font_id, str(uv[0]))
 
-                blf.position(font_id, tools_width+40*dpi_scale, view_height-180*dpi_scale, 0)
-                blf.size(font_id, 16, dpi)
+                blf.position(font_id, (view_width/2)+1020*dpi_scale, 10*dpi_scale, 0)
+                blf.size(font_id, 12, dpi)
                 blf.color(font_id, 1, 1, 1, 1)  
                 uv = uvcord()
                 blf.draw(font_id, str(uv[1]))
@@ -191,18 +193,18 @@ def draw_callback_2d(self, context):
         pass
 
     font_id = font_info["font_id"]
-    blf.position(font_id, tools_width+20*dpi_scale, header_height+20*dpi_scale, 0)
-    blf.size(font_id, 28, dpi)
+    blf.position(font_id, (view_width/2)-400*dpi_scale, 40*dpi_scale, 0)
+    blf.size(font_id, 18, dpi)
     blf.color(font_id, 0, 0.7, 1, 1)
     toolname = activetool()
     blf.draw(font_id, toolname)
 
-    blf.position(font_id, view_width-90*dpi_scale, header_height+50*dpi_scale, 0)
+    blf.position(font_id, (view_width/2)+500*dpi_scale, 50*dpi_scale, 0)
     blf.size(font_id, 12, dpi)
     blf.color(font_id, 1, 1, 1, 1)
     blf.draw(font_id, 'POLYCOUNT')
 
-    blf.position(font_id, view_width-90*dpi_scale, header_height+20*dpi_scale, 0)
+    blf.position(font_id, (view_width/2)+500*dpi_scale, 30*dpi_scale, 0)
     blf.size(font_id, 20, dpi)
     blf.color(font_id, 0, 0.7, 1, 1)
     count = polycount()
