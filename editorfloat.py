@@ -297,7 +297,7 @@ class FloatOutliner(bpy.types.Operator):
     bl_label = "EDITOR"
 
     def execute(self, context):
-        alpha = bpy.context.preferences.addons["XMENU"].preferences.float_alpha
+        alpha = bpy.context.preferences.addons[__package__].preferences.float_alpha
         loc = (1700,200)
         size = (300,500)
         label = ""
@@ -328,7 +328,7 @@ class FloatProps(bpy.types.Operator):
     bl_label = "EDITOR"
 
     def execute(self, context):
-        alpha = bpy.context.preferences.addons["XMENU"].preferences.float_alpha
+        alpha = bpy.context.preferences.addons[__package__].preferences.float_alpha
         loc = (2000,200)
         size = (500,800)
         label = ""
@@ -364,7 +364,7 @@ class FloatShader(bpy.types.Operator):
     bl_label = "EDITOR"
 
     def execute(self, context):
-        alpha = bpy.context.preferences.addons["XMENU"].preferences.float_alpha
+        alpha = bpy.context.preferences.addons[__package__].preferences.float_alpha
         loc = (200,500)
         size = (800,500)
         label = ""
@@ -401,7 +401,7 @@ class FloatUV(bpy.types.Operator):
     bl_label = "EDITOR"
 
     def execute(self, context):
-        alpha = bpy.context.preferences.addons["XMENU"].preferences.float_alpha
+        alpha = bpy.context.preferences.addons[__package__].preferences.float_alpha
         loc = (200,200)
         size = (1000,800)
         label = ""
@@ -435,7 +435,7 @@ class FloatImage(bpy.types.Operator):
     bl_label = "EDITOR"
 
     def execute(self, context):
-        alpha = bpy.context.preferences.addons["XMENU"].preferences.float_alpha
+        alpha = bpy.context.preferences.addons[__package__].preferences.float_alpha
         loc = (200,50)
         size = (600,400)
         label = ""
@@ -473,7 +473,7 @@ class FloatCam(bpy.types.Operator):
     bl_label = "EDITOR"
 
     def execute(self, context):
-        alpha = bpy.context.preferences.addons["XMENU"].preferences.float_alpha
+        alpha = bpy.context.preferences.addons[__package__].preferences.float_alpha
         loc = (400,600)
         size = (600,400)
         label = ""
