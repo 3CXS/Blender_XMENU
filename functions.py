@@ -66,8 +66,8 @@ def tool_grid(parent, col, align, slotmin, slotmax, h=1, w=1, text=False, icon="
         tool_op(parent=col, cmd=i, w=w, h=h, text=text, icon=icon)
 
 def tool_op(parent, cmd ,w=1, h=1, small=False, text=False, icon="NONE"):    
-    tool_icon = bpy.context.preferences.addons['XMENU'].preferences.tool_icon
-    tool_text = bpy.context.preferences.addons['XMENU'].preferences.tool_text  
+    tool_icon = bpy.context.preferences.addons[__package__].preferences.tool_icon
+    tool_text = bpy.context.preferences.addons[__package__].preferences.tool_text  
 
     icons = load_icons()
     Tools = Toolset()
@@ -184,7 +184,7 @@ def update_toolset():
             bpy.types.WindowManager.tool_state[i] = False
 
 def funct_bt(parent, cmd='cmd', tog=False, w=1, h=1, label='', icon="NONE"):    
-    tool_icon = bpy.context.preferences.addons['XMENU'].preferences.tool_icon
+    tool_icon = bpy.context.preferences.addons[__package__].preferences.tool_icon
 
     col = parent.column(align=True)
     col.ui_units_x = w
