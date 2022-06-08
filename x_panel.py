@@ -474,18 +474,15 @@ class XPanel(bpy.types.Panel):
             col = main_midrow.column()
             row = col.row()
             tool_bt(parent=row, cmd=0, w=2, h=1.4, text=False, icon='LARGE')
-            row.separator(factor = 8)
-            #col.separator(factor = 1)
-            row = col.row(align=True)
-            tool_grid(parent=row, col=5, align=True, slotmin=1, slotmax=4, w=2, h=1.4, text=True, icon='LARGE')
-            col.separator(factor = 1)
-            row = col.row(align=True)
+            row.separator(factor = 4)
             sub = row.column()
             sub.ui_units_x = 4         
             BrushCopy(self, context, parent=sub)
-            sub = row.column()
-            sub.ui_units_x = 8        
-            sub.label(text="")
+
+            col.separator(factor = 1)
+            row = col.row(align=True)
+            tool_grid(parent=row, col=5, align=True, slotmin=1, slotmax=4, w=2, h=1.4, text=True, icon='LARGE')
+            col.separator(factor = 1)
 
             main_midrow.separator(factor = 2)
             col = main_midrow.column()
@@ -541,18 +538,15 @@ class XPanel(bpy.types.Panel):
             col = main_midrow.column()
             row = col.row()
             tool_bt(parent=row, cmd=0, w=2, h=1.4, text=False, icon='LARGE')
-            row.separator(factor = 8)
-            #col.separator(factor = 1)
-            row = col.row(align=True)
-            tool_grid(parent=row, col=5, align=True, slotmin=1, slotmax=6, w=2, h=1.4, text=True, icon='LARGE')
-            col.separator(factor = 1)
-            row = col.row(align=True)
+            row.separator(factor = 4)
             sub = row.column()
             sub.ui_units_x = 4         
             BrushCopy(self, context, parent=sub)
-            sub = row.column()
-            sub.ui_units_x = 8        
-            sub.label(text="")
+            col.separator(factor = 1)
+            row = col.row(align=True)
+            tool_grid(parent=row, col=5, align=True, slotmin=1, slotmax=6, w=2, h=1.4, text=True, icon='LARGE')
+            col.separator(factor = 1)
+
 
             main_midrow.separator(factor = 2)
             col = main_midrow.column()

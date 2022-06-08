@@ -38,7 +38,7 @@ def draw(self, context):
     left = row.row()
     left.ui_units_x = view_width/2-15  
     left.alignment = 'RIGHT'
-    funct_bt(parent=left, cmd='float_cam', tog=False, w=3, h=1, label='CAM', icon="NONE")
+    funct_bt(parent=left, cmd='floater_06', tog=False, w=3, h=1, label='CAM', icon="NONE")
     left.separator(factor = 4)
     ModeSelector(self, context, left)
     left.separator(factor = 2)
@@ -150,11 +150,11 @@ def draw(self, context):
     funct_bt(parent=sub, cmd='persp', tog=True, w=2, h=1, label='PERSP', icon="NONE")
     sub.separator(factor = 2)
     subsub = sub.row(align=True)
-    funct_bt(parent=subsub, cmd='float_outliner', tog=False, w=3, h=1, label='OUTLINER', icon="NONE")
-    funct_bt(parent=subsub, cmd='float_props', tog=False, w=3, h=1, label='PROP', icon="NONE")
-    funct_bt(parent=subsub, cmd='float_shader', tog=False, w=3, h=1, label='SHADER', icon="NONE")
-    funct_bt(parent=subsub, cmd='float_uv', tog=False, w=3, h=1, label='UV', icon="NONE")
-    funct_bt(parent=subsub, cmd='float_image', tog=False, w=3, h=1, label='IMAGE', icon="NONE")
+    funct_bt(parent=subsub, cmd='floater_01', tog=False, w=3, h=1, label='OUTLINER', icon="NONE")
+    funct_bt(parent=subsub, cmd='floater_02', tog=False, w=3, h=1, label='PROP', icon="NONE")
+    funct_bt(parent=subsub, cmd='floater_03', tog=False, w=3, h=1, label='SHADER', icon="NONE")
+    funct_bt(parent=subsub, cmd='floater_04', tog=False, w=3, h=1, label='UV', icon="NONE")
+    funct_bt(parent=subsub, cmd='floater_05', tog=False, w=3, h=1, label='IMAGE', icon="NONE")
 
 
     #sub.separator(factor = 55)
@@ -187,14 +187,14 @@ def ColorHud(self, context, parent):
     row = parent.row(align=True)
 
     sub = row.row(align=True)
-    sub.ui_units_x = 4
+    sub.ui_units_x = 2.6
     sub.prop(ptr, 'color', text="")
-    sub.prop(ptr, 'secondary_color', text="")
+    #sub.prop(ptr, 'secondary_color', text="")
 
     sub = row.row(align=True)
-    sub.ui_units_x = 1.2
-    #sub.operator("xmenu.override", icon='EYEDROPPER').cmd ='ui.eyedropper_color'
+    sub.ui_units_x = 2.4
     sub.operator("paint.brush_colors_flip", icon='FILE_REFRESH', text="")
+    sub.operator("xmenu.override", icon='EYEDROPPER', text="").cmd ='ui.eyedropper_color'
 
 
 

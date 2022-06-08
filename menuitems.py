@@ -1179,9 +1179,9 @@ class VIEW3D_MT_BrushTexture(bpy.types.Menu):
         sub.prop(brush,"xm_tex_brush_categories",text="")
         sub = col.row(align=True)
         sub.scale_y = 0.5
-        sub.template_icon_view(brush,"xm_brush_texture",show_labels=True)
+        sub.template_icon_view(brush,"xm_brush_texture",show_labels=True, scale_popup=4)
         sub = col.row(align=True)
-        sub.prop(brush,"xm_use_mask",text="MASK",toggle=True)
+        sub.prop(brush,"xm_use_mask",text="MASK",toggle=True, )
         sub.prop(brush,"xm_invert_mask",text="",toggle=True,icon="IMAGE_ALPHA")
 
         '''
