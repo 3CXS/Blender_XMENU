@@ -292,17 +292,16 @@ def gen_C_dict(context, window, area_type='VIEW_3D'):
     return C_dict
 
 
-class FloatOutliner(bpy.types.Operator):
-    bl_idname = "xmenu.float_outliner"
+class Floater_01(bpy.types.Operator):
+    bl_idname = "xmenu.floater_01"
     bl_label = "EDITOR"
 
     def execute(self, context):
-
-        alpha = bpy.context.preferences.addons[__package__].preferences.float_alpha
-        loc = (1700,200)
-        size = (300,500)
-        label = ""
-        ui_type = 'OUTLINER'
+        label = bpy.context.preferences.addons[__package__].preferences.float_01_name
+        ui_type = bpy.context.preferences.addons[__package__].preferences.float_01_type
+        loc = bpy.context.preferences.addons[__package__].preferences.float_01_pos
+        size = bpy.context.preferences.addons[__package__].preferences.float_01_size
+        alpha = bpy.context.preferences.addons[__package__].preferences.float_01_alpha
 
         bpy.ops.screen.area_dupli('INVOKE_DEFAULT')
         new_window = bpy.context.window_manager.windows[-1]
@@ -327,16 +326,16 @@ class FloatOutliner(bpy.types.Operator):
 
         return {'FINISHED'}
 
-class FloatProps(bpy.types.Operator):
-    bl_idname = "xmenu.float_props"
+class Floater_02(bpy.types.Operator):
+    bl_idname = "xmenu.floater_02"
     bl_label = "EDITOR"
 
     def execute(self, context):
-        alpha = bpy.context.preferences.addons[__package__].preferences.float_alpha
-        loc = (2000,200)
-        size = (500,800)
-        label = ""
-        ui_type = 'PROPERTIES'
+        label = bpy.context.preferences.addons[__package__].preferences.float_02_name
+        ui_type = bpy.context.preferences.addons[__package__].preferences.float_02_type
+        loc = bpy.context.preferences.addons[__package__].preferences.float_02_pos
+        size = bpy.context.preferences.addons[__package__].preferences.float_02_size
+        alpha = bpy.context.preferences.addons[__package__].preferences.float_02_alpha
 
         bpy.ops.screen.area_dupli('INVOKE_DEFAULT')
         new_window = bpy.context.window_manager.windows[-1]
@@ -363,16 +362,16 @@ class FloatProps(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class FloatShader(bpy.types.Operator):
-    bl_idname = "xmenu.float_shader"
+class Floater_03(bpy.types.Operator):
+    bl_idname = "xmenu.floater_03"
     bl_label = "EDITOR"
 
     def execute(self, context):
-        alpha = bpy.context.preferences.addons[__package__].preferences.float_alpha
-        loc = (200,500)
-        size = (800,500)
-        label = ""
-        ui_type = 'ShaderNodeTree'
+        label = bpy.context.preferences.addons[__package__].preferences.float_03_name
+        ui_type = bpy.context.preferences.addons[__package__].preferences.float_03_type
+        loc = bpy.context.preferences.addons[__package__].preferences.float_03_pos
+        size = bpy.context.preferences.addons[__package__].preferences.float_03_size
+        alpha = bpy.context.preferences.addons[__package__].preferences.float_03_alpha
 
         bpy.ops.screen.area_dupli('INVOKE_DEFAULT')
         new_window = bpy.context.window_manager.windows[-1]
@@ -400,16 +399,16 @@ class FloatShader(bpy.types.Operator):
 
         return {'FINISHED'}
 
-class FloatUV(bpy.types.Operator):
-    bl_idname = "xmenu.float_uv"
+class Floater_04(bpy.types.Operator):
+    bl_idname = "xmenu.floater_04"
     bl_label = "EDITOR"
 
     def execute(self, context):
-        alpha = bpy.context.preferences.addons[__package__].preferences.float_alpha
-        loc = (200,200)
-        size = (1000,800)
-        label = ""
-        ui_type = 'UV'
+        label = bpy.context.preferences.addons[__package__].preferences.float_04_name
+        ui_type = bpy.context.preferences.addons[__package__].preferences.float_04_type
+        loc = bpy.context.preferences.addons[__package__].preferences.float_04_pos
+        size = bpy.context.preferences.addons[__package__].preferences.float_04_size
+        alpha = bpy.context.preferences.addons[__package__].preferences.float_04_alpha
 
         bpy.ops.screen.area_dupli('INVOKE_DEFAULT')
         new_window = bpy.context.window_manager.windows[-1]
@@ -434,16 +433,16 @@ class FloatUV(bpy.types.Operator):
 
         return {'FINISHED'}
 
-class FloatImage(bpy.types.Operator):
-    bl_idname = "xmenu.float_image"
+class Floater_05(bpy.types.Operator):
+    bl_idname = "xmenu.floater_05"
     bl_label = "EDITOR"
 
     def execute(self, context):
-        alpha = bpy.context.preferences.addons[__package__].preferences.float_alpha
-        loc = (200,50)
-        size = (600,400)
-        label = ""
-        ui_type = 'IMAGE_EDITOR'
+        label = bpy.context.preferences.addons[__package__].preferences.float_05_name
+        ui_type = bpy.context.preferences.addons[__package__].preferences.float_05_type
+        loc = bpy.context.preferences.addons[__package__].preferences.float_05_pos
+        size = bpy.context.preferences.addons[__package__].preferences.float_05_size
+        alpha = bpy.context.preferences.addons[__package__].preferences.float_05_alpha
 
         bpy.ops.screen.area_dupli('INVOKE_DEFAULT')
         new_window = bpy.context.window_manager.windows[-1]
@@ -468,20 +467,16 @@ class FloatImage(bpy.types.Operator):
 
         return {'FINISHED'}
 
-
-
-
-
-class FloatCam(bpy.types.Operator):
-    bl_idname = "xmenu.float_cam"
+class Floater_06(bpy.types.Operator):
+    bl_idname = "xmenu.floater_06"
     bl_label = "EDITOR"
 
     def execute(self, context):
-        alpha = bpy.context.preferences.addons[__package__].preferences.float_alpha
-        loc = (400,600)
-        size = (600,400)
-        label = ""
-        ui_type = 'VIEW_3D'
+        label = bpy.context.preferences.addons[__package__].preferences.float_06_name
+        ui_type = bpy.context.preferences.addons[__package__].preferences.float_06_type
+        loc = bpy.context.preferences.addons[__package__].preferences.float_06_pos
+        size = bpy.context.preferences.addons[__package__].preferences.float_06_size
+        alpha = bpy.context.preferences.addons[__package__].preferences.float_06_alpha
 
         bpy.ops.screen.area_dupli('INVOKE_DEFAULT')
         new_window = bpy.context.window_manager.windows[-1]
@@ -514,7 +509,7 @@ class FloatCam(bpy.types.Operator):
 
         return {'FINISHED'}
 
-
+#bpy.ops.wm.call_panel(name='', keep_open=True)
 #sv3d.show_region_tool_header = False
 #sv3d.overlay.show_overlays = False
 #sv3d.show_gizmo = False
@@ -523,7 +518,7 @@ class FloatCam(bpy.types.Operator):
 
 #////////////////////////////////////////////////////////////////////////////////////////////#
 
-classes = (FloatShader,FloatOutliner,FloatUV,FloatImage,FloatProps,FloatCam)
+classes = (Floater_01, Floater_02, Floater_03, Floater_04, Floater_05, Floater_06)
 
 def register():
 
