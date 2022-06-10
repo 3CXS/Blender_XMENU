@@ -144,16 +144,17 @@ def VertexColor(self, context, parent):
 def Normals(self, context, parent):
     layout = parent
     layout.use_property_split = False
-    mesh = context.active_object.data
-
-    col = layout.column(align=False)
-    row = col.row(align=True)
-    sub = row.row(align=True)
-    sub.prop(mesh, "use_auto_smooth", text="")
-    sub = sub.row(align=True)
-    sub.active = mesh.use_auto_smooth and not mesh.has_custom_normals
-    sub.prop(mesh, "auto_smooth_angle", text="")
-    #row.prop_decorator(mesh, "auto_smooth_angle")
+    ob = context.active_object
+    if ob != None:
+        mesh = context.active_object.data
+        col = layout.column(align=False)
+        row = col.row(align=True)
+        sub = row.row(align=True)
+        sub.prop(mesh, "use_auto_smooth", text="")
+        sub = sub.row(align=True)
+        sub.active = mesh.use_auto_smooth and not mesh.has_custom_normals
+        sub.prop(mesh, "auto_smooth_angle", text="")
+        #row.prop_decorator(mesh, "auto_smooth_angle")
 
 def GPLayers(self, context, parent):
     if context.active_object.type == "GPENCIL":
