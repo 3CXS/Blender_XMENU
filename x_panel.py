@@ -83,7 +83,8 @@ class XPanel(bpy.types.Panel):
             col.scale_y = 0.7
             col.label(text="---------")
             col.label(text="")
-
+            col = top_mid.column()
+            Normals(self, context, parent=col)
             #TOP-RIGHT////////////////////////////////////////////
 
             ToolOptions(self, context, parent=top_right)
@@ -270,8 +271,6 @@ class XPanel(bpy.types.Panel):
             tool_bt(parent=row, cmd=3, w=2, h=1.4, text=False, icon='LARGE')
             tool_bt(parent=row, cmd=4, w=2, h=1.4, text=False, icon='LARGE')
 
-            row = col.row(align=True)
-            Normals(self, context, parent=row)
             #MAIN-RIGHT/////////////////////////////////////////////////////////////////////////////////////
 
             col = main_rightrow.column(align=False)
