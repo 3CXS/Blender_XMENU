@@ -396,7 +396,6 @@ class Mask(bpy.types.Operator):
             bpy.ops.mesh.paint_mask_slice()
         return {'FINISHED'}
 
-
 class Override(bpy.types.Operator):
     bl_idname = "xmenu.override"
     bl_label = "Operator Override"
@@ -415,6 +414,33 @@ class Override(bpy.types.Operator):
                     override = {'area': area, 'region': region}
                     eval(op)
                     return {'FINISHED'}
+
+
+class Override_bckup(bpy.types.Operator):
+    bl_idname = "xmenu.override"
+    bl_label = "Operator Override"
+
+    cmd: bpy.props.StringProperty()
+
+    def execute(self, context):
+        op = 'bpy.ops.'
+        op += self.cmd
+        op += '(override)'
+
+        area = [area for area in bpy.context.screen.areas if area.type == "VIEW_3D"][0]
+        
+        override_context = bpy.context.copy()
+        override_context['window'] = bpy.context.window
+        override_context['screen'] = bpy.context.screen
+        override_context['area'] = area
+        override_context['region'] = area.regions[-1]
+        override_context['scene'] = bpy.context.scene
+        override_context['space_data'] = area.spaces.active
+
+        override = override_context
+        eval(op)
+        return {'FINISHED'}
+
 
 class Override1(bpy.types.Operator):
     bl_idname = "xmenu.override1"

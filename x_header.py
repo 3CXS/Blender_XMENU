@@ -38,7 +38,7 @@ def draw(self, context):
     left = row.row()
     left.ui_units_x = view_width/2-15  
     left.alignment = 'RIGHT'
-    funct_bt(parent=left, cmd='floater_06', tog=False, w=3, h=1, label='CAM', icon="NONE")
+    funct_bt(parent=left, cmd='floater_08', tog=False, w=3, h=1, label='CAM', icon="NONE")
     left.separator(factor = 4)
     ModeSelector(self, context, left)
     left.separator(factor = 2)
@@ -150,11 +150,13 @@ def draw(self, context):
     funct_bt(parent=sub, cmd='persp', tog=True, w=2, h=1, label='PERSP', icon="NONE")
     sub.separator(factor = 2)
     subsub = sub.row(align=True)
-    funct_bt(parent=subsub, cmd='floater_01', tog=False, w=3, h=1, label='OUTLINER', icon="NONE")
-    funct_bt(parent=subsub, cmd='floater_02', tog=False, w=3, h=1, label='PROP', icon="NONE")
-    funct_bt(parent=subsub, cmd='floater_03', tog=False, w=3, h=1, label='SHADER', icon="NONE")
-    funct_bt(parent=subsub, cmd='floater_04', tog=False, w=3, h=1, label='UV', icon="NONE")
-    funct_bt(parent=subsub, cmd='floater_05', tog=False, w=3, h=1, label='IMAGE', icon="NONE")
+    funct_bt(parent=subsub, cmd='floater_01', tog=True, w=2, h=1, label='', icon="OUTLINER")
+    funct_bt(parent=subsub, cmd='floater_02', tog=True, w=2, h=1, label='', icon="PROPERTIES")
+    funct_bt(parent=subsub, cmd='floater_03', tog=True, w=2, h=1, label='', icon="MODIFIER")
+    funct_bt(parent=subsub, cmd='floater_04', tog=True, w=2, h=1, label='', icon="NODE_MATERIAL")
+    funct_bt(parent=subsub, cmd='floater_05', tog=True, w=2, h=1, label='', icon="UV")
+    funct_bt(parent=subsub, cmd='floater_06', tog=True, w=2, h=1, label='', icon="IMAGE")
+    funct_bt(parent=subsub, cmd='floater_07', tog=True, w=2, h=1, label='', icon="NODETREE")
 
 
     #sub.separator(factor = 55)

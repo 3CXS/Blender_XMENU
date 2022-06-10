@@ -49,6 +49,7 @@ def register():
         kmi.properties.name = VIEW3D_MT_PIE_modes.bl_idname
         addon_keymaps.append((km, kmi))
 
+
 def unregister():
     for cls in classes:
         bpy.utils.unregister_class(cls)

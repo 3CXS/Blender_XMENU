@@ -233,6 +233,13 @@ def remove_draw():
 
 def redraw_regions():
     for area in bpy.context.window.screen.areas:
+        #if area.type == 'VIEW_3D':
+        for region in area.regions:
+            if region.type == 'WINDOW':
+                region.tag_redraw()
+
+def redraw_panel():
+    for area in bpy.context.window.screen.areas:
         if area.type == 'VIEW_3D':
             for region in area.regions:
                 if region.type == 'WINDOW':
