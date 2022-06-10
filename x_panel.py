@@ -74,8 +74,10 @@ class XPanel(bpy.types.Panel):
             
             row = top_left.row()
             row.ui_units_x = 6
-            row.operator('object.hide_view_set', text='HIDE').unselected=False
-            row.operator('object.hide_view_clear', text='UNHIDE')
+            Normals(self, context, parent=row)
+
+            #row.operator('object.hide_view_set', text='HIDE').unselected=False
+            #row.operator('object.hide_view_clear', text='UNHIDE')
 
             #TOP-MID//////////////////////////////////////////////
             col = top_mid.column()
@@ -83,8 +85,7 @@ class XPanel(bpy.types.Panel):
             col.scale_y = 0.7
             col.label(text="---------")
             col.label(text="")
-            col = top_mid.column()
-            Normals(self, context, parent=col)
+
             #TOP-RIGHT////////////////////////////////////////////
 
             ToolOptions(self, context, parent=top_right)

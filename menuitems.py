@@ -143,11 +143,10 @@ def VertexColor(self, context, parent):
 
 def Normals(self, context, parent):
     layout = parent
-    layout.use_property_split = True
+    layout.use_property_split = False
     mesh = context.active_object.data
 
-    col = layout.column(align=False, heading="Auto Smooth")
-    col.use_property_decorate = False
+    col = layout.column(align=False)
     row = col.row(align=True)
     sub = row.row(align=True)
     sub.prop(mesh, "use_auto_smooth", text="")
