@@ -26,6 +26,7 @@ def draw(self, context):
     ups = ts.unified_paint_settings
     ptr = ups if ups.use_unified_color else ts.image_paint.brush
     tool_mode = context.mode
+    ob = context.active_object
 
     for region in bpy.context.area.regions:
         if region.type == 'WINDOW':
@@ -38,14 +39,24 @@ def draw(self, context):
     left = row.row()
     left.ui_units_x = view_width/2-15  
     left.alignment = 'RIGHT'
-    funct_bt(parent=left, cmd='floater_08', tog=False, w=3, h=1, label='CAM', icon="NONE")
+    funct_bt(parent=left, cmd='floater_08', tog=False, w=2, h=1, label='', icon="VIEW_CAMERA")
     left.separator(factor = 4)
     ModeSelector(self, context, left)
     left.separator(factor = 2)
-    sub = left.row()
+    sub = left.row(align=True)
     funct_bt(parent=sub, cmd='frames', w=2, h=1, label='FRAME', icon="NONE")
     funct_bt(parent=sub, cmd='framea', w=2, h=1, label='ALL', icon="NONE")
-
+    sub.separator(factor = 1)
+    for window in bpy.context.window_manager.windows:
+        screen = window.screen
+        for area in screen.areas:
+            if area.type == 'VIEW_3D':
+                space = area.spaces.active
+                if space.region_3d.view_perspective == 'PERSP':
+                    icon_view = "VIEW_PERSPECTIVE"
+                else:
+                    icon_view = "VIEW_ORTHO"
+    funct_bt(parent=sub, cmd='persp', tog=False, w=1.2, h=1, label='', icon=icon_view)
     row.separator(factor = 2)
 
     mid = row.row()
@@ -53,7 +64,10 @@ def draw(self, context):
     mid.alignment = 'CENTER'
     if context.mode == 'OBJECT':
         select_hud(mid, self, context)
-    if context.mode == 'EDIT_MESH':  
+    if context.mode == 'EDIT_MESH':
+        sub = mid.row()
+        #sub.ui_units_x = 6
+        sub.template_edit_mode_selection()  
         select_hud(mid, self, context)
         sub = mid.row()
         subsub = sub.row()
@@ -140,14 +154,21 @@ def draw(self, context):
 
     row.separator(factor = 2)
 
-    right = row.row()
+    right = row.row(align =True)
     right.alignment = 'LEFT'
     right.ui_units_x = view_width/2-15
-    sub = right.row()
-    funct_bt(parent=sub, cmd='wire', tog=True, w=2, h=1, label='WIRE', icon="NONE")
-    funct_bt(parent=sub, cmd='xray', tog=True, w=2, h=1, label='XRAY', icon="NONE")
-    sub.separator(factor = 1) 
-    funct_bt(parent=sub, cmd='persp', tog=True, w=2, h=1, label='PERSP', icon="NONE")
+    sub = right.row(align =True)  
+    subsub = sub.column(align =True)
+    subsub.ui_units_x = 1.6
+    #funct_bt(parent=sub, cmd='wire', tog=True, w=2, h=1, label='WIRE', icon="NONE")
+
+    if ob != None and ob.type == 'MESH':
+        subsub.prop(ob, "show_wire", text="", icon="MOD_WIREFRAME", toggle=True)
+    else:
+        subsub.label(text='')
+    funct_bt(parent=sub, cmd='xray', tog=True, w=1.6, h=1, label='', icon="XRAY")
+    funct_bt(parent=sub, cmd='faceorient', tog=True, w=1.6, h=1, label='', icon="NORMALS_FACE")
+
     sub.separator(factor = 2)
     subsub = sub.row(align=True)
     funct_bt(parent=subsub, cmd='floater_01', tog=True, w=2, h=1, label='', icon="OUTLINER")
@@ -203,8 +224,7 @@ def ColorHud(self, context, parent):
 def select_hud(parent, self, context):
     sub = parent.row()
     sub.alignment = 'CENTER'
-    #sub.ui_units_x = 20
-
+    sub.ui_units_x = 12
     tool = context.workspace.tools.from_space_view3d_mode(context.mode)
     toolname = context.workspace.tools.from_space_view3d_mode(context.mode).idname
 

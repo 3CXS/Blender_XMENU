@@ -2,8 +2,8 @@ import bpy
 import os
 from .icons.icons import load_icons
 from.toolsets import Tools_Sculpt
-from .functions import tool_grid, tool_bt, funct_bt, setup_brush_tex, _invert_ramp, _mute_ramp, paint_settings
-from .brushtexture import brush_icons_path, get_brush_mode
+from .functions import tool_grid, tool_bt, funct_bt, paint_settings
+from .brushtexture import brush_icons_path, get_brush_mode, setup_brush_tex, _invert_ramp, _mute_ramp
 #from bl_ui.properties_data_modifier import DATA_PT_modifiers
 
 from bl_ui.space_toolsystem_common import (ToolSelectPanelHelper,ToolDef)
@@ -12,6 +12,22 @@ from bpy.app.translations import contexts as i18n_contexts
 from bpy.types import Menu, Panel, UIList
 from rna_prop_ui import PropertyPanel
 from collections import defaultdict
+
+
+def ShadingMode(self, context, parent):
+        layout = parent
+
+        tool_settings = context.tool_settings
+        view = context.space_data
+        shading = view.shading
+
+        row = layout.row(align=True)
+        row.ui_units_x = 6
+
+        row.prop(shading, "type", text="", expand=True)
+        sub = row.row(align=True)
+        sub.popover(panel="VIEW3D_PT_shading", text="")
+
 
 
 def VertexGroups(self, context, parent):
@@ -145,7 +161,7 @@ def Normals(self, context, parent):
     layout = parent
     layout.use_property_split = False
     ob = context.active_object
-    if ob != None:
+    if ob != None and ob.type == 'MESH':
         mesh = context.active_object.data
         col = layout.column(align=False)
         row = col.row(align=True)

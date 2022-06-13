@@ -103,7 +103,7 @@ class XPanel(bpy.types.Panel):
             col = box.column(align=True)
             col.scale_y = 0.8
             col.operator('object.join', text='JOIN')
-            col.operator('object.duplicate_move', text='DUBLICATE')
+            col.operator('object.duplicate_move', text='DUPLICATE')
             col.operator('object.duplicate_move_linked', text='LINKED')
             col.separator(factor = 2)
             col.operator('object.make_links_data', text='COPY MODS').type='MODIFIERS'
@@ -180,15 +180,13 @@ class XPanel(bpy.types.Panel):
             #TOP-ROW////////////////////////////////////////////////////////////////////////////////#
             #TOP-LEFT//////////////////////////////////////////// 
             top_left.separator(factor = 6)
-            row = top_left.row()
-            row.ui_units_x = 6
-            row.template_edit_mode_selection()
+
 
             #TOP-MID//////////////////////////////////////////////
             col = top_mid.column()
             col.alignment = 'CENTER'
             col.scale_y = 0.7
-            col.label(text="---------")
+            #col.menu_contents("OBJECT_MT_edgedata")
             col.label(text="")
 
             #TOP-RIGHT////////////////////////////////////////////
@@ -806,8 +804,6 @@ class XPanel(bpy.types.Panel):
             #MAIN-RIGHT/////////////////////////////////////////////////////////////////////////////////////
             col = main_rightrow.column(align=False)
             GPLayers(self, context, parent=col)
-
-
 
         end = main_rightrow.row()
         end.ui_units_x = 0.2

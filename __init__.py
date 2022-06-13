@@ -9,17 +9,17 @@ bl_info = {
     "category": "Interface",
 }
  
-modulesNames = ['x_panel', 'x_header', 'hud', 'menus', 'menuitems', 'functions', 'preferences', 'icons', 'toolsets', 'brushtexture', 'properties', 'editorfloat'] 
+modulesNames = ['x_panel', 'x_header', 'hud', 'menus', 'menuitems', 'functions', 'preferences', 'icons', 'toolsets', 'brushtexture', 'editorfloat'] 
  
 import sys
 import os
 import bpy
 import importlib
 from .icons.icons import xmenu_clear_icons
-from .import properties
+#from .import properties
 from .import brushtexture as brushtexture
-from .functions import clear_brush_textures
-from .brushtexture import register_previews, unregister_previews, user_path
+#from .functions import clear_brush_textures
+from .brushtexture import register_previews, unregister_previews, user_path, clear_brush_textures
 from .import menuitems
 from bpy.types import AddonPreferences
 
