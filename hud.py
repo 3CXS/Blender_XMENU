@@ -146,45 +146,57 @@ def draw_callback_2d(self, context):
     dpi = bpy.context.preferences.addons[__package__].preferences.hud_dpi
     dpi_scale = 0.014*dpi
 
-    blf.position(font_id, (view_width/2)-650*dpi_scale, 40*dpi_scale, 0)
-    blf.size(font_id, 20, dpi)
+
+    mode_size = bpy.context.preferences.addons[__package__].preferences.hud_mode_size
+    mode_pos_x = bpy.context.preferences.addons[__package__].preferences.hud_mode_pos_x
+    mode_pos_y = bpy.context.preferences.addons[__package__].preferences.hud_mode_pos_y
+
+
+    info_size = bpy.context.preferences.addons[__package__].preferences.hud_info_size
+    info_pos_x = bpy.context.preferences.addons[__package__].preferences.hud_info_pos_x
+    info_pos_y = bpy.context.preferences.addons[__package__].preferences.hud_info_pos_y
+
+    blf.position(font_id, mode_pos_x + tools_width, mode_pos_y, 0)
+    blf.size(font_id, mode_size, dpi)
     blf.color(font_id, 1, 1, 1, 1)
     cmode = mode()
     blf.draw(font_id, cmode)
 
     if obj.type in ['MESH', 'CURVE', 'FONT']:
         if obj.material_slots:
-            blf.position(font_id, (view_width/2)+900*dpi_scale, 25*dpi_scale, 0)
-            blf.size(font_id, 10, dpi)
+            blf.position(font_id, view_width-info_pos_x, info_pos_y-35*dpi_scale, 0)
+            blf.size(font_id, info_size*0.5, dpi)
             blf.color(font_id, 1, 1, 1, 1)
             blf.draw(font_id, "MAT:")
+
             if obj.active_material:
-                blf.position(font_id, (view_width/2)+900*dpi_scale, 10*dpi_scale, 0)
-                blf.size(font_id, 12, dpi)
+                blf.position(font_id, view_width-info_pos_x, info_pos_y-48*dpi_scale, 0)
+                blf.size(font_id, info_size*0.6, dpi)
                 blf.color(font_id, 0, 0.6, 1, 1)
                 mat = material()
                 blf.draw(font_id, str(mat[0]))
 
-                blf.position(font_id, (view_width/2)+920*dpi_scale, 10*dpi_scale, 0)
-                blf.size(font_id, 12, dpi)
+                blf.position(font_id, view_width-info_pos_x + 15*dpi_scale, info_pos_y-48*dpi_scale, 0)
+                blf.size(font_id, info_size*0.6, dpi)
                 blf.color(font_id, 1, 1, 1, 1)  
                 mat = material()
                 blf.draw(font_id, str(mat[1]))
+
         if obj.type == 'MESH':
             if obj.data.uv_layers:
-                blf.position(font_id, (view_width/2)+1000*dpi_scale, 25*dpi_scale, 0)
-                blf.size(font_id, 10, dpi)
+                blf.position(font_id, view_width-info_pos_x + 70*dpi_scale, info_pos_y-35*dpi_scale, 0)
+                blf.size(font_id, info_size*0.5, dpi)
                 blf.color(font_id, 1, 1, 1, 1)
                 blf.draw(font_id, "UV:")
 
-                blf.position(font_id, (view_width/2)+1000*dpi_scale, 10*dpi_scale, 0)
-                blf.size(font_id, 12, dpi)
+                blf.position(font_id, view_width-info_pos_x + 70*dpi_scale, info_pos_y-48*dpi_scale, 0)
+                blf.size(font_id, info_size*0.6, dpi)
                 blf.color(font_id, 0, 0.6, 1, 1)
                 uv = uvcord()
                 blf.draw(font_id, str(uv[0]))
 
-                blf.position(font_id, (view_width/2)+1020*dpi_scale, 10*dpi_scale, 0)
-                blf.size(font_id, 12, dpi)
+                blf.position(font_id, view_width-info_pos_x + 85*dpi_scale, info_pos_y-48*dpi_scale, 0)
+                blf.size(font_id, info_size*0.6, dpi)
                 blf.color(font_id, 1, 1, 1, 1)  
                 uv = uvcord()
                 blf.draw(font_id, str(uv[1]))
@@ -192,6 +204,20 @@ def draw_callback_2d(self, context):
     if cmode == 'SCULPT MODE':
         pass
 
+    blf.position(font_id, view_width - info_pos_x, info_pos_y, 0)
+    blf.size(font_id, info_size*0.6, dpi)
+    blf.color(font_id, 1, 1, 1, 1)
+    blf.draw(font_id, 'POLYCOUNT')
+
+    blf.position(font_id, view_width - info_pos_x, info_pos_y-20*dpi_scale, 0)
+    blf.size(font_id, info_size, dpi)
+    blf.color(font_id, 0, 0.7, 1, 1)
+    count = polycount()
+    blf.draw(font_id, str(count))
+
+
+
+    '''
     font_id = font_info["font_id"]
     blf.position(font_id, (view_width/2)-400*dpi_scale, 40*dpi_scale, 0)
     blf.size(font_id, 18, dpi)
@@ -199,33 +225,25 @@ def draw_callback_2d(self, context):
     toolname = activetool()
     blf.draw(font_id, toolname)
 
-    blf.position(font_id, (view_width/2)+500*dpi_scale, 50*dpi_scale, 0)
-    blf.size(font_id, 12, dpi)
-    blf.color(font_id, 1, 1, 1, 1)
-    blf.draw(font_id, 'POLYCOUNT')
-
-    blf.position(font_id, (view_width/2)+500*dpi_scale, 30*dpi_scale, 0)
-    blf.size(font_id, 20, dpi)
-    blf.color(font_id, 0, 0.7, 1, 1)
-    count = polycount()
-    blf.draw(font_id, str(count))
-
     shader1.bind()
     shader1.uniform_float("color", (1, 1, 1, 1.0))
     batch1.draw(shader1)
+    '''
 
 def draw_callback_3d(self, context):
     bgl.glLineWidth(2.5)
     shader2.bind()
     batch2.draw(shader2)
 
-def remove_draw():
+def remove_draw1():
     handler1 = bpy.app.driver_namespace.get('draw1')
-    handler2 = bpy.app.driver_namespace.get('draw2')
     if handler1:
         bpy.types.SpaceView3D.draw_handler_remove(handler1, 'WINDOW')
         del bpy.app.driver_namespace['draw1']
         redraw_regions()
+
+def remove_draw2():
+    handler2 = bpy.app.driver_namespace.get('draw2')
     if handler2:
         bpy.types.SpaceView3D.draw_handler_remove(handler2, 'WINDOW')
         del bpy.app.driver_namespace['draw2']
@@ -251,37 +269,49 @@ def redraw_panel():
 
 class HUD(bpy.types.Operator):
     bl_idname = "xmenu.hud"
-    bl_label = "HUD" 
+    bl_label = "HUD"
     bpy.types.WindowManager.hud_state = bpy.props.BoolProperty(default = False)
     def execute(self, context):
         handler1 = bpy.app.driver_namespace.get('draw1')
-        handler2 = bpy.app.driver_namespace.get('draw2')
-        #hud_activate = bpy.context.preferences.addons[__package__].preferences.hud_activate
-        #if hud_activate == True:
         if context.window_manager.hud_state == False:
             context.window_manager.hud_state = True
             handler1 = bpy.types.SpaceView3D.draw_handler_add(
                 draw_callback_2d, (None, None), 'WINDOW', 'POST_PIXEL')
             dns = bpy.app.driver_namespace
             dns['draw1'] = handler1
+        else:
+            context.window_manager.hud_state = False
+            remove_draw1()
+            redraw_regions()
+        return {'FINISHED'}
 
+class PIVOT(bpy.types.Operator):
+    bl_idname = "xmenu.pivot"
+    bl_label = "PIVOT" 
+    bpy.types.WindowManager.pivot_state = bpy.props.BoolProperty(default = False)
+    def execute(self, context):
+        handler2 = bpy.app.driver_namespace.get('draw2')
+        if context.window_manager.pivot_state == False:
+            context.window_manager.pivot_state = True
             handler2 = bpy.types.SpaceView3D.draw_handler_add(
                 draw_callback_3d, (None, None), 'WINDOW', 'POST_VIEW')
             dns = bpy.app.driver_namespace
             dns['draw2'] = handler2
-
-            redraw_regions()
         else:
-            context.window_manager.hud_state = False
-            remove_draw()
+            context.window_manager.pivot_state = False
+            remove_draw2()
             redraw_regions()
         return {'FINISHED'}
 
 #////////////////////////////////////////////////////////////////////////////////////////////#
-def register():
-    bpy.utils.register_class(HUD)
+classes = (HUD, PIVOT)
 
+def register():
+    for cls in classes:
+        bpy.utils.register_class(cls)
+    
 def unregister():
-    bpy.utils.unregister_class(HUD)
+    for cls in classes:
+        bpy.utils.unregister_class(cls)
 
 

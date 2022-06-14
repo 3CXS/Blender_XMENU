@@ -147,12 +147,13 @@ def UVTexture(self, context, parent):
     col.operator("xmenu.override", icon='REMOVE', text="").cmd='mesh.uv_texture_remove'
 
 def VertexColor(self, context, parent):
-    me = context.active_object.data
+    mesh = context.active_object.data
 
     row = parent.row()
     col = row.column()
     col.ui_units_x = 8
-    col.template_list("MESH_UL_vcols", "vcols", me, "vertex_colors", me.vertex_colors, "active_index", rows=2)
+    #UPDATE#
+    col.template_list("MESH_UL_color_attributes", "color_attributes", mesh, "color_attributes", mesh.color_attributes, "active_color_index", rows=2)
     col = row.column(align=True)
     col.operator("xmenu.override", icon='ADD', text="").cmd='mesh.vertex_color_add'
     col.operator("xmenu.override", icon='REMOVE', text="").cmd='mesh.vertex_color_remove'
@@ -324,7 +325,8 @@ def Transforms(self, context, parent):
         op = sub.operator('object.origin_set', text='CURSOR')
         op.type = 'ORIGIN_CURSOR'
         op.center ='MEDIAN'
-        sub.operator('object.pivotobottom', text='BOTTOM')
+        #UPDATE#
+        #sub.operator('object.pivotobottom', text='BOTTOM')
     else:
         col = row.column(align=True)
         col.ui_units_x = 8
@@ -414,7 +416,7 @@ def ObjectToolSettings(self, context, parent):
         sub = col.row(align=True)
         sub.label(text='------')
 
-def SculptToolSettings(self, context, parent):
+def SculptFilterSettings(self, context, parent):
     layout = parent
     tool = context.workspace.tools.from_space_view3d_mode(bpy.context.mode).idname
     #if tool.find('brush') != -1:
@@ -444,6 +446,47 @@ def SculptToolSettings(self, context, parent):
             row.prop(props, "sharpen_intensify_detail_strength", expand=False, slider=True ,text='DETAIL')
             row.prop(props, "sharpen_curvature_smooth_iterations", expand=False, text='ITERATION')
 
+    elif tool == 'builtin.color_filter':
+        tool = context.workspace.tools.from_space_view3d_mode(context.mode)
+        props = tool.operator_properties("sculpt.color_filter")
+        sub = col.column(align=True)
+        sub.ui_units_x = 5
+        sub.prop(props, "type", text='', expand=False)
+        if props.type == 'FILL':
+            sub.prop(props, "fill_color", expand=False)
+        sub.prop(props, "strength")
+
+    elif tool == 'builtin.cloth_filter':
+        tool = context.workspace.tools.from_space_view3d_mode(context.mode)
+        props = tool.operator_properties("sculpt.cloth_filter")
+        sub = col.column(align=True)
+        sub.ui_units_x = 5
+        sub.prop(props, "type", text='', expand=False)
+        sub.prop(props, "strength")
+        subsub = sub.row(align=True)
+        subsub.prop(props, "force_axis")
+        sub.prop(props, "orientation", expand=False)
+        sub.prop(props, "cloth_mass")
+        sub.prop(props, "cloth_damping")
+        sub.prop(props, "use_face_sets")
+        sub.prop(props, "use_collisions")
+
+    else:
+        sub = col.row(align=True)
+        sub.ui_units_x = 5
+        sub.label(text='>')
+
+
+def SculptToolSettings(self, context, parent):
+    layout = parent
+    tool = context.workspace.tools.from_space_view3d_mode(bpy.context.mode).idname
+    #if tool.find('brush') != -1:
+
+    col = layout.column()
+    col.alignment = 'LEFT'
+    col.ui_units_x = 6
+    col.scale_y = 0.7
+
     if tool == 'builtin.box_mask':
         tool = context.workspace.tools.from_space_view3d_mode(context.mode)
         props = tool.operator_properties("paint.mask_box_gesture")
@@ -451,14 +494,14 @@ def SculptToolSettings(self, context, parent):
         sub.ui_units_x = 5
         sub.prop(props, "use_front_faces_only", expand=False, text='FrontFaces')
 
-    if tool == 'builtin.lasso_mask':
+    elif tool == 'builtin.lasso_mask':
         tool = context.workspace.tools.from_space_view3d_mode(context.mode)
         props = tool.operator_properties("paint.mask_lasso_gesture")
         sub = col.row(align=True)
         sub.ui_units_x = 5
         sub.prop(props, "use_front_faces_only", expand=False, text='FrontFaces')
 
-    if tool == 'builtin.line_mask':
+    elif tool == 'builtin.line_mask':
         tool = context.workspace.tools.from_space_view3d_mode(context.mode)
         props = tool.operator_properties("paint.mask_line_gesture")
         sub = col.column(align=True)
@@ -466,21 +509,21 @@ def SculptToolSettings(self, context, parent):
         sub.prop(props, "use_front_faces_only", expand=False, text='FrontFaces')
         sub.prop(props, "use_limit_to_segment", expand=False, text='LimitSegment')
 
-    if tool == 'builtin.box_face_set':
+    elif tool == 'builtin.box_face_set':
         tool = context.workspace.tools.from_space_view3d_mode(context.mode)
         props = tool.operator_properties("sculpt.face_set_box_gesture")
         sub = col.row(align=True)
         sub.ui_units_x = 5
         sub.prop(props, "use_front_faces_only", expand=False, text='FrontFaces')
 
-    if tool == 'builtin.lasso_face_set':
+    elif tool == 'builtin.lasso_face_set':
         tool = context.workspace.tools.from_space_view3d_mode(context.mode)
         props = tool.operator_properties("sculpt.face_set_lasso_gesture")
         sub = col.row(align=True)
         sub.ui_units_x = 5
         sub.prop(props, "use_front_faces_only", expand=False, text='FrontFaces')
 
-    if tool == 'builtin.face_set_edit':
+    elif tool == 'builtin.face_set_edit':
         tool = context.workspace.tools.from_space_view3d_mode(context.mode)
         props = tool.operator_properties("sculpt.face_set_edit")
         sub = col.column(align=True)
@@ -488,7 +531,7 @@ def SculptToolSettings(self, context, parent):
         sub.prop(props, "mode", expand=False, text='')
         sub.prop(props, "modify_hidden")
 
-    if tool == 'builtin.box_trim':
+    elif tool == 'builtin.box_trim':
         tool = context.workspace.tools.from_space_view3d_mode(context.mode)
         props = tool.operator_properties("sculpt.trim_box_gesture")
         sub = col.column(align=True)
@@ -496,21 +539,27 @@ def SculptToolSettings(self, context, parent):
         sub.prop(props, "trim_mode", expand=False, text='')
         sub.prop(props, "use_cursor_depth", text='Cursor Depth', expand=False)
 
-    if tool == 'builtin.lasso_trim':
+    elif tool == 'builtin.lasso_trim':
         tool = context.workspace.tools.from_space_view3d_mode(context.mode)
         props = tool.operator_properties("sculpt.trim_lasso_gesture")
         sub = col.column(align=True)
         sub.ui_units_x = 5
         sub.prop(props, "trim_mode", expand=False, text='')
-        sub.prop(props, "use_cursor_depth", text='Cursor Depth', expand=False)
-        sub.prop(props, "trim_orientation", text='ORIENT', expand=False)
+        subsub = sub.row(align=True)
+        subsub.prop(props, "use_cursor_depth", text='Cursor Depth', expand=False, toggle=True)
+        subsub.prop(props, "trim_orientation", text='', expand=False)
 
-    if tool == 'builtin.transform':
+    elif tool == 'builtin.transform':
         scene = context.scene
         orient_slot = scene.transform_orientation_slots[0]
         sub = col.column(align=True)
         sub.ui_units_x = 5
         sub.prop(orient_slot, "type")
+
+    elif tool == 'builtin_brush.Paint':
+        brush = context.tool_settings.sculpt.brush
+        sub = col.column(align=True)
+        sub.prop(brush, "blend", text="")
 
     else:
         sub = col.row(align=True)
@@ -524,27 +573,37 @@ def SculptBrushSettings(self, context, parent):
     capabilities = brush.sculpt_capabilities
     sculpt_tool = brush.sculpt_tool
 
-    col = layout.column()
-    col.ui_units_x = 17
+    col = layout.column(align=True)
+    col.ui_units_x = 18
     col.scale_y = 0.7
     #ROW1#################################################
     row = col.row()
     sub = row.row(align=True)
-    sub.alignment = 'LEFT'
-    sub.ui_units_x = 5
+
+    sub.ui_units_x = 6
     if sculpt_tool == 'GRAB':
         sub.prop(brush, "use_grab_silhouette",  text='SILHOUETTE', toggle=True)
         sub.prop(brush, "use_grab_active_vertex",  text='VERTEX', toggle=True)
-    if direction:
-        subsub = sub.row()
+
+    elif direction:
+        subsub = sub.row(align=True)
         subsub.scale_x = 1.5
         subsub.prop(brush, "direction", expand=True, text="")
-    else:
-        sub.label(text="---")
+        subsub.label(text="")
+    elif sculpt_tool == 'PAINT':
+        sub.prop(brush, "flow", slider=True, text="FLOW")
+        sub.prop(brush, "invert_flow_pressure", text="")
+        sub.prop(brush, "use_flow_pressure", text="")
 
-    sub = row.row()
-    sub.alignment = 'CENTER'
-    sub.ui_units_x = 5
+    elif sculpt_tool == 'SMEAR':
+        sub.prop(brush, "smear_deform_type", expand=True)
+
+    else:
+        sub.label(text="")
+    #sub.separator(factor=1)
+
+    sub = row.row(align=True)
+    sub.ui_units_x = 6
     if sculpt_tool == 'CLAY_STRIPS':
         sub.prop(brush, "tip_roundness", slider=True, text='ROUND')
     elif sculpt_tool == 'LAYER':
@@ -563,35 +622,95 @@ def SculptBrushSettings(self, context, parent):
         sub.prop(brush, "normal_weight", slider=True, text='PEAK')
     elif sculpt_tool == 'ELASTIC_DEFORM':
         sub.prop(brush, "normal_weight", slider=True, text='PEAK')
+    elif sculpt_tool == 'PAINT':
+        sub.prop(brush, "wet_mix", slider=True, text="WETMIX")
+        sub.prop(brush, "invert_wet_mix_pressure", text="")
+        sub.prop(brush, "use_wet_mix_pressure", text="")
     else:
         sub.label(text="")
-    
-    sub = row.row()
-    sub.alignment = 'RIGHT'
-    sub.ui_units_x = 5
+    sub.separator(factor=1)
+
+    sub = row.row(align=True)
+    sub.ui_units_x = 6
     if capabilities.has_accumulate:
-        sub.prop(brush, "use_accumulate", text="ACCU", toggle=True)
+        subsub = sub.row(align=True)
+        subsub.scale_x = 0.5
+        subsub.prop(brush, "use_accumulate", text="ACCU", toggle=True)
+    elif sculpt_tool == 'PAINT':
+        sub.prop(brush, "wet_persistence", slider=True, text="PERS")
+        sub.prop(brush, "invert_wet_persistence_pressure", text="")
+        sub.prop(brush, "use_wet_persistence_pressure", text="")
     else:
         sub.label(text='')
-    row.separator(factor = 2)
+
     #ROW2#################################################
     row = col.row()
-    sub = row.row()
-
-    sub.ui_units_x = 5
+    sub = row.row(align=True)
+    sub.ui_units_x = 6
     sub.prop(brush, "normal_radius_factor", slider=True, text='NORMAL')
-    sub = row.row()
+    sub.separator(factor=1)
 
-    sub.ui_units_x = 5
+    sub = row.row(align=True)
+    sub.ui_units_x = 6
     sub.prop(brush, "hardness", slider=True, text='HARD')
-    sub = row.row()
+    sub.separator(factor=1)
 
-    sub.ui_units_x = 5
+    sub = row.row(align=True)
+    sub.ui_units_x = 6
     if sculpt_tool == 'MASK':
         sub.prop(brush, "mask_tool", expand=True)
+    elif sculpt_tool == 'PAINT':
+        sub.prop(brush, "wet_paint_radius_factor", slider=True, text='WET RAD')
     else:
         sub.prop(brush, "auto_smooth_factor", slider=True, text='SMTH')
-    row.separator(factor = 2) 
+
+def SculptExtra(self, context, parent):
+    layout = parent
+    brush = context.tool_settings.sculpt.brush
+    settings = context.tool_settings.sculpt
+    capabilities = brush.sculpt_capabilities
+    sculpt_tool = brush.sculpt_tool
+
+    col = layout.column()
+    col.alignment = 'RIGHT'
+    col.ui_units_x = 3
+    col.scale_y = 0.7
+
+    if capabilities.has_plane_offset:
+        sub = col.row(align=True)
+        sub.prop(brush, "plane_offset", slider=True, text='OFFSET')
+        sub = col.row(align = True)
+        sub.prop(brush, "use_plane_trim", slider=False, toggle=True, text='TRIM')
+        sub.prop(brush, "plane_trim", slider=True)
+
+    elif sculpt_tool == 'PAINT':
+        sub = col.row(align=True)
+        sub.prop(brush, "density", slider=True, text="DENS")
+        sub.prop(brush, "invert_density_pressure", text="")
+        sub.prop(brush, "use_density_pressure", text="")
+
+        sub = col.row(align=True)
+        sub.prop(brush, "tip_roundness", slider=True, text='ROUND')
+
+        sub = col.row(align=True)
+        sub.prop(brush, "tip_scale_x", slider=True, text='SCALE')
+
+    else:
+        sub = col.row(align=True)
+        sub.label(text='')
+
+def SculptRake(self, context, parent):
+    brush = context.tool_settings.sculpt.brush
+    capabilities = brush.sculpt_capabilities
+
+    col = parent.column()
+    col.ui_units_x = 4
+    col.scale_y = 0.7
+    if (capabilities.has_topology_rake and context.sculpt_object.use_dynamic_topology_sculpting):
+        col.prop(brush, "topology_rake_factor", slider=True, text='RAKE')
+    else:
+        col.label(text='')
+
 
 def TextureBrushSettings(self, context, parent):
     brush = context.tool_settings.image_paint.brush
@@ -925,21 +1044,22 @@ class VIEW3D_MT_StrokeAdv(bpy.types.Menu):
             #col.row().prop(brush, "jitter_unit", expand=True)
 
 def SculptMask(self, context, parent):
-    col = parent.column()
+    col = parent.column(align=True)
     col.scale_y = 0.7 
     row = col.row()
 
-    sub = row.column()
-    sub.ui_units_x = 4
+    sub = row.column(align=True)
+    sub.ui_units_x = 3.5
     subrow = sub.row(align=True)
-    subrow.operator('xmenu.mask', text='FILL').cmd='FILL'
+    #subrow.operator('xmenu.mask', text='FILL').cmd='FILL'
     subrow.operator('xmenu.mask', text='CLR').cmd='CLEAR'
     subrow.operator('xmenu.mask', text='INV').cmd='INVERT'
     subrow = sub.row(align=True)
     subrow.operator('xmenu.mask', text='DIRT').cmd='DIRTMASK'
     subrow.operator('xmenu.mask', text='SLICE').cmd='SLICEOBJ'
-    sub = row.column()
-    sub.ui_units_x = 4
+
+    sub = row.column(align=True)
+    sub.ui_units_x = 3.5
     subrow = sub.row(align=True)
     subrow.operator('xmenu.mask', text='-').cmd='SHRINK'
     subrow.operator('xmenu.mask', text='+').cmd='GROW'
@@ -969,40 +1089,6 @@ def SculptFaceSet(self, context, parent):
     subrow.operator("sculpt.face_sets_init", text='EDGE').mode = 'SHARP_EDGES'
     subrow.operator("sculpt.face_set_edit", text='Grow').mode = 'GROW'
     '''
-
-def SculptTrim(self, context, parent):
-    layout = parent
-    brush = context.tool_settings.sculpt.brush
-    settings = context.tool_settings.sculpt
-    capabilities = brush.sculpt_capabilities
-    sculpt_tool = brush.sculpt_tool
-
-    col = layout.column()
-    col.alignment = 'RIGHT'
-    col.ui_units_x = 3
-    col.scale_y = 0.7
-
-    if capabilities.has_plane_offset:
-        sub = col.row(align=True)
-        sub.prop(brush, "plane_offset", slider=True, text='OFFSET')
-        sub = col.row(align = True)
-        sub.prop(brush, "use_plane_trim", slider=False, toggle=True, text='TRIM')
-        sub.prop(brush, "plane_trim", slider=True)
-    else:
-        sub = col.row(align=True)
-        sub.label(text='')
-
-def SculptRake(self, context, parent):
-    brush = context.tool_settings.sculpt.brush
-    capabilities = brush.sculpt_capabilities
-
-    col = parent.column()
-    col.ui_units_x = 4
-    col.scale_y = 0.7
-    if (capabilities.has_topology_rake and context.sculpt_object.use_dynamic_topology_sculpting):
-        col.prop(brush, "topology_rake_factor", slider=True, text='RAKE')
-    else:
-        col.label(text='')
 
 class VIEW3D_MT_sym(bpy.types.Menu):
     bl_label = "Symmetry"
@@ -1177,9 +1263,10 @@ class VIEW3D_MT_remesh(bpy.types.Menu):
         grid.prop(mesh, "use_remesh_preserve_paint_mask", text="M", toggle=True)
         grid.prop(mesh, "use_remesh_preserve_sculpt_face_sets", text="FS", toggle=True)
 
+        '''
         if context.preferences.experimental.use_sculpt_vertex_colors:
             grid.prop(mesh, "use_remesh_preserve_vertex_colors", text="VertCol", toggle=True)
-
+        '''
         col.operator("object.voxel_remesh", text="REMESH")
 
 class VIEW3D_MT_BrushTexture(bpy.types.Menu):
@@ -1277,20 +1364,6 @@ def brush_texture_settings(layout, brush, sculpt):
     sub.prop(tex_slot, 'scale', text='')
     '''
 
-preview_collections = {}
-
-def unregister_previews():
-    for pcoll in preview_collections.values():
-        bpy.utils.previews.remove(pcoll)
-    preview_collections.clear()
-        
-def register_previews():
-    import bpy.utils.previews
-    pcoll = bpy.utils.previews.new()
-    pcoll.my_previews_dir = ""
-    pcoll.my_previews = ()
-
-    #preview_collections["xm_misc_icons"] = pcoll   
 
 classes = (VIEW3D_MT_dynamesh, VIEW3D_MT_remesh, VIEW3D_MT_sculpt_sym, VIEW3D_MT_sym, VIEW3D_MT_BrushTexture, VIEW3D_MT_StrokeAdv, VIEW3D_MT_Falloff)
 

@@ -34,8 +34,8 @@ def centerscreen():
         for area in window.screen.areas:
             for region in area.regions:
                 if region.type == 'WINDOW':
-                    center_x = region.width/2+200
-                    center_y = region.height/2-300
+                    center_x = region.width/2
+                    center_y = region.height/2
             return center_x, center_y
 
 class XPrefs(bpy.types.AddonPreferences):
@@ -43,8 +43,18 @@ class XPrefs(bpy.types.AddonPreferences):
 
     #///////////////////////////ITEMS////////////////////////////////#
     
-    hud_activate: BoolProperty(name="HUD", default=True)
+    #hud_activate: BoolProperty(name="HUD", default=False)
+  
+    hud_mode_size: IntProperty(name="Size", default=20)
+    hud_mode_pos_x: IntProperty(name="Pos X", default=25)
+    hud_mode_pos_y: IntProperty(name="Pos Y", default=900)
+
+    hud_info_size: IntProperty(name="Size", default=20)
+    hud_info_pos_x: IntProperty(name="Pos X", default=200)
+    hud_info_pos_y: IntProperty(name="Pos Y", default=100)
+
     hud_dpi: IntProperty(name="DPI", default=72)
+
     tool_icon: BoolProperty(name="TOOL ICON", default=True)
     tool_text: BoolProperty(name="TOOL TEXT", default=True)
     tex_path: StringProperty(name="Folder Path",subtype='DIR_PATH',default="")
@@ -105,13 +115,27 @@ class XPrefs(bpy.types.AddonPreferences):
     def draw(self, context):
         layout = self.layout
 
-        box = layout.box()
+        col = layout.column()
+        col.label(text="HUD:")
+        #col.prop(self, "hud_activate", toggle=False)
+        col.prop(self, "hud_dpi", toggle=False)
+        col.label(text="MODE")
+        col.prop(self, "hud_mode_size", toggle=False)
+        col.prop(self, "hud_mode_pos_x", toggle=False)
+        col.prop(self, "hud_mode_pos_y", toggle=False)
+        col.label(text="DATA")
+        col.prop(self, "hud_info_size", toggle=False)
+        col.prop(self, "hud_info_pos_x", toggle=False)
+        col.prop(self, "hud_info_pos_y", toggle=False)
 
-        box.prop(self, "hud_activate", toggle=False)
-        box.prop(self, "hud_dpi", toggle=False)
-        box.prop(self, "tool_icon", toggle=False)
-        box.prop(self, "tool_text", toggle=False)
-        box.prop(self, "tex_path", text="")
+        col = layout.column()
+        col.label(text="PANEL:")
+        col.prop(self, "tool_icon", toggle=False)
+        col.prop(self, "tool_text", toggle=False)
+
+        col = layout.column()
+        col.label(text="BRUSH TEX:")
+        col.prop(self, "tex_path", text="")
 
         col = layout.column()
         col.label(text="FLOATING EDITORS:")
@@ -148,7 +172,6 @@ class XPrefs(bpy.types.AddonPreferences):
 
 def register() :
     bpy.utils.register_class(XPrefs)
-
 
 def unregister() :
     bpy.utils.unregister_class(XPrefs) 

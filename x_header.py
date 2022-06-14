@@ -1,15 +1,11 @@
 import bpy
-from .hud import redraw_regions
-from .functions import tool_grid, tool_bt, funct_bt
-from bpy.types import Operator, AddonPreferences, Preferences
-from bl_ui.properties_data_modifier import DATA_PT_modifiers
-from bpy.types import Header, Panel, Menu
-from .menuitems import BrushCopy, ModeSelector
 
-from bl_ui.space_toolsystem_common import (
-    ToolSelectPanelHelper,
-    ToolDef,
-)
+from bpy.types import Operator, AddonPreferences, Preferences, Header, Panel, Menu
+from bl_ui.space_toolsystem_common import (ToolSelectPanelHelper, ToolDef)
+ 
+from .hud import redraw_regions
+from .functions import tool_grid, tool_bt, funct_bt, paint_settings
+from .menuitems import BrushCopy, ModeSelector
 
 #////////////////////////////////////////////////////////////////////////////////////////////#
 
@@ -75,6 +71,7 @@ def draw(self, context):
         subsub.menu_contents("VIEW3D_MT_sym")
     if context.mode == 'SCULPT':
         brush = context.tool_settings.sculpt.brush
+        ColorHud(self, context, parent=mid)
         paint_hud(mid, brush, self, context)
         sub = mid.row()
         subsub = sub.row()
@@ -179,33 +176,39 @@ def draw(self, context):
     funct_bt(parent=subsub, cmd='floater_06', tog=True, w=2, h=1, label='', icon="IMAGE")
     funct_bt(parent=subsub, cmd='floater_07', tog=True, w=2, h=1, label='', icon="NODETREE")
 
+    #bpy.ops.screen.screen_full_area(use_hide_panels=False)
 
-    #sub.separator(factor = 55)
 
-def paint_hud(parent, brush,  self, context):
+#////////////////////////////////////////////////////////////////////////////////////////////#
+
+
+def paint_hud(parent, brush, self, context):
     ts = context.tool_settings
     ups = ts.unified_paint_settings
-
-    #ptr = ups if ups.use_unified_color else ts.image_paint.brush
+    ptr = ups if ups.use_unified_size else paint_settings(context).brush
+    pts = ups if ups.use_unified_strength else paint_settings(context).brush
 
     sub = parent.row(align=True)
     sub.alignment = 'CENTER'
     sub.ui_units_x = 7
-    sub.prop(ups, "size", slider=True)
+    sub.prop(ptr, "size", slider=True)
     sub.prop(brush, "use_pressure_size", slider=True, text="")
     sub = parent.row(align=True)
     sub.separator(factor = 0.4)
     sub.ui_units_x = 7
-    sub.prop(brush, "strength", slider=True)
+    sub.prop(pts, "strength", slider=True)
     sub.prop(brush, "use_pressure_strength", slider=True, text="") 
 
 def ColorHud(self, context, parent):
     ts = context.tool_settings
     ups = ts.unified_paint_settings
+
     if context.mode == 'PAINT_VERTEX':
         ptr = ts.vertex_paint.brush
+    if context.mode == 'SCULPT':
+        ptr = ts.sculpt.brush
     else:
-        ptr = ups if ups.use_unified_color else ts.image_paint.brush    
+        ptr = ups if ups.use_unified_color else paint_settings(context).brush   
     
     row = parent.row(align=True)
 
@@ -218,8 +221,6 @@ def ColorHud(self, context, parent):
     sub.ui_units_x = 2.4
     sub.operator("paint.brush_colors_flip", icon='FILE_REFRESH', text="")
     sub.operator("xmenu.override", icon='EYEDROPPER', text="").cmd ='ui.eyedropper_color'
-
-
 
 def select_hud(parent, self, context):
     sub = parent.row()

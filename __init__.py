@@ -20,7 +20,7 @@ from .icons.icons import xmenu_clear_icons
 from .import brushtexture as brushtexture
 #from .functions import clear_brush_textures
 from .brushtexture import register_previews, unregister_previews, user_path, clear_brush_textures
-from .import menuitems
+
 from bpy.types import AddonPreferences
 
 
@@ -183,7 +183,7 @@ def register():
             if hasattr(sys.modules[currentModuleName], 'register'):
                 sys.modules[currentModuleName].register()
 
-    menuitems.register_previews()
+    #menuitems.register_previews()
     register_previews()
 
     global keymaps
@@ -196,7 +196,7 @@ def unregister():
             if hasattr(sys.modules[currentModuleName], 'unregister'):
                 sys.modules[currentModuleName].unregister()
   
-    menuitems.unregister_previews()
+    #menuitems.unregister_previews()
     unregister_previews()
     xmenu_clear_icons()
 
