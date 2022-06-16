@@ -17,19 +17,18 @@ from collections import defaultdict
 def SaveScene(self, context, parent):
         layout = parent
 
-        row = layout.row(align=True)
+        col = layout.column(align=True)
+        col.ui_units_x = 4
         #row.scale_y = 0.7
 
-        sub = row.column(align=True)
-        sub.ui_units_x = 3
-        sub.operator("wm.save_mainfile", icon='FILE_TICK', text="SAVE")
-        sub.operator("wm.save_as_mainfile", text="SAVEAS")
-
-        sub = row.column(align=True)
-        sub.ui_units_x = 3
+        col.operator("wm.save_mainfile", icon='FILE_TICK', text="SAVE")
+        col.operator("wm.save_as_mainfile", text="SAVE AS")
+        col.separator()
+        col.operator("wm.open_mainfile", text="OPEN")
+        col.separator()
+        sub = col.row(align=True)
         sub.operator("wm.link", icon='LINK_BLEND', text="LINK")
         sub.operator("wm.append", icon='APPEND_BLEND', text="APND")
-
 
 def History(self, context, parent):
         layout = parent

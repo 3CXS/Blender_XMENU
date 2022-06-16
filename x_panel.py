@@ -353,10 +353,9 @@ class XPanel(bpy.types.Panel):
             col = main_leftrow.column()
             SaveScene(self, context, parent=col)
 
-            sub = col.column()
-            sub.ui_units_x = 4
-            sub.popover("VIEW3D_PT_tools_brush_display")
-
+            #sub = col.column()
+            #sub.ui_units_x = 4
+            #sub.popover("VIEW3D_PT_tools_brush_display")
 
             col = main_leftrow.column(align=False)
             col.menu_contents("VIEW3D_MT_sculpt_sym")
