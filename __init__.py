@@ -88,7 +88,7 @@ keys = {"MENU": [{"label": "1",
                   "oskey": False,
                   "value": "PRESS"
                   },
-                {"label": "4",
+                {"label": "5",
                   "region_type": "WINDOW",
                   "space_type": "EMPTY",
                   "map_type": "KEYBOARD",
@@ -101,7 +101,7 @@ keys = {"MENU": [{"label": "1",
                   "oskey": False,
                   "value": "PRESS"
                   },
-                {"label": "4",
+                {"label": "6",
                   "region_type": "WINDOW",
                   "space_type": "EMPTY",
                   "map_type": "KEYBOARD",
@@ -114,7 +114,7 @@ keys = {"MENU": [{"label": "1",
                   "oskey": False,
                   "value": "PRESS"
                   },
-                {"label": "5",
+                {"label": "7",
                   "region_type": "WINDOW",
                   "space_type": "EMPTY",
                   "map_type": "KEYBOARD",
@@ -126,7 +126,21 @@ keys = {"MENU": [{"label": "1",
                   "shift": False,
                   "oskey": False,
                   "value": "PRESS"
-                  }]}
+                  },
+              {"label": "8",
+                  "region_type": "WINDOW",
+                  "space_type": "EMPTY",
+                  "map_type": "KEYBOARD",
+                  "keymap": "Window",
+                  "idname": "xmenu.floater_07",
+                  "type": "ZERO",
+                  "ctrl": False,
+                  "alt": True,
+                  "shift": False,
+                  "oskey": False,
+                  "value": "PRESS"
+                  }
+                  ]}
 
 def get_keys():
     keylists = []
