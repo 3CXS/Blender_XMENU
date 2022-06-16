@@ -228,6 +228,7 @@ class Detailsize(bpy.types.Operator):
 
         return {'FINISHED'}
 
+
 class Wire(bpy.types.Operator):
     bl_idname = "xmenu.wire"
     bl_label = "Wireframe"
@@ -241,6 +242,7 @@ class Wire(bpy.types.Operator):
                     space.overlay.show_wireframes = not space.overlay.show_wireframes
                     bpy.types.WindowManager.wire_state = space.overlay.show_wireframes
         return {'FINISHED'}
+
 
 class XRay(bpy.types.Operator):
     bl_idname = "xmenu.xray"
@@ -364,6 +366,33 @@ class FrameA(bpy.types.Operator):
                     bpy.ops.view3d.view_all(ctx)
                     break
         return {'FINISHED'} 
+
+class LocalView(bpy.types.Operator):
+    bl_idname = "xmenu.localview"
+    bl_label = "LocalView"
+    bpy.types.WindowManager.localview_state = bpy.props.BoolProperty(default = False)      
+    def execute(self, context):
+        for window in bpy.context.window_manager.windows:
+            screen = window.screen
+            for area in bpy.context.screen.areas:
+                if area.type == 'VIEW_3D':
+                    ctx = bpy.context.copy()
+                    ctx['area'] = area
+                    ctx['region'] = area.regions[-1]
+                    bpy.ops.view3d.localview(ctx)
+                    bpy.types.WindowManager.localview_state = not bpy.types.WindowManager.localview_state
+                    break
+        return {'FINISHED'}
+
+class MaxArea(bpy.types.Operator):
+    bl_idname = "xmenu.maxarea"
+    bl_label = "MaximizeArea"
+    bpy.types.WindowManager.maxarea_state = bpy.props.BoolProperty(default = False)      
+    def execute(self, context):
+        bpy.ops.screen.screen_full_area()
+        bpy.types.WindowManager.maxarea_state = not bpy.types.WindowManager.maxarea_state
+        return {'FINISHED'}
+
 
 class SetActive(bpy.types.Operator):
     bl_idname = "xmenu.setactive"
@@ -550,7 +579,7 @@ class SurfaceDrawMode(bpy.types.Operator):
 
         update_local_view(view, [(gp, True)])
 
-        gp.data.layers.new(name="SurfaceLayer")
+        #gp.data.layers.new(name="SurfaceLayer")
 
         context.view_layer.objects.active = gp
         active.select_set(False)
@@ -565,9 +594,6 @@ class SurfaceDrawMode(bpy.types.Operator):
         ts.gpencil_stroke_placement_view3d = 'SURFACE'
         gp.data.zdepth_offset = 0.01 
 
-
-        if not view.show_region_toolbar:
-            view.show_region_toolbar = True
         ''' 
         # optionally select the line tool
         if event.shift:
@@ -579,12 +605,14 @@ class SurfaceDrawMode(bpy.types.Operator):
 
 #////////////////////////////////////////////////////////////////////////////////////////////#
 
-classes = (XRay, ViewCam, FrameS, FrameA, Persp, LockCam, SetTool, Wire, SetActive, Detailsize, Mask, SurfaceDrawMode, FaceOrient, Override, Override1, Override2)
+classes = (XRay, ViewCam, FrameS, FrameA, LocalView, MaxArea, Persp, LockCam, SetTool, Wire, SetActive, Detailsize, Mask, SurfaceDrawMode, FaceOrient, Override, Override1, Override2)
 
 def register():
     for cls in classes:
         bpy.utils.register_class(cls)
-    
+    bpy.types.WindowManager.localview_state=False
+    bpy.types.WindowManager.maxarea_state =False
+
 def unregister():
     for cls in classes:
         bpy.utils.unregister_class(cls)

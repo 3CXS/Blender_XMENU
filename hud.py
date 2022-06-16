@@ -41,7 +41,7 @@ font_info = {
 def polycount():
     verts, edges, polys = 0, 0, 0
     dg = bpy.context.evaluated_depsgraph_get()  # Getting the dependency graph
-    obj = bpy.context.active_object
+    obj = bpy.context.object
     count = '---'
     if obj != None:
         if obj.type in ['MESH', 'CURVE', 'FONT']:

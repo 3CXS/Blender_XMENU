@@ -35,13 +35,14 @@ def draw(self, context):
     left = row.row()
     left.ui_units_x = view_width/2-15  
     left.alignment = 'RIGHT'
-    funct_bt(parent=left, cmd='floater_08', tog=False, w=2, h=1, label='', icon="VIEW_CAMERA")
-    left.separator(factor = 4)
     ModeSelector(self, context, left)
     left.separator(factor = 2)
+
     sub = left.row(align=True)
-    funct_bt(parent=sub, cmd='frames', w=2, h=1, label='FRAME', icon="NONE")
     funct_bt(parent=sub, cmd='framea', w=2, h=1, label='ALL', icon="NONE")
+    funct_bt(parent=sub, cmd='frames', w=2, h=1, label='FRME', icon="NONE")
+    funct_bt(parent=sub, cmd='localview',tog=True, w=2, h=1, label='ISO', icon="NONE")
+
     sub.separator(factor = 1)
     for window in bpy.context.window_manager.windows:
         screen = window.screen
@@ -53,6 +54,14 @@ def draw(self, context):
                 else:
                     icon_view = "VIEW_ORTHO"
     funct_bt(parent=sub, cmd='persp', tog=False, w=1.2, h=1, label='', icon=icon_view)
+
+
+    if bpy.types.WindowManager.maxarea_state == False:
+        icon_area = 'TRIA_DOWN'
+    else:
+        icon_area = 'TRIA_UP'
+    funct_bt(parent=sub, cmd='maxarea', tog=False, w=1.2, h=1, label='', icon=icon_area)
+
     row.separator(factor = 2)
 
     mid = row.row()
@@ -166,7 +175,7 @@ def draw(self, context):
     funct_bt(parent=sub, cmd='xray', tog=True, w=1.6, h=1, label='', icon="XRAY")
     funct_bt(parent=sub, cmd='faceorient', tog=True, w=1.6, h=1, label='', icon="NORMALS_FACE")
 
-    sub.separator(factor = 2)
+    sub.separator(factor = 4)
     subsub = sub.row(align=True)
     funct_bt(parent=subsub, cmd='floater_01', tog=True, w=2, h=1, label='', icon="OUTLINER")
     funct_bt(parent=subsub, cmd='floater_02', tog=True, w=2, h=1, label='', icon="PROPERTIES")
@@ -175,12 +184,11 @@ def draw(self, context):
     funct_bt(parent=subsub, cmd='floater_05', tog=True, w=2, h=1, label='', icon="UV")
     funct_bt(parent=subsub, cmd='floater_06', tog=True, w=2, h=1, label='', icon="IMAGE")
     funct_bt(parent=subsub, cmd='floater_07', tog=True, w=2, h=1, label='', icon="NODETREE")
+    funct_bt(parent=subsub, cmd='floater_08', tog=True, w=2, h=1, label='', icon="VIEW_CAMERA")
 
-    #bpy.ops.screen.screen_full_area(use_hide_panels=False)
-
-
+    #subsub.menu("VIEW3D_MT_Material")
 #////////////////////////////////////////////////////////////////////////////////////////////#
-
+ 
 
 def paint_hud(parent, brush, self, context):
     ts = context.tool_settings

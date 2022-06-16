@@ -1,6 +1,6 @@
 import bpy
 from bpy.types import Menu
-from .menuitems import ModeSelector, Materials, VertexGroups, ShadingMode
+from .menuitems import ModeSelector, VertexGroups, ShadingMode
 
 
 class MainMenu(bpy.types.Menu):
@@ -9,9 +9,9 @@ class MainMenu(bpy.types.Menu):
 
     def draw(self, context):
         layout = self.layout
-        layout.operator("wm.open_mainfile")
+        #layout.operator("wm.open_mainfile")
         layout.operator("wm.save_as_mainfile")
-        layout.operator("object.select_all")
+        
         col = layout.column()
         #ModeSelector(self, context, col)
         #VertexGroups(self, context, parent=col)

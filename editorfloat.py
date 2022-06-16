@@ -1,4 +1,5 @@
 import bpy
+from bpy import context
 import os, platform
 
 from mathutils import Vector
@@ -291,7 +292,6 @@ def gen_C_dict(context, window, area_type='VIEW_3D'):
     C_dict.update(window=window,area=area,region=region,region_data=region_data,screen=window.screen,space_data=space)
 
     return C_dict
-
 
 
 class Floater_01(bpy.types.Operator):
@@ -723,18 +723,28 @@ class Floater_08(bpy.types.Operator):
             set_win_text(hWnd, label,)
             if (alpha!=100):
                 set_win_transparency(hWnd, percentage=alpha, )
-            area.ui_type = ui_type
-                
+            
+            area.ui_type = 'DOPESHEET'
             sv3d = area.spaces.active
+            sv3d.show_region_header = True
 
+
+            with context.temp_override(window=new_window, area=area, region = area.regions[0]):
+                bpy.ops.screen.region_flip()
+
+            with context.temp_override(window=new_window, area=area):
+                bpy.ops.screen.area_split(direction='HORIZONTAL', factor=0.3)
+
+            area.ui_type = 'VIEW_3D'
+            sv3d = area.spaces.active
             bpy.ops.view3d.view_camera(C_dict)
             sv3d.lock_camera = True
             sv3d.use_local_camera = True                        
             sv3d.camera = bpy.context.scene.camera if bpy.context.object.type not in ["CAMERA","LIGHT"] else bpy.context.object
-
+            context.scene.camera.data.sensor_fit = 'HORIZONTAL'
             bpy.ops.view3d.view_center_camera(C_dict)
-
             sv3d.show_region_header = False
+
 
             bpy.types.WindowManager.floater_08_init = True
             bpy.types.WindowManager.floater_08_state = True
@@ -751,12 +761,6 @@ class Floater_08(bpy.types.Operator):
 
         return {'FINISHED'}
 
-#bpy.ops.wm.call_panel(name='', keep_open=True)
-#sv3d.show_region_tool_header = False
-#sv3d.overlay.show_overlays = False
-#sv3d.show_gizmo = False
-#sv3d.shading.show_xray = False
-#sv3d.overlay.show_wireframes = True
 
 #////////////////////////////////////////////////////////////////////////////////////////////#
 

@@ -14,6 +14,37 @@ from rna_prop_ui import PropertyPanel
 from collections import defaultdict
 
 
+def SaveScene(self, context, parent):
+        layout = parent
+
+        row = layout.row(align=True)
+        #row.scale_y = 0.7
+
+        sub = row.column(align=True)
+        sub.ui_units_x = 3
+        sub.operator("wm.save_mainfile", icon='FILE_TICK', text="SAVE")
+        sub.operator("wm.save_as_mainfile", text="SAVEAS")
+
+        sub = row.column(align=True)
+        sub.ui_units_x = 3
+        sub.operator("wm.link", icon='LINK_BLEND', text="LINK")
+        sub.operator("wm.append", icon='APPEND_BLEND', text="APND")
+
+
+def History(self, context, parent):
+        layout = parent
+        row = layout.row(align=True)
+
+        row.ui_units_x = 4
+        sub = row.row()
+        sub.alignment = 'LEFT'
+        sub.scale_x = 2
+        sub.operator("ed.undo", icon='TRIA_LEFT', text="")
+        sub = row.row()
+        sub.alignment = 'RIGHT'
+        sub.scale_x = 2
+        sub.operator("ed.redo", icon='TRIA_RIGHT', text="")
+
 def ShadingMode(self, context, parent):
         layout = parent
 
@@ -86,62 +117,71 @@ def VertexGroups(self, context, parent):
         op.cmd = 'object.vertex_group_mirror'
         op.prop1 = 'use_topology=False'
 
-def Materials(self, context, parent):
 
-    #context = bpy.context.copy()
-    mat = context.material
-    ob = context.active_object
-    #ob = context.object
-    slot = context.material_slot
-    space = context.space_data
+class VIEW3D_MT_Material(bpy.types.Menu):
+    bl_label = "Materials"
 
-    box = parent.box()
-    box.ui_units_x = 10
+    def draw(self, context):
+        layout = self.layout
 
-    if ob:
-        is_sortable = len(ob.material_slots) > 1
-        rows = 3
-        if is_sortable:
+        layout.use_property_split = False
+        layout.use_property_decorate = False
+        mat = context.material
+        ob = context.active_object
+
+        slot = context.material_slot
+        space = context.space_data
+
+        box = layout.column()
+        box.ui_units_x = 8
+
+        if ob:
+            is_sortable = len(ob.material_slots) > 1
             rows = 3
-        row = box.row()
-        row.template_list("MATERIAL_UL_matslots", "", ob, "material_slots", ob, "active_material_index", rows=rows)
-        col = row.column(align=True)
-        col.operator("xmenu.override", icon='ADD', text="").cmd='object.material_slot_add'
-        col.operator("xmenu.override", icon='REMOVE', text="").cmd='object.material_slot_remove'
-        col.separator()
-        col.menu("MATERIAL_MT_context_menu", icon='DOWNARROW_HLT', text="")
-        if is_sortable:
+            #if is_sortable:
+                #rows = 3
+            row = box.row()
+            row.template_list("MATERIAL_UL_matslots", "", ob, "material_slots", ob, "active_material_index", rows=rows)
+            col = row.column(align=True)
+            col.ui_units_x = 1
+            col.operator("xmenu.override", icon='ADD', text="").cmd='object.material_slot_add'
+            col.operator("xmenu.override", icon='REMOVE', text="").cmd='object.material_slot_remove'
             col.separator()
-            op = col.operator("xmenu.override1", icon='TRIA_UP', text="")
-            op.cmd='object.material_slot_move'
-            op.prop1 ='direction="UP"'
-            op = col.operator("xmenu.override1", icon='TRIA_DOWN', text="")
-            op.cmd='object.material_slot_move'
-            op.prop1 ='direction="DOWN"'
+            col.menu("MATERIAL_MT_context_menu", icon='DOWNARROW_HLT', text="")
+            if is_sortable:
+                col.separator()
+                op = col.operator("xmenu.override1", icon='TRIA_UP', text="")
+                op.cmd='object.material_slot_move'
+                op.prop1 ='direction="UP"'
+                op = col.operator("xmenu.override1", icon='TRIA_DOWN', text="")
+                op.cmd='object.material_slot_move'
+                op.prop1 ='direction="DOWN"'
 
-        row = box.row()
-        row.template_ID(ob, "active_material", new="material.new")
-        if slot:
-            icon_link = 'MESH_DATA' if slot.link == 'DATA' else 'OBJECT_DATA'
-            row.prop(slot, "link", icon=icon_link, icon_only=True)
-        if ob.mode == 'EDIT':
-            row = box.row(align=True)
-            row.operator("xmenu.override", text="Assign").cmd='object.material_slot_assign'
-            row.operator("object.material_slot_select", text="Select")
-            row.operator("object.material_slot_deselect", text="Deselect")
+            row = box.row()
+            
+            row.template_ID(ob, "active_material", new="material.new")
+            if slot:
+                icon_link = 'MESH_DATA' if slot.link == 'DATA' else 'OBJECT_DATA'
+                row.prop(slot, "link", icon=icon_link, icon_only=True)
+            if ob.mode == 'EDIT':
+                row = box.row(align=True)
+                row.operator("xmenu.override", text="Assign").cmd='object.material_slot_assign'
+                row.operator("object.material_slot_select", text="Select")
+                row.operator("object.material_slot_deselect", text="Deselect")
 
-    elif mat:
-        row.template_ID(space, "pin_id")
+        elif mat:
+            row.template_ID(space, "pin_id")
+
 
 def UVTexture(self, context, parent):
-    me = context.active_object.data
+    mesh = context.active_object.data
 
     box = parent.box()
     box.ui_units_x = 8
 
     row = box.row()
     col = row.column()
-    col.template_list("MESH_UL_uvmaps", "uvmaps", me, "uv_layers", me.uv_layers, "active_index", rows=2)
+    col.template_list("MESH_UL_uvmaps", "uvmaps", mesh, "uv_layers", mesh.uv_layers, "active_index", rows=2)
     col = row.column(align=True)
     col.operator("xmenu.override", icon='ADD', text="").cmd='mesh.uv_texture_add'
     col.operator("xmenu.override", icon='REMOVE', text="").cmd='mesh.uv_texture_remove'
@@ -152,11 +192,11 @@ def VertexColor(self, context, parent):
     row = parent.row()
     col = row.column()
     col.ui_units_x = 8
-    #UPDATE#
+
     col.template_list("MESH_UL_color_attributes", "color_attributes", mesh, "color_attributes", mesh.color_attributes, "active_color_index", rows=2)
     col = row.column(align=True)
-    col.operator("xmenu.override", icon='ADD', text="").cmd='mesh.vertex_color_add'
-    col.operator("xmenu.override", icon='REMOVE', text="").cmd='mesh.vertex_color_remove'
+    col.operator("xmenu.override", icon='ADD', text="").cmd='geometry.color_attribute_add'
+    col.operator("xmenu.override", icon='REMOVE', text="").cmd='geometry.color_attribute_remove'
 
 def Normals(self, context, parent):
     layout = parent
@@ -322,11 +362,11 @@ def Transforms(self, context, parent):
         op = sub.operator('object.origin_set', text='COG')
         op.type = 'ORIGIN_GEOMETRY'
         op.center ='MEDIAN'
+        sub.operator('object.pivotobottom', text='BOTTOM')        #needs 3d viewport pie menu addon#
         op = sub.operator('object.origin_set', text='CURSOR')
         op.type = 'ORIGIN_CURSOR'
         op.center ='MEDIAN'
-        #UPDATE#
-        #sub.operator('object.pivotobottom', text='BOTTOM')
+
     else:
         col = row.column(align=True)
         col.ui_units_x = 8
@@ -710,6 +750,22 @@ def SculptRake(self, context, parent):
         col.prop(brush, "topology_rake_factor", slider=True, text='RAKE')
     else:
         col.label(text='')
+
+
+def SculptOverlay(self, context, parent):
+    ts = bpy.context.scene.tool_settings.sculpt
+
+    col = parent.column()
+    col.ui_units_x = 4
+    #col.scale_y = 0.7
+
+    sub = col.row(align=True)
+    sub.ui_units_x = 7
+    sub.prop(ts, "show_face_sets", text="FACESETS", toggle=True )
+    sub.prop(ts, "show_mask", text="MASK", toggle=True)
+    #sub = parent.row(align=True)
+    #sub.separator(factor = 0.4)
+
 
 
 def TextureBrushSettings(self, context, parent):
@@ -1283,52 +1339,61 @@ class VIEW3D_MT_BrushTexture(bpy.types.Menu):
         sub = col.row(align=True)
         sub.scale_y = 0.5
         sub.template_icon_view(brush,"xm_brush_texture",show_labels=True, scale_popup=4)
-        sub = col.row(align=True)
-        sub.prop(brush,"xm_use_mask",text="MASK",toggle=True, )
-        sub.prop(brush,"xm_invert_mask",text="",toggle=True,icon="IMAGE_ALPHA")
-
-        '''
-        sub = col.row(align=True)
-        subcol = sub.column(align=True)
-        subcol.scale_y = 0.7
-        subcol.prop(brush,"xm_ramp_tonemap_l",text="MapL",slider=True)
-        subcol.prop(brush,"xm_ramp_tonemap_r",text="MapR",slider=True)
-        subcol = sub.column(align=True)
-        subcol.scale_y = 1.4
-        subcol.prop(brush,"xm_invert_mask",text="",toggle=True,icon="IMAGE_ALPHA")
-        sub = col.row(align=True)
-        sub.scale_y = 0.7
-        sub.prop(brush,"xm_use_mask",text="MASK",toggle=True)
-        col.separator(factor=0.2)
-        '''
         col = layout.column()
         col.ui_units_x = 12
         sub = col.row(align=True)
         sub.scale_y = 0.7
         brush_texture_settings(col, brush, context.sculpt_object)
-        '''
-        col = layout.column()
-        col.template_icon_view(brush,"xm_stencil_texture",show_labels=True)
-        col.prop(brush,"xm_invert_stencil_mask",text="Invert Mask",toggle=True,icon="IMAGE_ALPHA")
-        '''
-        
+
+class VIEW3D_MT_TextureMask(bpy.types.Menu):
+    bl_label = ""
+    def draw(self, context):
+        layout = self.layout
+        brush = get_brush_mode(self, context)
+
+        row = layout.row(align=True)
+
+        col = row.column(align=True)
+        col.ui_units_x = 3.5
+        sub = col.row(align=True)
+        sub.scale_y = 1.4
+        sub.prop(brush,"xm_use_mask",text="MASK",toggle=True,)
+        subsub = sub.row(align=True)
+        subsub.active = brush.xm_use_mask
+        subsub.prop(brush,"xm_invert_mask",text="",toggle=True, icon="IMAGE_ALPHA")
+
+        col = row.column(align=True)
+        col.ui_units_x = 4.5
+        sub = col.column(align=True)
+        sub.scale_y = 0.7
+        sub.active = brush.xm_use_mask
+        sub.prop(brush,"xm_ramp_tonemap_l",text="L",slider=True)
+        sub.prop(brush,"xm_ramp_tonemap_r",text="R",slider=True)
+
+
+
 def brush_texture_settings(layout, brush, sculpt):
     tex_slot = brush.texture_slot
 
-    # map_mode
-    layout.prop(tex_slot, "map_mode", text="")
+    col = layout.column()
+
+    col.prop(tex_slot, "map_mode", text="")
 
     if tex_slot.map_mode == 'STENCIL':
+        sub = col.row(align=True)
+        #sub.scale_y = 0.7
         if brush.texture and brush.texture.type == 'IMAGE':
-            layout.operator("brush.stencil_fit_image_aspect")
-        layout.operator("brush.stencil_reset_transform")
+            sub.operator("brush.stencil_fit_image_aspect")
+        sub.operator("brush.stencil_reset_transform")
 
     # angle and texture_angle_source
     if tex_slot.has_texture_angle:
-        col = layout.column()
-        col.prop(tex_slot, "angle", text="Angle")
+        sub = col.column()
+        #sub.scale_y = 0.7
+        sub.prop(tex_slot, "angle", text="Angle")
         if tex_slot.has_texture_angle_source:
             sub = col.row(align=True)
+            sub.scale_y = 0.7
             sub.prop(tex_slot, "use_rake", text="RAKE", toggle=True)
 
             if brush.brush_capabilities.has_random_texture_angle and tex_slot.has_random_texture_angle:
@@ -1351,6 +1416,8 @@ def brush_texture_settings(layout, brush, sculpt):
         sub.scale_y = 0.7
         sub.prop(brush, "texture_sample_bias", slider=True, text="Sample Bias")
 
+
+
     '''
     # scale and offset
     row = layout.row(align=True)
@@ -1365,7 +1432,7 @@ def brush_texture_settings(layout, brush, sculpt):
     '''
 
 
-classes = (VIEW3D_MT_dynamesh, VIEW3D_MT_remesh, VIEW3D_MT_sculpt_sym, VIEW3D_MT_sym, VIEW3D_MT_BrushTexture, VIEW3D_MT_StrokeAdv, VIEW3D_MT_Falloff)
+classes = (VIEW3D_MT_Material, VIEW3D_MT_dynamesh, VIEW3D_MT_remesh, VIEW3D_MT_sculpt_sym, VIEW3D_MT_sym, VIEW3D_MT_BrushTexture, VIEW3D_MT_TextureMask, VIEW3D_MT_StrokeAdv, VIEW3D_MT_Falloff)
 
 def register():
     for cls in classes:
