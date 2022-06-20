@@ -8,6 +8,7 @@ from bpy.props import (StringProperty,
                        IntProperty,
                        PointerProperty)
 from bl_ui.space_toolsystem_common import ToolSelectPanelHelper
+from bpy_extras.object_utils import AddObjectHelper, object_data_add
 from bpy.types import Operator, AddonPreferences
 from .icons.icons import load_icons
 from.toolsets import Toolset
@@ -116,7 +117,7 @@ def tool_op(parent, cmd ,w=1, h=1, small=False, text=False, icon="NONE"):
 class SetTool(bpy.types.Operator):
     bl_idname = "xmenu.settool"
     bl_label = "SETTOOL"
-
+    bl_options = {'REGISTER', 'UNDO',}
     tool_index: bpy.props.IntProperty()
 
     def execute(self, context):
@@ -242,7 +243,6 @@ class Wire(bpy.types.Operator):
                     space.overlay.show_wireframes = not space.overlay.show_wireframes
                     bpy.types.WindowManager.wire_state = space.overlay.show_wireframes
         return {'FINISHED'}
-
 
 class XRay(bpy.types.Operator):
     bl_idname = "xmenu.xray"

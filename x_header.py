@@ -12,8 +12,6 @@ from .menuitems import BrushCopy, ModeSelector
 def draw(self, context): 
     layout = self.layout
 
-    dpi = bpy.context.preferences.addons[__package__].preferences.hud_dpi
-    dpi_scale = 0.014*dpi
     ui_scale = context.preferences.view.ui_scale
     ts = context.tool_settings
     scene = context.scene
@@ -77,6 +75,7 @@ def draw(self, context):
         sub = mid.row()
         subsub = sub.row()
         subsub.ui_units_x = 5
+        subsub.separator(factor = 1)
         subsub.menu_contents("VIEW3D_MT_sym")
     if context.mode == 'SCULPT':
         brush = context.tool_settings.sculpt.brush
@@ -85,6 +84,7 @@ def draw(self, context):
         sub = mid.row()
         subsub = sub.row()
         subsub.ui_units_x = 5
+        subsub.separator(factor = 1)
         subsub.menu_contents("VIEW3D_MT_sym")
     if context.mode == 'PAINT_VERTEX':
         brush = context.tool_settings.vertex_paint.brush
@@ -93,6 +93,7 @@ def draw(self, context):
         sub = mid.row()
         subsub = sub.row()
         subsub.ui_units_x = 5
+        subsub.separator(factor = 1)
         subsub.menu_contents("VIEW3D_MT_sym")
     if context.mode == 'PAINT_WEIGHT':
         brush = context.tool_settings.weight_paint.brush
@@ -100,6 +101,7 @@ def draw(self, context):
         sub = mid.row()
         subsub = sub.row()
         subsub.ui_units_x = 5
+        subsub.separator(factor = 1)
         subsub.menu_contents("VIEW3D_MT_sym")
     if context.mode == 'PAINT_TEXTURE':
         brush = context.tool_settings.image_paint.brush
@@ -108,6 +110,7 @@ def draw(self, context):
         sub = mid.row()
         subsub = sub.row()
         subsub.ui_units_x = 5
+        subsub.separator(factor = 1)
         subsub.menu_contents("VIEW3D_MT_sym")
     if context.mode == 'PAINT_GPENCIL':
         brush = context.tool_settings.gpencil_paint.brush

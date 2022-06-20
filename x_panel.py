@@ -7,7 +7,7 @@ from bpy.app.translations import contexts as i18n_contexts
 from bpy.types import Header, Panel
 from .menuitems import *
 from .brushtexture import get_brush_mode
-
+from bpy_extras.object_utils import AddObjectHelper, object_data_add
 
 #////////////////////////////////////////////////////////////////////////////////////////////#
 
@@ -18,7 +18,7 @@ class XPanel(bpy.types.Panel):
     bl_region_type = "WINDOW"
     bl_context = "scene"
     bl_order = 2000
-    #bl_options = {'HIDE_HEADER','DEFAULT_CLOSED'}
+    bl_options = {'DEFAULT_CLOSED',}
 
     def draw(self, context):
         
@@ -27,18 +27,31 @@ class XPanel(bpy.types.Panel):
         #LAYOUT-STRUCTURE/////////////////////////////////////////
         top_row = layout.row()
         top_row.alignment = 'CENTER'
+
+        top_left_outer = top_row.row()
+        top_left_outer.ui_units_x = 11.5
+        top_left_outer.alignment = 'LEFT'
+
         top_left = top_row.row()
-        top_left.ui_units_x = 24
+        top_left.ui_units_x = 12.5
         top_left.alignment = 'RIGHT'
+
         top_mid = top_row.row()
         top_mid.alignment = 'CENTER'
         top_mid.ui_units_x = 36
+
         top_right = top_row.row()
-        top_right.ui_units_x = 24
+        top_right.ui_units_x = 12.5
         top_right.alignment = 'LEFT'
 
+        top_right_outer = top_row.row()
+        top_right_outer.ui_units_x = 11.5
+        top_right_outer.alignment = 'RIGHT'
+
+
         main_row = layout.row()
-        main_row.alignment = 'CENTER'  
+        main_row.alignment = 'CENTER' 
+
         main_left = main_row.column()
         main_left.ui_units_x = 24
         #main_left.alignment = 'RIGHT'
@@ -64,6 +77,34 @@ class XPanel(bpy.types.Panel):
         main_rightrow = main_right.row()
         main_rightrow.alignment = 'LEFT'
 
+        row = top_left_outer.row()
+        row.ui_units_x = 1.5
+        row.label(text='')
+
+        row = top_left_outer.row()
+        row.ui_units_x = 4
+        row.operator("wm.save_mainfile", icon='FILE_TICK', text="SAVE")
+
+        row = top_left_outer.row()
+        row.ui_units_x = 1.6
+        row.operator("screen.redo_last", text="CMD")
+
+
+
+        row = top_right_outer.row(align=True)
+        funct_bt(parent=row, cmd='hud', tog=False, w=2, h=1, label='HUD', icon="NONE") 
+        funct_bt(parent=row, cmd='pivot', tog=False, w=2, h=1, label='ORIG', icon="NONE")
+
+        row = top_right_outer.row(align=True)
+        row.ui_units_x = 3.5
+        History(self, context, parent=row)
+
+        col = top_right_outer.column()
+        col.ui_units_x = 2
+        col.scale_y = 0.7
+        col.label(text='')
+        col.label(text='')
+
         #/////////////////////////////////////////////////////////////////////////////#
         #                               OBJECT                                        #
         #/////////////////////////////////////////////////////////////////////////////#
@@ -71,15 +112,6 @@ class XPanel(bpy.types.Panel):
             #TOP-ROW//////////////////////////////////////////////////////////////////#
             #TOP-LEFT/////////////////////////////////////////////////////////////////#
             row = top_left.row()
-            History(self, context, parent=row)
-
-            row = top_left.row(align=True)
-            row.ui_units_x = 4
-            row.operator("object.shade_flat", text="FLAT")
-            row.operator("object.shade_smooth", text="SMTH")
-            
-            row = top_left.row()
-            row.ui_units_x = 6
             Normals(self, context, parent=row)
 
             #row.operator('object.hide_view_set', text='HIDE').unselected=False
@@ -97,19 +129,13 @@ class XPanel(bpy.types.Panel):
             ToolOptions(self, context, parent=top_right)
             top_right.separator(factor = 2)
             ObjectToolSettings(self, context, parent=top_right)
-            top_right.separator(factor = 2)  
-            col = top_right.column(align=True)
-            sub = col.row(align=True)
-            funct_bt(parent=sub, cmd='hud', tog=True, w=2, h=1, label='DATA', icon="NONE") 
-            funct_bt(parent=sub, cmd='pivot', tog=True, w=2, h=1, label='PVT', icon="NONE")
 
             #MAIN-ROW/////////////////////////////////////////////////////////////////#
             #MAIN-LEFT////////////////////////////////////////////////////////////////#
             col = main_leftrow.column(align=True)
             SaveScene(self, context, parent=col)
-
             col = main_leftrow.column(align=True)
-            ViewCam(self, context, parent=col)
+            col.menu_contents("VIEW3D_MT_Import")
 
             box = main_leftrow.box()
             box.ui_units_x = 4
@@ -135,7 +161,7 @@ class XPanel(bpy.types.Panel):
             col = box.column(align=True)
             col.scale_y = 0.8
             col.label(text="Linked")
-            col.ui_units_x = 5
+            col.ui_units_x = 4
             sub = col.row(align=True)
             sub.operator('object.select_linked', text='DATA').type='OBDATA'
             sub.operator('object.select_linked', text='MAT').type='MATERIAL'
@@ -195,6 +221,10 @@ class XPanel(bpy.types.Panel):
             Transforms(self, context, parent=col)
             col = main_rightrow.column(align=False)
             col.menu_contents("VIEW3D_MT_Material")
+            col = main_rightrow.column(align=False)
+            UVTexture(self, context, parent=col)
+            col = main_rightrow.column(align=True)
+            ViewCam(self, context, parent=col)
             #with context.temp_override(bl_context = "material"):
             #col.popover("DATA_PT_modifiers", text='XX')
             #layout.prop_tabs_enum(view, "context", icon_only=True)
@@ -204,31 +234,23 @@ class XPanel(bpy.types.Panel):
         if bpy.context.mode == 'EDIT_MESH':
             #TOP-ROW//////////////////////////////////////////////////////////////////#
             #TOP-LEFT/////////////////////////////////////////////////////////////////# 
-            row = top_left.row()
-            History(self, context, parent=row)
+            col = top_left.column()
+            col.label(text="")
 
             #TOP-MID//////////////////////////////////////////////////////////////////#
             col = top_mid.column()
             col.alignment = 'CENTER'
             col.scale_y = 0.7
-            #col.menu_contents("OBJECT_MT_edgedata")
+            col.label(text="---------")
             col.label(text="")
+            #col.menu_contents("OBJECT_MT_edgedata")
 
             #TOP-RIGHT////////////////////////////////////////////////////////////////#
             col = top_right.column(align=True)
             ToolOptions(self, context, parent=col)
-            top_right.separator(factor = 2)
-            top_left.separator(factor = 6)
-            col = top_right.column(align=True)
-            sub = col.row(align=True)
-            funct_bt(parent=sub, cmd='hud', tog=False, w=2, h=1, label='DATA', icon="NONE") 
-            funct_bt(parent=sub, cmd='pivot', tog=False, w=2, h=1, label='PVT', icon="NONE")
 
             #MAIN-ROW/////////////////////////////////////////////////////////////////#
             #MAIN-LEFT////////////////////////////////////////////////////////////////#
-            col = main_leftrow.column(align=True)
-            SaveScene(self, context, parent=col)
-
             col = main_leftrow.column(align=True)
             ViewCam(self, context, parent=col)
             #MAIN-MID/////////////////////////////////////////////////////////////////#
@@ -319,8 +341,12 @@ class XPanel(bpy.types.Panel):
         if bpy.context.mode == 'SCULPT':
             #TOP-ROW//////////////////////////////////////////////////////////////////#
             #TOP-LEFT/////////////////////////////////////////////////////////////////#
-            row = top_left.row()
-            History(self, context, parent=row)
+            col = top_left.column()    
+            col.ui_units_x = 4
+            col.scale_y = 0.7
+            sub = col.column(align=True)
+            sub.operator("sculpt.symmetrize", text='SYM')
+            col.menu("VIEW3D_MT_sculpt_sym")
 
             col = top_left.column()
             col.ui_units_x = 8
@@ -336,29 +362,19 @@ class XPanel(bpy.types.Panel):
             SculptBrushSettings(self, context, parent=top_mid)
             top_mid.separator(factor = 0.4)
             SculptMask(self, context, parent=top_mid)
-
+            top_mid.separator(factor = 2)
             #TOP-RIGHT////////////////////////////////////////////////////////////////#
             col = top_right.column(align=True)
             ToolOptions(self, context, parent=col)
-            top_right.separator(factor = 2)
 
-            col = top_right.column(align=True)
-            sub = col.row(align=True)
-            funct_bt(parent=sub, cmd='hud', tog=False, w=2, h=1, label='DATA', icon="NONE") 
-            funct_bt(parent=sub, cmd='pivot', tog=False, w=2, h=1, label='PVT', icon="NONE")
-            col = top_right.column(align=True)
             #SculptOverlay(self, context, parent=col)
             #MAIN-ROW/////////////////////////////////////////////////////////////////#
             #MAIN-LEFT////////////////////////////////////////////////////////////////#
-            col = main_leftrow.column()
-            SaveScene(self, context, parent=col)
-
-            #sub = col.column()
-            #sub.ui_units_x = 4
-            #sub.popover("VIEW3D_PT_tools_brush_display")
-
             col = main_leftrow.column(align=False)
-            col.menu_contents("VIEW3D_MT_sculpt_sym")
+            col.ui_units_x = 8
+            VertexColor(self, context, parent=col)
+
+            #col.popover("VIEW3D_PT_tools_brush_display")
 
             box = main_leftrow.box()     
             box.ui_units_x = 8
@@ -421,11 +437,13 @@ class XPanel(bpy.types.Panel):
             row.separator(factor = 0.4)
             col.separator(factor = 0.4)
             row = col.row()
-            tool_grid(parent=row, col=1, align=True, slotmin=23, slotmax=25, w=1.2, h=1, icon='CUSTOM')
+            row.separator(factor = 0.4)
+            #tool_grid(parent=row, col=1, align=True, slotmin=23, slotmax=25, w=1.2, h=1, icon='CUSTOM')
             sub = row.column()
             #tool_bt(parent=sub, cmd=25, w=1.8, h=1, text=False, icon='OFF')
             sub.menu_contents("VIEW3D_MT_Falloff")
-            tool_grid(parent=row, col=1, align=True, slotmin=26, slotmax=28, w=1.2, h=1, icon='CUSTOM')
+            row.separator(factor = 0.4)
+            #tool_grid(parent=row, col=1, align=True, slotmin=26, slotmax=28, w=1.2, h=1, icon='CUSTOM')
 
             #POLISH//////////// 
             col = main_midrow.column()
@@ -508,9 +526,6 @@ class XPanel(bpy.types.Panel):
             brush = context.tool_settings.vertex_paint.brush
             #TOP-ROW///////////////////////////////////////////////////////////////////#
             #TOP-LEFT////////////////////////////////////////////
-            row = top_left.row()
-            History(self, context, parent=row)
-
             col = top_left.column()
             col.ui_units_x = 8
             col.menu_contents("VIEW3D_MT_TextureMask")
@@ -532,12 +547,7 @@ class XPanel(bpy.types.Panel):
 
             #TOP-RIGHT////////////////////////////////////////////
             ToolOptions(self, context, parent=top_right)
-            top_right.separator(factor = 2)  
-            col = top_right.column(align=True)
-            sub = col.row(align=True)
-            funct_bt(parent=sub, cmd='hud', tog=False, w=2, h=1, label='DATA', icon="NONE") 
-            funct_bt(parent=sub, cmd='pivot', tog=False, w=2, h=1, label='PVT', icon="NONE")
-            
+
             #MAIN-ROW////////////////////////////////////////////////////////////////////////////////#
             #MAIN-LEFT////////////////////////////////////////////           
             box = main_leftrow.box()     
@@ -588,9 +598,6 @@ class XPanel(bpy.types.Panel):
 
             #TOP-ROW////////////////////////////////////////////////////////////////////////////////#
             #TOP-LEFT////////////////////////////////////////////
-            row = top_left.row()
-            History(self, context, parent=row)
-
             col = top_left.column()
             col.ui_units_x = 8
             col.menu_contents("VIEW3D_MT_TextureMask")
@@ -609,12 +616,7 @@ class XPanel(bpy.types.Panel):
 
             #TOP-RIGHT////////////////////////////////////////////
             ToolOptions(self, context, parent=top_right)
-            top_right.separator(factor = 2)  
-            col = top_right.column(align=True)
-            sub = col.row(align=True)
-            funct_bt(parent=sub, cmd='hud', tog=False, w=2, h=1, label='DATA', icon="NONE") 
-            funct_bt(parent=sub, cmd='pivot', tog=False, w=2, h=1, label='PVT', icon="NONE")
-            
+
             #MAIN-ROW////////////////////////////////////////////////////////////////////////////////#
             #MAIN-LEFT////////////////////////////////////////////           
             box = main_leftrow.box()     
@@ -666,9 +668,6 @@ class XPanel(bpy.types.Panel):
             #TOP-ROW////////////////////////////////////////////////////////////////////////////////#
             #TOP-LEFT////////////////////////////////////////////
             row = top_left.row()
-            History(self, context, parent=row)
-
-            row = top_left.row()
             row.ui_units_x = 6
             row.operator("object.shade_flat", text="FLAT")
             row.operator("object.shade_smooth", text="SMOOTH")
@@ -681,13 +680,8 @@ class XPanel(bpy.types.Panel):
             col.label(text="")
 
             #TOP-RIGHT////////////////////////////////////////////
-            top_right.separator(factor = 2)  
-            col = top_right.column(align=True)
-            sub = col.row(align=True)
-            funct_bt(parent=sub, cmd='hud', tog=False, w=2, h=1, label='DATA', icon="NONE") 
-            funct_bt(parent=sub, cmd='pivot', tog=False, w=2, h=1, label='PVT', icon="NONE")
-            #ToolOptions(self, context, parent=top_right)
-            top_right.separator(factor = 2)
+            col = top_right.column()
+            col.label(text="")
 
             #MAIN-ROW////////////////////////////////////////////////////////////////////////////////#
             #MAIN-LEFT////////////////////////////////////////////           
@@ -716,9 +710,6 @@ class XPanel(bpy.types.Panel):
             #TOP-ROW////////////////////////////////////////////////////////////////////////////////#
             #TOP-LEFT////////////////////////////////////////////
             row = top_left.row()
-            History(self, context, parent=row)
-
-            row = top_left.row()
             row.ui_units_x = 6
             row.operator("object.shade_flat", text="FLAT")
             row.operator("object.shade_smooth", text="SMOOTH")
@@ -731,13 +722,8 @@ class XPanel(bpy.types.Panel):
             col.label(text="")
 
             #TOP-RIGHT////////////////////////////////////////////
-            top_right.separator(factor = 2)  
-            col = top_right.column(align=True)
-            sub = col.row(align=True)
-            funct_bt(parent=sub, cmd='hud', tog=False, w=2, h=1, label='DATA', icon="NONE") 
-            funct_bt(parent=sub, cmd='pivot', tog=False, w=2, h=1, label='PVT', icon="NONE")
-            #ToolOptions(self, context, parent=top_right)
-            top_right.separator(factor = 2)
+            col = top_right.column()
+            col.label(text="")
 
             #MAIN-ROW////////////////////////////////////////////////////////////////////////////////#
             #MAIN-LEFT////////////////////////////////////////////           
@@ -782,9 +768,6 @@ class XPanel(bpy.types.Panel):
             #TOP-ROW////////////////////////////////////////////////////////////////////////////////#
             #TOP-LEFT////////////////////////////////////////////
             row = top_left.row()
-            History(self, context, parent=row)
-
-            row = top_left.row()
             row.ui_units_x = 6
             row.operator("object.shade_flat", text="FLAT")
             row.operator("object.shade_smooth", text="SMOOTH")
@@ -797,13 +780,8 @@ class XPanel(bpy.types.Panel):
             col.label(text="")
 
             #TOP-RIGHT////////////////////////////////////////////
-            top_right.separator(factor = 2)  
-            col = top_right.column(align=True)
-            sub = col.row(align=True)
-            funct_bt(parent=sub, cmd='hud', tog=False, w=2, h=1, label='DATA', icon="NONE") 
-            funct_bt(parent=sub, cmd='pivot', tog=False, w=2, h=1, label='PVT', icon="NONE")
-            #ToolOptions(self, context, parent=top_right)
-            top_right.separator(factor = 2)
+            col = top_right.column()
+            col.label(text="")
 
             #MAIN-ROW////////////////////////////////////////////////////////////////////////////////#
             #MAIN-LEFT////////////////////////////////////////////           
@@ -850,9 +828,6 @@ class XPanel(bpy.types.Panel):
             #TOP-ROW////////////////////////////////////////////////////////////////////////////////#
             #TOP-LEFT////////////////////////////////////////////
             row = top_left.row()
-            History(self, context, parent=row)
-
-            row = top_left.row()
             row.ui_units_x = 6
             row.operator("object.shade_flat", text="FLAT")
             row.operator("object.shade_smooth", text="SMOOTH")
@@ -865,13 +840,8 @@ class XPanel(bpy.types.Panel):
             col.label(text="")
 
             #TOP-RIGHT////////////////////////////////////////////
-            top_right.separator(factor = 2)  
-            col = top_right.column(align=True)
-            sub = col.row(align=True)
-            funct_bt(parent=sub, cmd='hud', tog=False, w=2, h=1, label='DATA', icon="NONE") 
-            funct_bt(parent=sub, cmd='pivot', tog=False, w=2, h=1, label='PVT', icon="NONE")
-            #ToolOptions(self, context, parent=top_right)
-            top_right.separator(factor = 2)
+            col = top_right.column()
+            col.label(text="")
 
             #MAIN-ROW////////////////////////////////////////////////////////////////////////////////#
             #MAIN-LEFT////////////////////////////////////////////           
@@ -908,9 +878,6 @@ class XPanel(bpy.types.Panel):
             #TOP-ROW////////////////////////////////////////////////////////////////////////////////#
             #TOP-LEFT////////////////////////////////////////////
             row = top_left.row()
-            History(self, context, parent=row)
-
-            row = top_left.row()
             row.ui_units_x = 6
             row.operator("object.shade_flat", text="FLAT")
             row.operator("object.shade_smooth", text="SMOOTH")
@@ -923,13 +890,8 @@ class XPanel(bpy.types.Panel):
             col.label(text="")
 
             #TOP-RIGHT////////////////////////////////////////////
-            top_right.separator(factor = 2)  
-            col = top_right.column(align=True)
-            sub = col.row(align=True)
-            funct_bt(parent=sub, cmd='hud', tog=False, w=2, h=1, label='DATA', icon="NONE") 
-            funct_bt(parent=sub, cmd='pivot', tog=False, w=2, h=1, label='PVT', icon="NONE")
-            #ToolOptions(self, context, parent=top_right)
-            top_right.separator(factor = 2)
+            col = top_right.column()
+            col.label(text="")
 
             #MAIN-ROW////////////////////////////////////////////////////////////////////////////////#
             #MAIN-LEFT////////////////////////////////////////////           

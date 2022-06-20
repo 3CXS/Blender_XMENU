@@ -2,30 +2,6 @@ import os
 import bpy
 from bpy.props import StringProperty, IntProperty, BoolProperty
 #////////////////////////////////////////////////////////////////////////////////////////////#
-editors_items = [
-    ('VIEW_3D','3D Viewport','','VIEW3D',1),
-    ('IMAGE_EDITOR','Image Editor','','IMAGE',2),
-    ('UV','Uv Editor','','UV',3),
-    ('ShaderNodeTree','Shader Editor','','NODE_MATERIAL',4),
-    ('GeometryNodeTree','Geonode Editor','','NODETREE',5),
-    ('CompositorNodeTree','Compositor','','NODE_COMPOSITING',6),
-    ('TextureNodeTree','Texture Editor','','NODE_TEXTURE',7),
-    ('SEQUENCE_EDITOR','Video Sequencer','','SEQUENCE',8),
-    ('CLIP_EDITOR','Movie Clip Editor','','TRACKER',9),
-    ('DOPESHEET','Dope Sheet','','ACTION',10),
-    ('TIMELINE','Timeline','','TIME',11),
-    ('FCURVES','Graph Editor','','GRAPH',12),
-    ('DRIVERS','Drivers','','TRACKING',13),
-    ('NLA_EDITOR','Non-Linear','','NLA',14),
-    ('TEXT_EDITOR','Text Editor','','TEXT',15),
-    ('CONSOLE','Python Console','','CONSOLE',16),
-    ('INFO','Info','','INFO',17),
-    ('OUTLINER','Outliner','','OUTLINER',18),
-    ('PROPERTIES','Properties','','PROPERTIES',19),
-    ('FILES','File Browser','','FILEBROWSER',20),
-    ('ASSETS','Asset Browser','','ASSET_MANAGER',21),
-    ('PREFERENCES','Preferences','','PREFERENCES',22),
-    ]
 
 def centerscreen():
     center_x = bpy.props.FloatProperty(name="center_x", default=1)
@@ -42,22 +18,24 @@ class XPrefs(bpy.types.AddonPreferences):
     bl_idname = __package__
 
     #///////////////////////////ITEMS////////////////////////////////#
-    
-    #hud_activate: BoolProperty(name="HUD", default=False)
-  
-    hud_mode_size: IntProperty(name="Size", default=20)
-    hud_mode_pos_x: IntProperty(name="Pos X", default=25)
-    hud_mode_pos_y: IntProperty(name="Pos Y", default=900)
+ 
+    hud_01_size: IntProperty(name="Size", default=24)
+    hud_01_pos_x: IntProperty(name="Pos X", default=25)
+    hud_01_pos_y: IntProperty(name="Pos Y", default=100)
 
-    hud_info_size: IntProperty(name="Size", default=20)
-    hud_info_pos_x: IntProperty(name="Pos X", default=200)
-    hud_info_pos_y: IntProperty(name="Pos Y", default=100)
+    hud_02_size: IntProperty(name="Size", default=14)
+    hud_02_pos_x: IntProperty(name="Pos X", default=35)
+    hud_02_pos_y: IntProperty(name="Pos Y", default=800)
 
-    hud_dpi: IntProperty(name="DPI", default=72)
+    hud_03_size: IntProperty(name="Size", default=20)
+    hud_03_pos_x: IntProperty(name="Pos X", default=460)
+    hud_03_pos_y: IntProperty(name="Pos Y", default=55)
 
     tool_icon: BoolProperty(name="TOOL ICON", default=True)
     tool_text: BoolProperty(name="TOOL TEXT", default=True)
-    tex_path: StringProperty(name="Folder Path",subtype='DIR_PATH',default="")
+    tex_path: StringProperty(name="Tex Folder Path",subtype='DIR_PATH',default="")
+
+    file_path: StringProperty(name="File Folder Path",subtype='DIR_PATH',default="")
 
     floater_01_name : bpy.props.StringProperty(default="1", name="Name",)
     floater_01_type : bpy.props.StringProperty(default='OUTLINER')
@@ -109,6 +87,8 @@ class XPrefs(bpy.types.AddonPreferences):
 
     floaters : bpy.props.EnumProperty(default="01",items=[("01","Outliner",""),("02","Properties",""),("03","Modifiers",""),("04","Shader",""),("05","UV",""),("06","Image",""),("07","GeoNode",""),("08","Cam","")])
 
+    hud_items : bpy.props.EnumProperty(default="01",items=[("01","MODE",""),("02","TOOL",""),("03","DATA","")])
+
 
     #///////////////////////////MENU/////////////////////////////////#
 
@@ -116,29 +96,46 @@ class XPrefs(bpy.types.AddonPreferences):
         layout = self.layout
 
         col = layout.column()
+        col.use_property_split = True
+
         col.label(text="HUD:")
-        #col.prop(self, "hud_activate", toggle=False)
-        col.prop(self, "hud_dpi", toggle=False)
-        col.label(text="MODE")
-        col.prop(self, "hud_mode_size", toggle=False)
-        col.prop(self, "hud_mode_pos_x", toggle=False)
-        col.prop(self, "hud_mode_pos_y", toggle=False)
-        col.label(text="DATA")
-        col.prop(self, "hud_info_size", toggle=False)
-        col.prop(self, "hud_info_pos_x", toggle=False)
-        col.prop(self, "hud_info_pos_y", toggle=False)
+        sub = col.column()
+        slots = sub.row()
+        slots.scale_y = 1.2
+        slots.prop(self,"hud_items", text='ITEMS', expand=True)
+        col.separator()
+
+        istr = self.hud_items
+
+        box = col.box()
+        propcol = box.column()
+        propcol.use_property_split = True
+
+        propcol.prop(self,f"hud_{istr}_size",)
+        propcol.separator()
+        propcol.prop(self,f"hud_{istr}_pos_x",)
+        propcol.separator()
+        propcol.prop(self,f"hud_{istr}_pos_y",)
 
         col = layout.column()
         col.label(text="PANEL:")
+        col.use_property_split = True
         col.prop(self, "tool_icon", toggle=False)
         col.prop(self, "tool_text", toggle=False)
 
         col = layout.column()
-        col.label(text="BRUSH TEX:")
+        col.label(text="TEXTURE PATH:")
+        col.use_property_split = True
         col.prop(self, "tex_path", text="")
 
         col = layout.column()
+        col.label(text="FILE PATH:")
+        col.use_property_split = True
+        col.prop(self, "file_path", text="")
+
+        col = layout.column()
         col.label(text="FLOATING EDITORS:")
+
         sub = col.column()
 
         slots = sub.row()
@@ -158,15 +155,6 @@ class XPrefs(bpy.types.AddonPreferences):
         propcol.separator()
         propcol.prop(self,f"floater_{istr}_alpha",)
         propcol.separator()
-        propcol.prop(self,f"floater_{istr}_key",)
-        propcol.separator()
-        #propcol.prop(self,f"float_{istr}_name",)
-        #propcol.separator()
-        #propcol.prop(self,f"float_{istr}_type",)
-        #propcol.separator()
-
-
-
 
 #////////////////////////////////////////////////////////////////////////////////////////////#
 

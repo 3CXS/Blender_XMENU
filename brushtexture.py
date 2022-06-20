@@ -210,34 +210,7 @@ def setup_brush_tex(img_path,tex_type="BRUSH"):
         image_node = node_tree.nodes['Image']
     image_node.location = [0,0]
     image_node.image = brush_img
-    '''
-    if "ColorRamp" not in node_tree.nodes:    
-        ramp_node = node_tree.nodes.new('TextureNodeValToRGB')
-        
-    else:
-        ramp_node = node_tree.nodes['ColorRamp']
-        
-    if "invert_color" not in ramp_node:
-        ramp_node["invert_color"] = False    
-        
-    ramp_node.location = [200,0]
-    if tex_type == "BRUSH":
-        if brush_tex.xm_invert_mask:
-            ramp_node.color_ramp.elements[0].color = [1,1,1,0]
-            ramp_node.color_ramp.elements[1].color = [1,1,1,1]
-        else:    
-            ramp_node.color_ramp.elements[0].color = [1,1,1,1]
-            ramp_node.color_ramp.elements[1].color = [1,1,1,0]
-    else:
-        if brush_tex.xm_invert_stencil_mask:
-            ramp_node.color_ramp.elements[0].color = [1,1,1,1]
-            ramp_node.color_ramp.elements[1].color = [0,0,0,1]
-        else:    
-            ramp_node.color_ramp.elements[0].color = [0,0,0,1]
-            ramp_node.color_ramp.elements[1].color = [1,1,1,1]
-    node_tree.links.new(ramp_node.inputs['Fac'],image_node.outputs['Image'])
-    node_tree.links.new(output_node.inputs['Color'],ramp_node.outputs['Color']) 
-    '''
+
     if "Output" not in node_tree.nodes:
         output_node = node_tree.nodes.new('TextureNodeOutput')
     else:
@@ -251,15 +224,25 @@ def setup_brush_tex(img_path,tex_type="BRUSH"):
 #////////////////////////////////////////////////////////////////////////////////////////////#
 
 def _invert_ramp(self,context,tex_type="BRUSH"):
+    mode = context.active_object.mode
     if ("xm_brush_tex" in bpy.data.textures and tex_type == "BRUSH") or ("xm_stencil_tex" in bpy.data.textures and tex_type == "STENCIL"):
         if self.xm_use_mask == True:
             if tex_type == "BRUSH":
-                if self.xm_invert_mask:
-                    bpy.data.textures["xm_brush_tex"].color_ramp.elements[0].color = (1,1,1,1)
-                    bpy.data.textures["xm_brush_tex"].color_ramp.elements[1].color = (1,1,1,0)
+                if mode == 'SCULPT':
+                    if self.xm_invert_mask:
+                        bpy.data.textures["xm_brush_tex"].color_ramp.elements[0].color = (1,1,1,1)
+                        bpy.data.textures["xm_brush_tex"].color_ramp.elements[1].color = (0,0,0,1)
+                    else:
+                        bpy.data.textures["xm_brush_tex"].color_ramp.elements[0].color = (0,0,0,1)
+                        bpy.data.textures["xm_brush_tex"].color_ramp.elements[1].color = (1,1,1,1)
                 else:
-                    bpy.data.textures["xm_brush_tex"].color_ramp.elements[0].color = (1,1,1,0)
-                    bpy.data.textures["xm_brush_tex"].color_ramp.elements[1].color = (1,1,1,1)
+                    if self.xm_invert_mask:
+                        bpy.data.textures["xm_brush_tex"].color_ramp.elements[0].color = (1,1,1,1)
+                        bpy.data.textures["xm_brush_tex"].color_ramp.elements[1].color = (1,1,1,0)
+                    else:
+                        bpy.data.textures["xm_brush_tex"].color_ramp.elements[0].color = (1,1,1,0)
+                        bpy.data.textures["xm_brush_tex"].color_ramp.elements[1].color = (1,1,1,1)
+
             elif tex_type == "STENCIL":
                 if self.xm_invert_stencil_mask:
                     bpy.data.textures["xm_brush_tex"].color_ramp.elements[0].color = (1,1,1,1)
@@ -425,13 +408,10 @@ def refresh_brush_category(self,context):
             brush_tex = setup_brush_tex(img_path)
             if brush == 'TEXTURE_PAINT':
                 context.tool_settings.image_paint.brush.texture = brush_tex
-                bpy.types.Texture.xm_sculpt.xm_sculpt = False
             if brush == 'SCULPT':
                 context.tool_settings.sculpt.brush.texture = brush_tex
-                bpy.types.Texture.xm_sculpt.xm_sculpt = False
             if brush == 'VERTEX_PAINT':
                 context.tool_settings.vertex_paint.brush.texture = brush_tex  
-                bpy.types.Texture.xm_sculpt.xm_sculpt = False
         else:
             if brush == 'TEXTURE_PAINT':
                 context.tool_settings.image_paint.brush.texture = None

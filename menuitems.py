@@ -4,8 +4,7 @@ from .icons.icons import load_icons
 from.toolsets import Tools_Sculpt
 from .functions import tool_grid, tool_bt, funct_bt, paint_settings
 from .brushtexture import brush_icons_path, get_brush_mode, setup_brush_tex, _invert_ramp, _mute_ramp
-#from bl_ui.properties_data_modifier import DATA_PT_modifiers
-
+from bpy.props import StringProperty, IntProperty, BoolProperty
 from bl_ui.space_toolsystem_common import (ToolSelectPanelHelper,ToolDef)
 from bpy.app.translations import contexts as i18n_contexts
 
@@ -16,30 +15,93 @@ from collections import defaultdict
 
 def SaveScene(self, context, parent):
         layout = parent
+        box = layout.box()
 
-        col = layout.column(align=True)
+        col = box.column(align=True)
         col.ui_units_x = 4
-        #row.scale_y = 0.7
-
-        col.operator("wm.save_mainfile", icon='FILE_TICK', text="SAVE")
         col.operator("wm.save_as_mainfile", text="SAVE AS")
         col.separator()
         col.operator("wm.open_mainfile", text="OPEN")
+        col.menu("TOPBAR_MT_file_open_recent", text="RECENT")
         col.separator()
         sub = col.row(align=True)
         sub.operator("wm.link", icon='LINK_BLEND', text="LINK")
         sub.operator("wm.append", icon='APPEND_BLEND', text="APND")
+
+class VIEW3D_MT_Import(bpy.types.Menu):
+    bl_label = "Import"
+
+    def draw(self, context):
+        layout = self.layout
+        layout.use_property_split = False
+        layout.use_property_decorate = False
+
+        file_path = bpy.context.preferences.addons[__package__].preferences.file_path              
+        scene = context.scene
+
+        box = layout.box()
+        col = box.column(align=True)
+        col.ui_units_x = 4.5
+        sub = col.row(align=True)
+        sub.prop(scene, "import_items", expand=True)
+        sub = col.column(align=True)
+        if scene.import_items == '01':
+            subsub = sub.row(align=True)
+            subsub.label(text='-->')
+            subsub.scale_y = 0.7
+            subsub = sub.row(align=True)
+            op = subsub.operator("import_mesh.ply", text="PLY")
+            op.filepath = file_path
+            op = subsub.operator("import_mesh.stl", text="STL")
+            op.filepath = file_path
+            op.axis_forward = 'Y'
+            op.axis_up = 'Z'
+            op = subsub.operator("import_scene.obj", text="OBJ")
+            op.filepath = file_path
+            op.axis_forward = 'Y'
+            op.axis_up = 'Z'
+            subsub = sub.row(align=True)
+            op = subsub.operator("wm.alembic_import", text="ABC")
+            #op.filepath = file_path
+            op.relative_path = True
+            op = subsub.operator("import_scene.fbx", text="FBX")
+            op.filepath = file_path
+            op.axis_forward = 'Y'
+            op.axis_up = 'Z'
+        else:
+            subsub = sub.row(align=True)
+            subsub.label(text='<--')
+            subsub.scale_y = 0.7
+            subsub = sub.row(align=True)
+            op = subsub.operator("export_mesh.ply", text="PLY")
+            op.filepath = file_path
+            op = subsub.operator("export_mesh.stl", text="STL")
+            op.filepath = file_path
+            op.axis_forward = 'Y'
+            op.axis_up = 'Z'
+            op = subsub.operator("export_scene.obj", text="OBJ")
+            op.filepath = file_path
+            op.axis_forward = 'Y'
+            op.axis_up = 'Z'
+            subsub = sub.row(align=True)
+            op = subsub.operator("wm.alembic_export", text="ABC")
+            op.filepath = file_path
+            op = subsub.operator("export_scene.fbx", text="FBX")
+            op.filepath = file_path
+            op.axis_forward = 'Y'
+            op.axis_up = 'Z'
+
 
 def History(self, context, parent):
         layout = parent
         row = layout.row(align=True)
 
         row.ui_units_x = 4
-        sub = row.row()
+        sub = row.row(align=True)
         sub.alignment = 'LEFT'
         sub.scale_x = 2
         sub.operator("ed.undo", icon='TRIA_LEFT', text="")
-        sub = row.row()
+        sub = row.row(align=True)
         sub.alignment = 'RIGHT'
         sub.scale_x = 2
         sub.operator("ed.redo", icon='TRIA_RIGHT', text="")
@@ -201,16 +263,28 @@ def Normals(self, context, parent):
     layout = parent
     layout.use_property_split = False
     ob = context.active_object
+    col = layout.column(align=False)
+    row = col.row(align=True)
+
     if ob != None and ob.type == 'MESH':
         mesh = context.active_object.data
-        col = layout.column(align=False)
-        row = col.row(align=True)
         sub = row.row(align=True)
+        sub.ui_units_x = 4
+        sub.operator("object.shade_flat", text="FLAT")
+        sub.operator("object.shade_smooth", text="SMTH")
+        sub.separator()
+
+        sub = row.row(align=True)
+        sub.ui_units_x = 1
         sub.prop(mesh, "use_auto_smooth", text="")
-        sub = sub.row(align=True)
+        sub = row.row(align=True)
+        sub.ui_units_x = 4
         sub.active = mesh.use_auto_smooth and not mesh.has_custom_normals
         sub.prop(mesh, "auto_smooth_angle", text="")
         #row.prop_decorator(mesh, "auto_smooth_angle")
+    else:
+        sub = row.row(align=True)
+        sub.label(text=">")
 
 def GPLayers(self, context, parent):
     if context.active_object.type == "GPENCIL":
@@ -613,13 +687,13 @@ def SculptBrushSettings(self, context, parent):
     sculpt_tool = brush.sculpt_tool
 
     col = layout.column(align=True)
-    col.ui_units_x = 18
+    col.ui_units_x = 16
     col.scale_y = 0.7
     #ROW1#################################################
     row = col.row()
     sub = row.row(align=True)
 
-    sub.ui_units_x = 6
+    sub.ui_units_x = 4
     if sculpt_tool == 'GRAB':
         sub.prop(brush, "use_grab_silhouette",  text='SILHOUETTE', toggle=True)
         sub.prop(brush, "use_grab_active_vertex",  text='VERTEX', toggle=True)
@@ -642,7 +716,7 @@ def SculptBrushSettings(self, context, parent):
     #sub.separator(factor=1)
 
     sub = row.row(align=True)
-    sub.ui_units_x = 6
+    sub.ui_units_x = 4
     if sculpt_tool == 'CLAY_STRIPS':
         sub.prop(brush, "tip_roundness", slider=True, text='ROUND')
     elif sculpt_tool == 'LAYER':
@@ -670,7 +744,7 @@ def SculptBrushSettings(self, context, parent):
     sub.separator(factor=1)
 
     sub = row.row(align=True)
-    sub.ui_units_x = 6
+    sub.ui_units_x = 4
     if capabilities.has_accumulate:
         subsub = sub.row(align=True)
         subsub.scale_x = 0.5
@@ -1104,7 +1178,7 @@ def SculptMask(self, context, parent):
     row = col.row()
 
     sub = row.column(align=True)
-    sub.ui_units_x = 3.5
+    sub.ui_units_x = 4
     subrow = sub.row(align=True)
     #subrow.operator('xmenu.mask', text='FILL').cmd='FILL'
     subrow.operator('xmenu.mask', text='CLR').cmd='CLEAR'
@@ -1114,7 +1188,7 @@ def SculptMask(self, context, parent):
     subrow.operator('xmenu.mask', text='SLICE').cmd='SLICEOBJ'
 
     sub = row.column(align=True)
-    sub.ui_units_x = 3.5
+    sub.ui_units_x = 4
     subrow = sub.row(align=True)
     subrow.operator('xmenu.mask', text='-').cmd='SHRINK'
     subrow.operator('xmenu.mask', text='+').cmd='GROW'
@@ -1157,17 +1231,16 @@ class VIEW3D_MT_sym(bpy.types.Menu):
         mesh = context.active_object.data
 
         row = layout.row(align=True)
-        row.ui_units_x = 4
-        row.scale_y = 1
-        split = row.split(factor=0.2, align=True)
-        split.label(icon='MOD_MIRROR')
-        subrow = split.row(align=True)
-        subrow.prop(mesh, "use_mirror_x", text="X", toggle=True)
-        subrow.prop(mesh, "use_mirror_y", text="Y", toggle=True)
-        subrow.prop(mesh, "use_mirror_z", text="Z", toggle=True)
+        #row.ui_units_x = 2
+        #row.scale_y = 1
+        #split = row.split(factor=0.2, align=True)
+        #split.label(icon='MOD_MIRROR')
+        row.prop(mesh, "use_mirror_x", text="X", toggle=True)
+        row.prop(mesh, "use_mirror_y", text="Y", toggle=True)
+        row.prop(mesh, "use_mirror_z", text="Z", toggle=True)
 
 class VIEW3D_MT_sculpt_sym(bpy.types.Menu):
-    bl_label = "Symmetry"
+    bl_label = "MENU"
 
     @classmethod
     def poll(cls, context):
@@ -1179,30 +1252,31 @@ class VIEW3D_MT_sculpt_sym(bpy.types.Menu):
 
     def draw(self, context):
         layout = self.layout
-        layout.use_property_split = False
+        layout.use_property_split = True
         layout.use_property_decorate = False
+        layout.separator_spacer()
 
         sculpt = context.tool_settings.sculpt
         mesh = context.active_object.data
 
-        box = layout.box()     
-        box.ui_units_x = 6
-        sub = box.column(align=True)
-        sub.operator("sculpt.symmetrize", text='SYM')
-        subsub = sub.row(align=True)
-        subsub.scale_y = 0.7
-        subsub.prop(sculpt, "symmetrize_direction", text='')
+        col = layout.column()     
+        col.ui_units_x = 4
 
-        sub = box.row(align=True)
+        sub = col.row()
+        sub.prop(sculpt, "symmetrize_direction", text='')
+
+        sub = col.row(align=True)
         sub.scale_y = 0.3 
         sub.label(text="RADIAL")
         sub.label(text="OFFSET")
-        sub = box.row(align=True)
+
+        sub = col.row(align=True)
         sub.scale_y = 0.7
         subsub = sub.column(align=True)     
         subsub.prop(sculpt, "radial_symmetry", text="")
         subsub = sub.column(align=True)     
         subsub.prop(sculpt, "tile_offset", text="")
+
         '''
         row = box.row(align=True, heading="Mirror")
         row.scale_y = 0.7
@@ -1333,13 +1407,14 @@ class VIEW3D_MT_BrushTexture(bpy.types.Menu):
         brush = get_brush_mode(self, context)
 
         col = layout.column()
+        col.ui_units_x = 4
         sub = col.row(align=True)
         sub.prop(brush,"xm_tex_brush_categories",text="")
         sub = col.row(align=True)
         sub.scale_y = 0.5
         sub.template_icon_view(brush,"xm_brush_texture",show_labels=True, scale_popup=4)
         col = layout.column()
-        col.ui_units_x = 12
+        col.ui_units_x = 4
         sub = col.row(align=True)
         sub.scale_y = 0.7
         brush_texture_settings(col, brush, context.sculpt_object)
@@ -1356,7 +1431,7 @@ class VIEW3D_MT_TextureMask(bpy.types.Menu):
         col.ui_units_x = 3.5
         sub = col.row(align=True)
         sub.scale_y = 1.4
-        sub.prop(brush,"xm_use_mask",text="MASK",toggle=True,)
+        sub.prop(brush,"xm_use_mask",text="RAMP",toggle=True,)
         subsub = sub.row(align=True)
         subsub.active = brush.xm_use_mask
         subsub.prop(brush,"xm_invert_mask",text="",toggle=True, icon="IMAGE_ALPHA")
@@ -1369,13 +1444,10 @@ class VIEW3D_MT_TextureMask(bpy.types.Menu):
         sub.prop(brush,"xm_ramp_tonemap_l",text="L",slider=True)
         sub.prop(brush,"xm_ramp_tonemap_r",text="R",slider=True)
 
-
-
 def brush_texture_settings(layout, brush, sculpt):
     tex_slot = brush.texture_slot
 
     col = layout.column()
-
     col.prop(tex_slot, "map_mode", text="")
 
     if tex_slot.map_mode == 'STENCIL':
@@ -1385,7 +1457,6 @@ def brush_texture_settings(layout, brush, sculpt):
             sub.operator("brush.stencil_fit_image_aspect")
         sub.operator("brush.stencil_reset_transform")
 
-    # angle and texture_angle_source
     if tex_slot.has_texture_angle:
         sub = col.column()
         #sub.scale_y = 0.7
@@ -1410,12 +1481,9 @@ def brush_texture_settings(layout, brush, sculpt):
                         sub.scale_y = 0.7
                         sub.prop(tex_slot, "random_angle", text="ANGLE")
     if sculpt:
-        # texture_sample_bias
         sub = col.row()
         sub.scale_y = 0.7
         sub.prop(brush, "texture_sample_bias", slider=True, text="Sample Bias")
-
-
 
     '''
     # scale and offset
@@ -1430,10 +1498,11 @@ def brush_texture_settings(layout, brush, sculpt):
     sub.prop(tex_slot, 'scale', text='')
     '''
 
-
-classes = (VIEW3D_MT_Material, VIEW3D_MT_dynamesh, VIEW3D_MT_remesh, VIEW3D_MT_sculpt_sym, VIEW3D_MT_sym, VIEW3D_MT_BrushTexture, VIEW3D_MT_TextureMask, VIEW3D_MT_StrokeAdv, VIEW3D_MT_Falloff)
+classes = (VIEW3D_MT_Material, VIEW3D_MT_Import, VIEW3D_MT_dynamesh, VIEW3D_MT_remesh, VIEW3D_MT_sculpt_sym, VIEW3D_MT_sym, VIEW3D_MT_BrushTexture, VIEW3D_MT_TextureMask, VIEW3D_MT_StrokeAdv, VIEW3D_MT_Falloff)
 
 def register():
+    bpy.types.Scene.import_items = bpy.props.EnumProperty(default="01",items=[("01","IMPORT",""),("02","EXPORT","")])
+
     for cls in classes:
         bpy.utils.register_class(cls)
     

@@ -30,7 +30,7 @@ shader2 = gpu.shader.from_builtin('3D_SMOOTH_COLOR')
 batch2 = batch_for_shader(shader2, 'LINES', {"pos": vertices2, "color": col2})
 
 
-font_info = {
+font_data = {
     "font_id": 0,
     "handler": None,
 }
@@ -108,17 +108,13 @@ def vertcolor():
         return vertcol
 
 def activetool():
-    #obj = bpy.context.active_object
-    #toolsettings = bpy.context.tool_settings
-    #sculpt = toolsettings.sculpt
-    #context_tool = bpy.context.scene.tool_settings.sculpt
-
-    #brush = bpy.context.tool_settings.sculpt.brush
-    #capabilities = brush.sculpt_capabilities
-    #ups = bpy.context.tool_settings.unified_paint_settings
     tool = bpy.context.workspace.tools.from_space_view3d_mode(bpy.context.mode)
     idname = str(tool.idname.upper())
-    toolname = idname.split('.')[-1]
+    string = "BRUSH"
+    if string in idname:
+        toolname = ""
+    else:
+        toolname = idname.split('.')[-1]
     return toolname
 
 
@@ -139,96 +135,89 @@ def draw_callback_2d(self, context):
         if region.type == 'TOOL_HEADER':
             header_height = region.height
           
-    font_id = font_info["font_id"]
+    font_id = font_data["font_id"]
     obj = bpy.context.active_object
 
+    mode_size = bpy.context.preferences.addons[__package__].preferences.hud_01_size
+    mode_pos_x = bpy.context.preferences.addons[__package__].preferences.hud_01_pos_x
+    mode_pos_y = bpy.context.preferences.addons[__package__].preferences.hud_01_pos_y
 
-    dpi = bpy.context.preferences.addons[__package__].preferences.hud_dpi
-    dpi_scale = 0.014*dpi
+    tool_size = bpy.context.preferences.addons[__package__].preferences.hud_02_size
+    tool_pos_x = bpy.context.preferences.addons[__package__].preferences.hud_02_pos_x
+    tool_pos_y = bpy.context.preferences.addons[__package__].preferences.hud_02_pos_y
 
+    data_size = bpy.context.preferences.addons[__package__].preferences.hud_03_size
+    data_pos_x = bpy.context.preferences.addons[__package__].preferences.hud_03_pos_x
+    data_pos_y = bpy.context.preferences.addons[__package__].preferences.hud_03_pos_y
 
-    mode_size = bpy.context.preferences.addons[__package__].preferences.hud_mode_size
-    mode_pos_x = bpy.context.preferences.addons[__package__].preferences.hud_mode_pos_x
-    mode_pos_y = bpy.context.preferences.addons[__package__].preferences.hud_mode_pos_y
-
-
-    info_size = bpy.context.preferences.addons[__package__].preferences.hud_info_size
-    info_pos_x = bpy.context.preferences.addons[__package__].preferences.hud_info_pos_x
-    info_pos_y = bpy.context.preferences.addons[__package__].preferences.hud_info_pos_y
-
-    blf.position(font_id, mode_pos_x + tools_width, mode_pos_y, 0)
-    blf.size(font_id, mode_size, dpi)
+    blf.position(font_id, mode_pos_x + tools_width, view_height-mode_pos_y, 0)
+    blf.size(font_id, mode_size, 72)
     blf.color(font_id, 1, 1, 1, 1)
     cmode = mode()
     blf.draw(font_id, cmode)
 
+    blf.position(font_id, tool_pos_x, tool_pos_y, 0)
+    blf.size(font_id, tool_size, 72)
+    blf.color(font_id, 0, 0.7, 1, 1)
+    toolname = activetool()
+    blf.draw(font_id, toolname)
+
+    blf.position(font_id, view_width - data_pos_x, data_pos_y, 0)
+    blf.size(font_id, data_size*0.6, 72)
+    blf.color(font_id, 1, 1, 1, 1)
+    blf.draw(font_id, 'POLYCOUNT')
+
+    blf.position(font_id, view_width - data_pos_x, data_pos_y-22*(data_size*0.05), 0)
+    blf.size(font_id, data_size, 72)
+    blf.color(font_id, 0, 0.7, 1, 1)
+    count = polycount()
+    blf.draw(font_id, str(count))
+
     if obj.type in ['MESH', 'CURVE', 'FONT']:
         if obj.material_slots:
-            blf.position(font_id, view_width-info_pos_x, info_pos_y-35*dpi_scale, 0)
-            blf.size(font_id, info_size*0.5, dpi)
+            blf.position(font_id, view_width-data_pos_x, data_pos_y-38*(data_size*0.05), 0)
+            blf.size(font_id, data_size*0.5, 72)
             blf.color(font_id, 1, 1, 1, 1)
             blf.draw(font_id, "MAT:")
 
             if obj.active_material:
-                blf.position(font_id, view_width-info_pos_x, info_pos_y-48*dpi_scale, 0)
-                blf.size(font_id, info_size*0.6, dpi)
+                blf.position(font_id, view_width-data_pos_x, data_pos_y-54*(data_size*0.05), 0)
+                blf.size(font_id, data_size*0.6, 72)
                 blf.color(font_id, 0, 0.6, 1, 1)
                 mat = material()
                 blf.draw(font_id, str(mat[0]))
 
-                blf.position(font_id, view_width-info_pos_x + 15*dpi_scale, info_pos_y-48*dpi_scale, 0)
-                blf.size(font_id, info_size*0.6, dpi)
+                blf.position(font_id, (view_width-data_pos_x)+15*(data_size*0.05), data_pos_y-54*(data_size*0.05), 0)
+                blf.size(font_id, data_size*0.6, 72)
                 blf.color(font_id, 1, 1, 1, 1)  
                 mat = material()
                 blf.draw(font_id, str(mat[1]))
 
         if obj.type == 'MESH':
             if obj.data.uv_layers:
-                blf.position(font_id, view_width-info_pos_x + 70*dpi_scale, info_pos_y-35*dpi_scale, 0)
-                blf.size(font_id, info_size*0.5, dpi)
+                blf.position(font_id, (view_width-data_pos_x)+70*(data_size*0.05), data_pos_y-38*(data_size*0.05), 0)
+                blf.size(font_id, data_size*0.5, 72)
                 blf.color(font_id, 1, 1, 1, 1)
                 blf.draw(font_id, "UV:")
 
-                blf.position(font_id, view_width-info_pos_x + 70*dpi_scale, info_pos_y-48*dpi_scale, 0)
-                blf.size(font_id, info_size*0.6, dpi)
+                blf.position(font_id, (view_width-data_pos_x)+70*(data_size*0.05), data_pos_y-54*(data_size*0.05), 0)
+                blf.size(font_id, data_size*0.6, 72)
                 blf.color(font_id, 0, 0.6, 1, 1)
                 uv = uvcord()
                 blf.draw(font_id, str(uv[0]))
 
-                blf.position(font_id, view_width-info_pos_x + 85*dpi_scale, info_pos_y-48*dpi_scale, 0)
-                blf.size(font_id, info_size*0.6, dpi)
+                blf.position(font_id, (view_width-data_pos_x)+85*(data_size*0.05), data_pos_y-54*(data_size*0.05), 0)
+                blf.size(font_id, data_size*0.6, 72)
                 blf.color(font_id, 1, 1, 1, 1)  
                 uv = uvcord()
                 blf.draw(font_id, str(uv[1]))
 
-    if cmode == 'SCULPT MODE':
-        pass
+    #if cmode == 'SCULPT MODE':
+        #pass
 
-    blf.position(font_id, view_width - info_pos_x, info_pos_y, 0)
-    blf.size(font_id, info_size*0.6, dpi)
-    blf.color(font_id, 1, 1, 1, 1)
-    blf.draw(font_id, 'POLYCOUNT')
-
-    blf.position(font_id, view_width - info_pos_x, info_pos_y-20*dpi_scale, 0)
-    blf.size(font_id, info_size, dpi)
-    blf.color(font_id, 0, 0.7, 1, 1)
-    count = polycount()
-    blf.draw(font_id, str(count))
-
-
-
-    '''
-    font_id = font_info["font_id"]
-    blf.position(font_id, (view_width/2)-400*dpi_scale, 40*dpi_scale, 0)
-    blf.size(font_id, 18, dpi)
-    blf.color(font_id, 0, 0.7, 1, 1)
-    toolname = activetool()
-    blf.draw(font_id, toolname)
-
-    shader1.bind()
-    shader1.uniform_float("color", (1, 1, 1, 1.0))
-    batch1.draw(shader1)
-    '''
+    #shader1.bind()
+    #shader1.uniform_float("color", (1, 1, 1, 1.0))
+    #batch1.draw(shader1)
 
 def draw_callback_3d(self, context):
     bgl.glLineWidth(2.5)
