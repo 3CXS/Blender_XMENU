@@ -1,6 +1,6 @@
 import bpy
 from .hud import redraw_regions
-from .functions import tool_grid, tool_bt, funct_bt
+from .functions import tool_grid, tool_bt, funct_bt, initvoxelsize
 from bpy.types import Operator, AddonPreferences
 from bl_ui.properties_data_modifier import DATA_PT_modifiers
 from bpy.app.translations import contexts as i18n_contexts
@@ -29,11 +29,11 @@ class XPanel(bpy.types.Panel):
         top_row.alignment = 'CENTER'
 
         top_left_outer = top_row.row()
-        top_left_outer.ui_units_x = 11.5
+        top_left_outer.ui_units_x = 8
         top_left_outer.alignment = 'LEFT'
 
         top_left = top_row.row()
-        top_left.ui_units_x = 12.5
+        top_left.ui_units_x = 16
         top_left.alignment = 'RIGHT'
 
         top_mid = top_row.row()
@@ -41,11 +41,11 @@ class XPanel(bpy.types.Panel):
         top_mid.ui_units_x = 36
 
         top_right = top_row.row()
-        top_right.ui_units_x = 12.5
+        top_right.ui_units_x = 12
         top_right.alignment = 'LEFT'
 
         top_right_outer = top_row.row()
-        top_right_outer.ui_units_x = 11.5
+        top_right_outer.ui_units_x = 12
         top_right_outer.alignment = 'RIGHT'
 
 
@@ -68,7 +68,7 @@ class XPanel(bpy.types.Panel):
         main_leftrow.alignment = 'RIGHT'
 
         main_midbox = main_mid.box()
-        main_midbox.ui_units_y = 1
+        main_midbox.ui_units_y = 0.8
         main_midrow = main_mid.row()
         main_midrow.alignment = 'CENTER'
 
@@ -78,7 +78,7 @@ class XPanel(bpy.types.Panel):
         main_rightrow.alignment = 'LEFT'
 
         row = top_left_outer.row()
-        row.ui_units_x = 1.5
+        row.ui_units_x = 0.2
         row.label(text='')
 
         row = top_left_outer.row()
@@ -86,21 +86,22 @@ class XPanel(bpy.types.Panel):
         row.operator("wm.save_mainfile", icon='FILE_TICK', text="SAVE")
 
         row = top_left_outer.row()
-        row.ui_units_x = 1.6
+        row.ui_units_x = 4
         row.operator("screen.redo_last", text="CMD")
 
+        row = top_right_outer.row(align=True)
 
+        Overlay(self, context, layout=row)
+        #row.separator(factor = 1)
+        funct_bt(parent=row, cmd='hud', tog=True, w=2, h=1.4, label='INFO', icon="NONE") 
+        funct_bt(parent=row, cmd='pivot', tog=True, w=1.2, h=1.4, label='ORIG', icon="OUTLINER_DATA_EMPTY")
 
         row = top_right_outer.row(align=True)
-        funct_bt(parent=row, cmd='hud', tog=False, w=2, h=1, label='HUD', icon="NONE") 
-        funct_bt(parent=row, cmd='pivot', tog=False, w=2, h=1, label='ORIG', icon="NONE")
-
-        row = top_right_outer.row(align=True)
-        row.ui_units_x = 3.5
+        row.ui_units_x = 4
         History(self, context, parent=row)
 
         col = top_right_outer.column()
-        col.ui_units_x = 2
+        col.ui_units_x = 0.2
         col.scale_y = 0.7
         col.label(text='')
         col.label(text='')
@@ -108,7 +109,7 @@ class XPanel(bpy.types.Panel):
         #/////////////////////////////////////////////////////////////////////////////#
         #                               OBJECT                                        #
         #/////////////////////////////////////////////////////////////////////////////#
-        if bpy.context.mode == 'OBJECT':
+        if context.mode == 'OBJECT':
             #TOP-ROW//////////////////////////////////////////////////////////////////#
             #TOP-LEFT/////////////////////////////////////////////////////////////////#
             row = top_left.row()
@@ -119,17 +120,18 @@ class XPanel(bpy.types.Panel):
 
             #TOP-MID//////////////////////////////////////////////////////////////////#
             col = top_mid.column()
-            col.alignment = 'CENTER'
-            col.scale_y = 0.7
-            col.label(text="---------")
+            col.ui_units_x = 6
+            #col.alignment = 'CENTER'
+            ObjectToolSettings(self, context, parent=top_mid)
+            col = top_mid.column()
+            #col.ui_units_x = 6
+            #col.scale_y = 0.7
             col.label(text="")
-
             #TOP-RIGHT////////////////////////////////////////////////////////////////#
 
             ToolOptions(self, context, parent=top_right)
             top_right.separator(factor = 2)
-            ObjectToolSettings(self, context, parent=top_right)
-
+            ViewCam(self, context, parent=top_right)
             #MAIN-ROW/////////////////////////////////////////////////////////////////#
             #MAIN-LEFT////////////////////////////////////////////////////////////////#
             col = main_leftrow.column(align=True)
@@ -215,7 +217,6 @@ class XPanel(bpy.types.Panel):
             row.operator('curve.primitive_bezier_curve_add', text="", icon='CURVE_DATA')
             row.operator('object.delete', text='DELETE').use_global=False            
 
-
             #MAIN-RIGHT///////////////////////////////////////////////////////////////#
             col = main_rightrow.column(align=False)
             Transforms(self, context, parent=col)
@@ -223,15 +224,11 @@ class XPanel(bpy.types.Panel):
             col.menu_contents("VIEW3D_MT_Material")
             col = main_rightrow.column(align=False)
             UVTexture(self, context, parent=col)
-            col = main_rightrow.column(align=True)
-            ViewCam(self, context, parent=col)
-            #with context.temp_override(bl_context = "material"):
-            #col.popover("DATA_PT_modifiers", text='XX')
-            #layout.prop_tabs_enum(view, "context", icon_only=True)
+
         #/////////////////////////////////////////////////////////////////////////////#
         #                               EDIT                                          #
         #/////////////////////////////////////////////////////////////////////////////#
-        if bpy.context.mode == 'EDIT_MESH':
+        if context.mode == 'EDIT_MESH':
             #TOP-ROW//////////////////////////////////////////////////////////////////#
             #TOP-LEFT/////////////////////////////////////////////////////////////////# 
             col = top_left.column()
@@ -252,7 +249,7 @@ class XPanel(bpy.types.Panel):
             #MAIN-ROW/////////////////////////////////////////////////////////////////#
             #MAIN-LEFT////////////////////////////////////////////////////////////////#
             col = main_leftrow.column(align=True)
-            ViewCam(self, context, parent=col)
+            UVTexture(self, context, parent=col)
             #MAIN-MID/////////////////////////////////////////////////////////////////#
             # MID 1 //////////////////////////////////////////////////////////////////#
             col = main_midrow.column(align=False)
@@ -327,12 +324,10 @@ class XPanel(bpy.types.Panel):
             #MAIN-RIGHT///////////////////////////////////////////////////////////////#
 
             col = main_rightrow.column(align=False)
-            UVTexture(self, context, parent=col)
-            #col = main_rightrow.column(align=False)
-            #VertexGroups(self, context, parent=col)
+            VertexGroups(self, context, parent=col)
 
-            #col = main_rightrow.column(align=False)
-            #Materials(self, context, parent=col)
+            col = main_rightrow.column(align=False)
+            col.menu_contents("VIEW3D_MT_Material")
 
 
         #/////////////////////////////////////////////////////////////////////////////#
@@ -341,8 +336,8 @@ class XPanel(bpy.types.Panel):
         if bpy.context.mode == 'SCULPT':
             #TOP-ROW//////////////////////////////////////////////////////////////////#
             #TOP-LEFT/////////////////////////////////////////////////////////////////#
-            col = top_left.column()    
-            col.ui_units_x = 4
+            col = top_left.column(align=True)    
+            col.ui_units_x = 3
             col.scale_y = 0.7
             sub = col.column(align=True)
             sub.operator("sculpt.symmetrize", text='SYM')
@@ -356,24 +351,29 @@ class XPanel(bpy.types.Panel):
             col.ui_units_x = 4
             BrushCopy(self, context, parent=col)
             #TOP-MID//////////////////////////////////////////////////////////////////#
-            SculptToolSettings(self, context, parent=top_mid)
-            top_mid.separator(factor = 0.4)
-
-            SculptBrushSettings(self, context, parent=top_mid)
-            top_mid.separator(factor = 0.4)
+            col = top_mid.column()
+            col.ui_units_x = 4
+            SculptToolSettings(self, context, parent=col)
+            col = top_mid.column()
+            col.ui_units_x = 3
+            col.label(text='')
+            col = top_mid.column()
+            col.ui_units_x = 17
+            SculptBrushSettings(self, context, parent=col)
+            col = top_mid.column()
+            col.ui_units_x = 12
             SculptMask(self, context, parent=top_mid)
-            top_mid.separator(factor = 2)
+
             #TOP-RIGHT////////////////////////////////////////////////////////////////#
             col = top_right.column(align=True)
             ToolOptions(self, context, parent=col)
 
-            #SculptOverlay(self, context, parent=col)
             #MAIN-ROW/////////////////////////////////////////////////////////////////#
             #MAIN-LEFT////////////////////////////////////////////////////////////////#
             col = main_leftrow.column(align=False)
             col.ui_units_x = 8
             VertexColor(self, context, parent=col)
-
+            ColorPalette(self, context, parent=col)
             #col.popover("VIEW3D_PT_tools_brush_display")
 
             box = main_leftrow.box()     
@@ -582,7 +582,6 @@ class XPanel(bpy.types.Panel):
             main_midrow.separator(factor = 2)
             col = main_midrow.column()
             col.ui_units_x = 8
-            col.separator(factor = 8)
             ColorPalette(self, context, parent=col)
 
             #MAIN-RIGHT/////////////////////////////////////////////////////////////////////////////////////
@@ -651,7 +650,6 @@ class XPanel(bpy.types.Panel):
             main_midrow.separator(factor = 2)
             col = main_midrow.column()
             col.ui_units_x = 8
-            col.separator(factor = 10)
             ColorPalette(self, context, parent=col)
 
             #MAIN-RIGHT/////////////////////////////////////////////////////////////////////////////////////
@@ -914,7 +912,6 @@ class XPanel(bpy.types.Panel):
         end.ui_units_y = 7.6
         end.label(text="")
         #//////////////////////////////////////////////////////////////////////////////////#
-
         redraw_regions()
 
         box = layout.box()

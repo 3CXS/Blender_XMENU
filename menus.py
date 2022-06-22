@@ -2,23 +2,9 @@ import bpy
 from bpy.types import Menu
 from .menuitems import ModeSelector, VertexGroups, ShadingMode
 
-
-class MainMenu(bpy.types.Menu):
-    bl_label = "MAIN"
-    bl_idname = "OBJECT_MT_main_menu"
-
-    def draw(self, context):
-        layout = self.layout
-        #layout.operator("wm.open_mainfile")
-        layout.operator("wm.save_as_mainfile")
-        
-        col = layout.column()
-        #ModeSelector(self, context, col)
-        #VertexGroups(self, context, parent=col)
-
-class VIEW3D_MT_PIE_modes(Menu):
-    bl_label = "MODES"
-    bl_idname = "OBJECT_MT_modes_menu"
+class ModesMenu(Menu):
+    bl_label = "MODES-MENU"
+    bl_idname = "XM_MT_modes_menu"
 
     def draw(self, context):
         layout = self.layout
@@ -31,31 +17,44 @@ class VIEW3D_MT_PIE_modes(Menu):
         row = pie.column()
         ShadingMode(self, context, row)
 
-addon_keymaps = []
-classes = (MainMenu, VIEW3D_MT_PIE_modes)
+class MainMenu(bpy.types.Menu):
+    bl_label = "MAIN-MENU"
+    bl_idname = "XM_MT_main_menu"
+
+    def draw(self, context):
+        layout = self.layout
+
+        col = layout.column()
+        col.operator("script.reload", icon='FILE_REFRESH', text="SCRIPT RELOAD")
+
+class ToolMenu(Menu):
+    bl_label = "TOOL-MENU"
+    bl_idname = "XM_MT_tool_menu"
+
+    def draw(self, context):
+        layout = self.layout
+
+        col = layout.column()
+        col.label(text='TOOLS')
+
+class SelectMenu(Menu):
+    bl_label = "SELECT-MENU"
+    bl_idname = "XM_MT_select_menu"
+
+    def draw(self, context):
+        layout = self.layout
+
+        col = layout.column()
+        col.label(text='SELECTION')
+
+classes = (MainMenu, ModesMenu, ToolMenu, SelectMenu)
 
 def register():
     for cls in classes:
         bpy.utils.register_class(cls)
     
-    wm = bpy.context.window_manager
-    kc = wm.keyconfigs.addon
-    if kc:
-        km = wm.keyconfigs.addon.keymaps.new(name='3D View', space_type='VIEW_3D')
-
-        kmi = km.keymap_items.new('wm.call_menu', 'D', 'PRESS', ctrl=False, shift=False, alt=False)
-        kmi.properties.name = MainMenu.bl_idname
-        addon_keymaps.append((km, kmi))
-
-        kmi = km.keymap_items.new('wm.call_menu_pie', 'TAB', 'PRESS', ctrl=False, shift=False, alt=False)
-        kmi.properties.name = VIEW3D_MT_PIE_modes.bl_idname
-        addon_keymaps.append((km, kmi))
-
-
 def unregister():
     for cls in classes:
         bpy.utils.unregister_class(cls)
 
-    for km, kmi in addon_keymaps:
-        km.keymap_items.remove(kmi)
-    addon_keymaps.clear()
+

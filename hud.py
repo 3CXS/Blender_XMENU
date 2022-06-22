@@ -195,18 +195,18 @@ def draw_callback_2d(self, context):
 
         if obj.type == 'MESH':
             if obj.data.uv_layers:
-                blf.position(font_id, (view_width-data_pos_x)+70*(data_size*0.05), data_pos_y-38*(data_size*0.05), 0)
+                blf.position(font_id, (view_width-data_pos_x)+100*(data_size*0.05), data_pos_y-38*(data_size*0.05), 0)
                 blf.size(font_id, data_size*0.5, 72)
                 blf.color(font_id, 1, 1, 1, 1)
                 blf.draw(font_id, "UV:")
 
-                blf.position(font_id, (view_width-data_pos_x)+70*(data_size*0.05), data_pos_y-54*(data_size*0.05), 0)
+                blf.position(font_id, (view_width-data_pos_x)+100*(data_size*0.05), data_pos_y-54*(data_size*0.05), 0)
                 blf.size(font_id, data_size*0.6, 72)
                 blf.color(font_id, 0, 0.6, 1, 1)
                 uv = uvcord()
                 blf.draw(font_id, str(uv[0]))
 
-                blf.position(font_id, (view_width-data_pos_x)+85*(data_size*0.05), data_pos_y-54*(data_size*0.05), 0)
+                blf.position(font_id, (view_width-data_pos_x)+115*(data_size*0.05), data_pos_y-54*(data_size*0.05), 0)
                 blf.size(font_id, data_size*0.6, 72)
                 blf.color(font_id, 1, 1, 1, 1)  
                 uv = uvcord()
@@ -262,14 +262,14 @@ class HUD(bpy.types.Operator):
     bpy.types.WindowManager.hud_state = bpy.props.BoolProperty(default = False)
     def execute(self, context):
         handler1 = bpy.app.driver_namespace.get('draw1')
-        if context.window_manager.hud_state == False:
-            context.window_manager.hud_state = True
+        if bpy.types.WindowManager.hud_state == False:
+            bpy.types.WindowManager.hud_state = True
             handler1 = bpy.types.SpaceView3D.draw_handler_add(
                 draw_callback_2d, (None, None), 'WINDOW', 'POST_PIXEL')
             dns = bpy.app.driver_namespace
             dns['draw1'] = handler1
         else:
-            context.window_manager.hud_state = False
+            bpy.types.WindowManager.hud_state = False
             remove_draw1()
             redraw_regions()
         return {'FINISHED'}
@@ -280,14 +280,14 @@ class PIVOT(bpy.types.Operator):
     bpy.types.WindowManager.pivot_state = bpy.props.BoolProperty(default = False)
     def execute(self, context):
         handler2 = bpy.app.driver_namespace.get('draw2')
-        if context.window_manager.pivot_state == False:
-            context.window_manager.pivot_state = True
+        if bpy.types.WindowManager.pivot_state == False:
+            bpy.types.WindowManager.pivot_state = True
             handler2 = bpy.types.SpaceView3D.draw_handler_add(
                 draw_callback_3d, (None, None), 'WINDOW', 'POST_VIEW')
             dns = bpy.app.driver_namespace
             dns['draw2'] = handler2
         else:
-            context.window_manager.pivot_state = False
+            bpy.types.WindowManager.pivot_state = False
             remove_draw2()
             redraw_regions()
         return {'FINISHED'}
@@ -296,6 +296,8 @@ class PIVOT(bpy.types.Operator):
 classes = (HUD, PIVOT)
 
 def register():
+    bpy.types.WindowManager.hud_state = False
+    bpy.types.WindowManager.pivot_state = False
     for cls in classes:
         bpy.utils.register_class(cls)
     

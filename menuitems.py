@@ -126,24 +126,19 @@ def VertexGroups(self, context, parent):
     ob = context.active_object
     group = ob.vertex_groups.active
     box = parent.box()
-    box.ui_units_x = 10
-    row = box.row()
-    col = row.column()
-    rows = 3
-    if group:
-        rows = 3
+
 
     row = box.row()
-    row.template_list("MESH_UL_vgroups", "", ob, "vertex_groups", ob.vertex_groups, "active_index", rows=rows)
+    col = row.column(align=True)
+    col.ui_units_x = 6
+    col.template_list("MESH_UL_vgroups", "", ob, "vertex_groups", ob.vertex_groups, "active_index", rows=5)
 
     col = row.column(align=True)
-
+    col.ui_units_x = 1
     col.operator("xmenu.override", icon='ADD', text="").cmd ='object.vertex_group_add'
     col.operator("xmenu.override", icon='REMOVE', text="").cmd='object.vertex_group_remove'
     col.separator()
-
-    #col.menu("MESH_MT_vertex_group_context_menu", icon='DOWNARROW_HLT', text="")
-    
+    #col.menu("MESH_MT_vertex_group_context_menu", icon='DOWNARROW_HLT', text="")   
     if group:
         col.separator()
         op = col.operator("xmenu.override1", icon='TRIA_UP', text="")
@@ -154,29 +149,32 @@ def VertexGroups(self, context, parent):
         op.cmd='object.vertex_group_move'
         op.prop1 ='direction="DOWN"'
 
-    if (
-            ob.vertex_groups and
-            (ob.mode == 'EDIT' or
-                (ob.mode == 'WEIGHT_PAINT' and ob.type == 'MESH' and ob.data.use_paint_mask_vertex))
-    ):
-        row = box.row()
-        sub = row.row(align=True)
-        sub.operator("xmenu.override", text="Assign").cmd ='object.vertex_group_assign'
-        sub.operator("xmenu.override", text="Remove").cmd ='object.vertex_group_remove_from'
+    if (ob.vertex_groups and (ob.mode == 'EDIT' or (ob.mode == 'WEIGHT_PAINT' and ob.type == 'MESH' and ob.data.use_paint_mask_vertex))):
+        col = row.column(align=True)
+        col.ui_units_x = 5
+        sub = col.row(align=True)
+        sub.operator("xmenu.override", text="ASSIGN").cmd ='object.vertex_group_assign'
+        sub.operator("xmenu.override", text="REMOVE").cmd ='object.vertex_group_remove_from'
 
-        sub = row.row(align=True)
-        sub.operator("xmenu.override", text="Select").cmd ='object.vertex_group_select'
-        sub.operator("xmenu.override", text="Deselect").cmd ='object.vertex_group_deselect'
+        sub = col.row(align=True)
+        sub.operator("xmenu.override", text="SELECT").cmd ='object.vertex_group_select'
+        sub.operator("xmenu.override", text="DESELCT").cmd ='object.vertex_group_deselect'
 
-        box.prop(context.tool_settings, "vertex_group_weight", text="Weight")
-        row = box.row()
-        sub = row.row(align=True)
-        sub.operator("xmenu.override", text="COPY").cmd ='object.vertex_group_copy'
-        sub.operator("xmenu.override", text="COPY TO").cmd ='object.vertex_group_copy_to_selected'
-        sub = row.row(align=True)
-        op = sub.operator("xmenu.override1", text="MIRROR")
-        op.cmd = 'object.vertex_group_mirror'
-        op.prop1 = 'use_topology=False'
+        col.prop(context.tool_settings, "vertex_group_weight", text="WEIGHT")
+
+    else:
+        col = row.column(align=True)
+        col.ui_units_x = 5
+        col.label(text='>')
+
+        #row = box.row()
+        #sub = row.row(align=True)
+        #sub.operator("xmenu.override", text="COPY").cmd ='object.vertex_group_copy'
+        #sub.operator("xmenu.override", text="COPY TO").cmd ='object.vertex_group_copy_to_selected'
+        #sub = row.row(align=True)
+        #op = sub.operator("xmenu.override1", text="MIRROR")
+        #op.cmd = 'object.vertex_group_mirror'
+        #op.prop1 = 'use_topology=False'
 
 
 class VIEW3D_MT_Material(bpy.types.Menu):
@@ -193,22 +191,22 @@ class VIEW3D_MT_Material(bpy.types.Menu):
         slot = context.material_slot
         space = context.space_data
 
-        box = layout.column()
-        box.ui_units_x = 8
+        box = layout.box()
 
         if ob:
             is_sortable = len(ob.material_slots) > 1
-            rows = 3
-            #if is_sortable:
-                #rows = 3
+
             row = box.row()
-            row.template_list("MATERIAL_UL_matslots", "", ob, "material_slots", ob, "active_material_index", rows=rows)
+            col = row.column(align=True)
+            col.ui_units_x = 7
+            col.template_list("MATERIAL_UL_matslots", "", ob, "material_slots", ob, "active_material_index", rows=4)
+            col.template_ID(ob, "active_material", new="material.new")
             col = row.column(align=True)
             col.ui_units_x = 1
             col.operator("xmenu.override", icon='ADD', text="").cmd='object.material_slot_add'
             col.operator("xmenu.override", icon='REMOVE', text="").cmd='object.material_slot_remove'
             col.separator()
-            col.menu("MATERIAL_MT_context_menu", icon='DOWNARROW_HLT', text="")
+            #col.menu("MATERIAL_MT_context_menu", icon='DOWNARROW_HLT', text="")
             if is_sortable:
                 col.separator()
                 op = col.operator("xmenu.override1", icon='TRIA_UP', text="")
@@ -218,42 +216,45 @@ class VIEW3D_MT_Material(bpy.types.Menu):
                 op.cmd='object.material_slot_move'
                 op.prop1 ='direction="DOWN"'
 
-            row = box.row()
             
-            row.template_ID(ob, "active_material", new="material.new")
             if slot:
                 icon_link = 'MESH_DATA' if slot.link == 'DATA' else 'OBJECT_DATA'
                 row.prop(slot, "link", icon=icon_link, icon_only=True)
             if ob.mode == 'EDIT':
-                row = box.row(align=True)
-                row.operator("xmenu.override", text="Assign").cmd='object.material_slot_assign'
-                row.operator("object.material_slot_select", text="Select")
-                row.operator("object.material_slot_deselect", text="Deselect")
+                col = row.column(align=True)
+                col.ui_units_x = 3
+                col.operator("xmenu.override", text="Assign").cmd='object.material_slot_assign'
+                col.operator("object.material_slot_select", text="Select")
+                col.operator("object.material_slot_deselect", text="Deselect")
 
         elif mat:
             row.template_ID(space, "pin_id")
 
 
 def UVTexture(self, context, parent):
-    mesh = context.active_object.data
-
+    ob = context.active_object
     box = parent.box()
     box.ui_units_x = 8
 
-    row = box.row()
-    col = row.column()
-    col.template_list("MESH_UL_uvmaps", "uvmaps", mesh, "uv_layers", mesh.uv_layers, "active_index", rows=2)
-    col = row.column(align=True)
-    col.operator("xmenu.override", icon='ADD', text="").cmd='mesh.uv_texture_add'
-    col.operator("xmenu.override", icon='REMOVE', text="").cmd='mesh.uv_texture_remove'
+    if ob != None and ob.type == 'MESH':
+        mesh = context.active_object.data
+        row = box.row()
+        col = row.column()
+        col.template_list("MESH_UL_uvmaps", "uvmaps", mesh, "uv_layers", mesh.uv_layers, "active_index", rows=2)
+        col = row.column(align=True)
+        col.operator("xmenu.override", icon='ADD', text="").cmd='mesh.uv_texture_add'
+        col.operator("xmenu.override", icon='REMOVE', text="").cmd='mesh.uv_texture_remove'
+    else:
+        sub = box.row(align=True)
+        sub.label(text=">")
 
 def VertexColor(self, context, parent):
     mesh = context.active_object.data
 
-    row = parent.row()
+    box = parent.box()
+    row = box.row()
+    row.ui_units_x = 8
     col = row.column()
-    col.ui_units_x = 8
-
     col.template_list("MESH_UL_color_attributes", "color_attributes", mesh, "color_attributes", mesh.color_attributes, "active_color_index", rows=2)
     col = row.column(align=True)
     col.operator("xmenu.override", icon='ADD', text="").cmd='geometry.color_attribute_add'
@@ -464,34 +465,41 @@ def SetPivot(self, context, parent):
 def ToolOptions(self, context, parent):
     ts = context.tool_settings   
     layout = parent
-    row = parent.row(align=True)   
-    row.ui_units_x = 8
+    row = layout.row()
+    #row.ui_units_x = 12
     if bpy.context.mode == 'OBJECT': 
-        row.prop(ts, "use_transform_data_origin", text="Origin", toggle=True)
-        row.prop(ts, "use_transform_pivot_point_align", text="Locations", toggle=True)
-        row.prop(ts, "use_transform_skip_children", text="Parents", toggle=True)
+        subrow = row.row(align=True)
+        subrow.ui_units_x = 8
+        subrow.prop(ts, "use_transform_data_origin", text="ORIG", toggle=True)
+        subrow.prop(ts, "use_transform_pivot_point_align", text="LOC", toggle=True)
+        subrow.prop(ts, "use_transform_skip_children", text="PARENT", toggle=True)
 
     elif bpy.context.mode == 'EDIT_MESH':
         row.prop(ts, "use_mesh_automerge", text="Auto Merge", toggle=True)
 
     elif bpy.context.mode == 'SCULPT':
         brush = ts.sculpt.brush
+        subrow = row.row(align=True)
+        subrow.scale_y = 1
+        sub = subrow.column(align=True)
+        sub.ui_units_x = 2
+        sub.prop(brush, "use_automasking_topology", text="TOPO", toggle=True)
+        sub = subrow.column(align=True)
+        sub.ui_units_x = 2
+        sub.prop(brush, "use_frontface", text="FRONT", toggle=True)
+        sub = subrow.column(align=True)
+        sub.ui_units_x = 2
+        sub.prop(brush, "use_automasking_boundary_edges", text="BND", toggle=True)
 
-        col = row.column(align=True)
-        col.ui_units_x = 4
-        col.scale_y = 0.7
-        col.prop(brush, "use_automasking_topology", text="Topology", toggle=True)
-        sub = col.row(align=True)
-        sub.prop(brush, "use_frontface", text="Front", toggle=True)
-        sub.prop(brush, "use_automasking_boundary_edges", text="Bound", toggle=True)
-        col = row.column(align=True)
-        col.ui_units_x = 4
-        col.scale_y = 0.7       
-        col.prop(brush, "use_automasking_face_sets", text="Face Sets", toggle=True)
-        sub = col.row(align=True)
-        split = sub.split(factor=0.4, align=True)
-        split.prop(brush, "use_automasking_boundary_face_sets", text="STP", toggle=True)
-        split.prop(brush, "automasking_boundary_edges_propagation_steps", text="",)
+        subrow = row.row(align=True)
+        sub = subrow.column(align=True)
+        sub.ui_units_x = 4
+        sub.scale_y = 0.7       
+        subsub = sub.row(align=True)
+        split = subsub.split(factor=0.6, align=True)
+        split.prop(brush, "use_automasking_face_sets", text="F-SET", toggle=True)
+        split.prop(brush, "use_automasking_boundary_face_sets", text="BND", toggle=True)
+        sub.prop(brush, "automasking_boundary_edges_propagation_steps", text="",)
 
     elif bpy.context.mode == 'PAINT_TEXTURE':
         ipaint = ts.image_paint
@@ -593,11 +601,10 @@ def SculptFilterSettings(self, context, parent):
 def SculptToolSettings(self, context, parent):
     layout = parent
     tool = context.workspace.tools.from_space_view3d_mode(bpy.context.mode).idname
-    #if tool.find('brush') != -1:
 
     col = layout.column()
     col.alignment = 'LEFT'
-    col.ui_units_x = 6
+    col.ui_units_x = 4
     col.scale_y = 0.7
 
     if tool == 'builtin.box_mask':
@@ -687,13 +694,13 @@ def SculptBrushSettings(self, context, parent):
     sculpt_tool = brush.sculpt_tool
 
     col = layout.column(align=True)
-    col.ui_units_x = 16
+    #col.ui_units_x = 15
     col.scale_y = 0.7
     #ROW1#################################################
     row = col.row()
     sub = row.row(align=True)
 
-    sub.ui_units_x = 4
+    sub.ui_units_x = 6
     if sculpt_tool == 'GRAB':
         sub.prop(brush, "use_grab_silhouette",  text='SILHOUETTE', toggle=True)
         sub.prop(brush, "use_grab_active_vertex",  text='VERTEX', toggle=True)
@@ -716,7 +723,7 @@ def SculptBrushSettings(self, context, parent):
     #sub.separator(factor=1)
 
     sub = row.row(align=True)
-    sub.ui_units_x = 4
+    sub.ui_units_x = 6
     if sculpt_tool == 'CLAY_STRIPS':
         sub.prop(brush, "tip_roundness", slider=True, text='ROUND')
     elif sculpt_tool == 'LAYER':
@@ -744,10 +751,10 @@ def SculptBrushSettings(self, context, parent):
     sub.separator(factor=1)
 
     sub = row.row(align=True)
-    sub.ui_units_x = 4
+    sub.ui_units_x = 6
     if capabilities.has_accumulate:
         subsub = sub.row(align=True)
-        subsub.scale_x = 0.5
+        subsub.label(text='')
         subsub.prop(brush, "use_accumulate", text="ACCU", toggle=True)
     elif sculpt_tool == 'PAINT':
         sub.prop(brush, "wet_persistence", slider=True, text="PERS")
@@ -825,19 +832,46 @@ def SculptRake(self, context, parent):
         col.label(text='')
 
 
-def SculptOverlay(self, context, parent):
-    ts = bpy.context.scene.tool_settings.sculpt
+def Overlay(self, context, layout):
+    ts = context.scene.tool_settings.sculpt
+    scene = context.scene
+    ob = context.active_object
 
-    col = parent.column()
+    for window in bpy.context.window_manager.windows:
+        screen = window.screen
+        for area in screen.areas:
+            if area.type == 'VIEW_3D':
+                view = area.spaces.active
+                overlay = view.overlay
+                shading = view.shading
+
+    col = layout.column(align=True)
+    col.scale_y = 0.7
     col.ui_units_x = 4
-    #col.scale_y = 0.7
+    subcol = col.column(align=True)
+    if context.mode == 'SCULPT':
+        sub = subcol.row(align=True)
+        sub.prop(ts, "show_face_sets", text="F-SETS", toggle=True)
+        sub.prop(ts, "show_mask", text="MASK", toggle=True)
+        sub = subcol.row(align=True)
+        if ob != None and ob.type == 'MESH':
+            sub.active = ob.show_wire
+            sub.prop(overlay, "wireframe_opacity", text="Wire")
+        else:
+            sub.label(text="")
 
-    sub = col.row(align=True)
-    sub.ui_units_x = 7
-    sub.prop(ts, "show_face_sets", text="FACESETS", toggle=True )
-    sub.prop(ts, "show_mask", text="MASK", toggle=True)
-    #sub = parent.row(align=True)
-    #sub.separator(factor = 0.4)
+    else:
+        sub = subcol.row(align=True)
+        funct_bt(parent=sub, cmd='grid', tog=True, w=2, h=1, label='GRID', icon="NONE")
+        funct_bt(parent=sub, cmd='axis', tog=True, w=2, h=1, label='AXIS', icon="NONE")
+        sub = subcol.row(align=True)
+        if ob != None and ob.type == 'MESH':
+            sub.active = ob.show_wire
+            sub.prop(overlay, "wireframe_opacity", text="Wire")
+        else:
+            sub.label(text="")
+
+
 
 
 
@@ -912,7 +946,7 @@ def BrushCopy(self, context, parent):
     settings = paint_settings(context)
 
     col = parent.column(align=True)     
-    col.ui_units_x = 4.4
+    col.ui_units_x = 4
     col.scale_x = 0.2
     col.scale_y = 0.2
     row= col.row()   
@@ -1013,8 +1047,9 @@ def Color(self, context, parent):
 
 def ColorPalette(self, context, parent):
     settings = paint_settings(context)
-
-    col = parent.column()
+    box = parent.box()
+    col = box.column()
+    #col.scale_y = 0.8    
     col.template_ID(settings, "palette", new="palette.new")
     if settings.palette:
         col.template_palette(settings, "palette", color=True)
@@ -1023,10 +1058,9 @@ def ViewCam(self, context, parent):
     layout = parent
 
     row = parent.row(align=True)     
-    row.ui_units_x = 4.2
-    funct_bt(parent=row, cmd='viewcam', tog=True, w=3, h=1.2, label='VIEW CAM', icon="NONE")
-    funct_bt(parent=row, cmd='lockcam', tog=True, w=1.2, h=1.2, label='', icon="LOCKED")
-    funct_bt(parent=parent, cmd='setactive', tog=False, w=2, h=0.8, label='SET ACTIVE', icon="NONE")  
+    funct_bt(parent=row, cmd='viewcam', tog=True, w=2.4, h=1, label='CAM', icon="NONE")
+    funct_bt(parent=row, cmd='lockcam', tog=True, w=1.2, h=1, label='', icon="LOCKED")
+    funct_bt(parent=row, cmd='setactive', tog=False, w=1.6, h=1, label='SET', icon="NONE")  
 
 def Stroke(self, context, parent):
     mode = context.mode
@@ -1036,9 +1070,7 @@ def Stroke(self, context, parent):
     col = parent.column()
     col.scale_y = 1 
     col.alignment = 'RIGHT'
-    #sub = col.row()
-    #sub.scale_y = 0.5
-    #sub.label(text="STROKE")
+    col.ui_units_x = 4
     col.prop(brush, "stroke_method", text="")
     if brush.use_anchor:
         col.prop(brush, "use_edge_to_edge", text="Edge to Edge")
@@ -1054,7 +1086,7 @@ def Stroke(self, context, parent):
     else:
         col.label(text="")
     col.menu("VIEW3D_MT_StrokeAdv")
-    col.separator(factor = 1)
+    #col.separator(factor = 1)
     SmoothStroke(self, context, parent=col)
 
 def SmoothStroke(self, context, parent):
@@ -1306,7 +1338,7 @@ class VIEW3D_MT_dynamesh(bpy.types.Menu):
         tool_settings = context.tool_settings
         sculpt = tool_settings.sculpt
         box = layout.box()
-        box.ui_units_x = 7
+        box.ui_units_x = 6
         col = box.column()
         col.operator(
             "sculpt.dynamic_topology_toggle",
@@ -1358,13 +1390,20 @@ class VIEW3D_MT_remesh(bpy.types.Menu):
         mesh = context.active_object.data
         
         box = layout.box()
-        box.ui_units_x = 7
+        box.ui_units_x = 6
         col = box.column(align=False)
 
         row = col.row(align=True)
         row.prop(mesh, "remesh_voxel_size", text="")
         props = row.operator("sculpt.sample_detail_size", text="", icon='EYEDROPPER')
         props.mode = 'VOXEL'
+
+        sub = col.row(align=True)
+        sub.scale_y = 0.8
+        sub.operator('xmenu.voxelsize', text='S').size=0.01
+        sub.operator('xmenu.voxelsize', text='M').size=0.02
+        sub.operator('xmenu.voxelsize', text='L').size=0.05
+
         sub0 = col.row()
         sub0.scale_y = 0.8
         sub0_col1 = sub0.column()
@@ -1376,7 +1415,7 @@ class VIEW3D_MT_remesh(bpy.types.Menu):
         sub1 = col.row()
         sub1.scale_y = 0.8
 
-        sub0_col2.prop(mesh, "use_remesh_fix_poles", toggle=True)
+        #sub0_col2.prop(mesh, "use_remesh_fix_poles", toggle=True)
 
         sub2 = col.row(align=False)
         sub2.scale_y = 0.8

@@ -13,7 +13,7 @@ from bpy.types import Operator, AddonPreferences
 from .icons.icons import load_icons
 from.toolsets import Toolset
 from mathutils import Vector, Matrix
-from .brushtexture import get_brush_mode
+from .brushtexture import get_brush_mode ,mute_ramp
 
 #////////////////////////////////////////////////////////////////////////////////////////////#
 # Construct context
@@ -151,7 +151,7 @@ class SetTool(bpy.types.Operator):
                 context.tool_settings.weight_paint.brush = bpy.data.brushes[Brush]
             if mode == 'PAINT_GPENCIL':
                 context.tool_settings.gpencil_paint.brush = bpy.data.brushes[Brush]
-       
+
         return {'FINISHED'}
 
 def update_toolset(): 
@@ -178,6 +178,8 @@ def update_toolset():
     for i in range(NTools):
         if Tools[i][2] == '' and toolid == Tools[i][1]:
             bpy.types.WindowManager.tool_state[i] = True
+            #brushname.xm_use_mask != brushname.xm_use_mask
+            #mute_ramp(self,context)
 
         elif Tools[i][2] != '' and brushname == bpy.data.brushes[Tools[i][2]]:
             bpy.types.WindowManager.tool_state[i] = True
@@ -225,9 +227,26 @@ class Detailsize(bpy.types.Operator):
     size: bpy.props.FloatProperty()
 
     def execute(self, context):
+
         context.scene.tool_settings.sculpt.detail_size = self.size
 
         return {'FINISHED'}
+
+class Voxelsize(bpy.types.Operator):
+    bl_idname = "xmenu.voxelsize"
+    bl_label = ""
+
+    size: bpy.props.FloatProperty()
+
+    def execute(self, context):
+        mesh = context.active_object.data
+        mesh.remesh_voxel_size = self.size
+        return {'FINISHED'}
+
+def initvoxelsize(self, context):
+    mesh = context.active_object.data
+    mesh.remesh_voxel_size = 0.02
+    return {'FINISHED'}
 
 
 class Wire(bpy.types.Operator):
@@ -271,6 +290,53 @@ class FaceOrient(bpy.types.Operator):
                     space.overlay.show_face_orientation = not space.overlay.show_face_orientation
                     bpy.types.WindowManager.faceorient_state = space.overlay.show_face_orientation
         return {'FINISHED'}
+
+class Grid(bpy.types.Operator):
+    bl_idname = "xmenu.grid"
+    bl_label = "GRID"
+   
+    bpy.types.WindowManager.grid_state = bpy.props.BoolProperty(default = False)        
+    def execute(self, context):
+        for window in bpy.context.window_manager.windows:
+            screen = window.screen
+            for area in screen.areas:
+                if area.type == 'VIEW_3D':
+                    view = area.spaces.active
+                    overlay = view.overlay
+                    if overlay.show_floor == False:
+                        overlay.show_floor = True
+                        overlay.show_ortho_grid = True
+                    else:
+                        overlay.show_floor = False
+                        overlay.show_ortho_grid = False
+                    bpy.types.WindowManager.grid_state = overlay.show_floor
+                    break
+        return {'FINISHED'}
+
+class Axis(bpy.types.Operator):
+    bl_idname = "xmenu.axis"
+    bl_label = "AXIS"
+   
+    bpy.types.WindowManager.axis_state = bpy.props.BoolProperty(default = False)        
+    def execute(self, context):
+        for window in bpy.context.window_manager.windows:
+            screen = window.screen
+            for area in screen.areas:
+                if area.type == 'VIEW_3D':
+                    view = area.spaces.active
+                    overlay = view.overlay
+                    if overlay.show_axis_x == False:
+                        overlay.show_axis_x = True
+                        overlay.show_axis_y = True
+                        overlay.show_axis_z = False
+                    else:
+                        overlay.show_axis_x = False
+                        overlay.show_axis_y = False
+                        overlay.show_axis_z = False
+                    bpy.types.WindowManager.axis_state = overlay.show_axis_x
+                    break
+        return {'FINISHED'}
+
 
 class Persp(bpy.types.Operator):
     bl_idname = "xmenu.persp"
@@ -605,13 +671,14 @@ class SurfaceDrawMode(bpy.types.Operator):
 
 #////////////////////////////////////////////////////////////////////////////////////////////#
 
-classes = (XRay, ViewCam, FrameS, FrameA, LocalView, MaxArea, Persp, LockCam, SetTool, Wire, SetActive, Detailsize, Mask, SurfaceDrawMode, FaceOrient, Override, Override1, Override2)
+classes = (XRay, ViewCam, Grid, Axis, FrameS, FrameA, LocalView, MaxArea, Persp, LockCam, SetTool, Wire, SetActive, Detailsize, Voxelsize, Mask, SurfaceDrawMode, FaceOrient, Override, Override1, Override2)
 
 def register():
     for cls in classes:
         bpy.utils.register_class(cls)
-    bpy.types.WindowManager.localview_state=False
-    bpy.types.WindowManager.maxarea_state =False
+    bpy.types.WindowManager.localview_state = False
+    bpy.types.WindowManager.maxarea_state = False
+    bpy.types.WindowManager.grid_state = True
 
 def unregister():
     for cls in classes:

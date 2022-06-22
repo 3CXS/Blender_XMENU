@@ -2,10 +2,9 @@ import bpy
 
 from bpy.types import Operator, AddonPreferences, Preferences, Header, Panel, Menu
 from bl_ui.space_toolsystem_common import (ToolSelectPanelHelper, ToolDef)
- 
 from .hud import redraw_regions
 from .functions import tool_grid, tool_bt, funct_bt, paint_settings
-from .menuitems import BrushCopy, ModeSelector
+from .menuitems import BrushCopy, ModeSelector, Overlay
 
 #////////////////////////////////////////////////////////////////////////////////////////////#
 
@@ -21,6 +20,7 @@ def draw(self, context):
     ptr = ups if ups.use_unified_color else ts.image_paint.brush
     tool_mode = context.mode
     ob = context.active_object
+    overlay = view.overlay
 
     for region in bpy.context.area.regions:
         if region.type == 'WINDOW':
@@ -169,14 +169,17 @@ def draw(self, context):
     sub = right.row(align =True)  
     subsub = sub.column(align =True)
     subsub.ui_units_x = 1.6
-    #funct_bt(parent=sub, cmd='wire', tog=True, w=2, h=1, label='WIRE', icon="NONE")
 
     if ob != None and ob.type == 'MESH':
-        subsub.prop(ob, "show_wire", text="", icon="MOD_WIREFRAME", toggle=True)
+        if context.mode == 'EDIT_MESH':
+            subsub.prop(overlay, "show_occlude_wire", text="", icon="MOD_WIREFRAME", toggle=True)
+        else:
+            subsub.prop(ob, "show_wire", text="", icon="MOD_WIREFRAME", toggle=True)
     else:
         subsub.label(text='')
-    funct_bt(parent=sub, cmd='xray', tog=True, w=1.6, h=1, label='', icon="XRAY")
+    #funct_bt(parent=sub, cmd='wire', tog=True, w=2, h=1, label='WIRE', icon="NONE")#global wireframe
     funct_bt(parent=sub, cmd='faceorient', tog=True, w=1.6, h=1, label='', icon="NORMALS_FACE")
+    funct_bt(parent=sub, cmd='xray', tog=True, w=1.6, h=1, label='', icon="XRAY")
 
     sub.separator(factor = 4)
     subsub = sub.row(align=True)
@@ -188,8 +191,12 @@ def draw(self, context):
     funct_bt(parent=subsub, cmd='floater_06', tog=True, w=2, h=1, label='', icon="IMAGE")
     funct_bt(parent=subsub, cmd='floater_07', tog=True, w=2, h=1, label='', icon="NODETREE")
     funct_bt(parent=subsub, cmd='floater_08', tog=True, w=2, h=1, label='', icon="VIEW_CAMERA")
+    subsub.separator(factor = 2)
 
     #subsub.menu("VIEW3D_MT_Material")
+
+    redraw_regions()
+
 #////////////////////////////////////////////////////////////////////////////////////////////#
  
 
@@ -291,6 +298,8 @@ def gp_select_hud(parent, self, context):
         sub.template_icon(icon_value=icon_id)
         props = tool.operator_properties("gpencil.select_lasso")
         sub.prop(props, "mode", text="", expand=True, icon_only=True)
+
+
 #////////////////////////////////////////////////////////////////////////////////////////////#
 
 def register() :

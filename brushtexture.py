@@ -24,18 +24,19 @@ def get_tex_path(self, context):
     return user_texture_path
 
 def get_brush_mode(self, context):
-    mode = context.active_object.mode
-    if mode == 'TEXTURE_PAINT':
-        brush = context.tool_settings.image_paint.brush
-    if mode == 'SCULPT':
-        brush = context.tool_settings.sculpt.brush
-    if mode == 'VERTEX_PAINT':
-        brush = context.tool_settings.vertex_paint.brush
-    if mode == 'WEIGHT_PAINT':
-        brush = context.tool_settings.weight_paint.brush
-    if mode == 'PAINT_GPENCIL':
-        brush = context.tool_settings.gpencil_paint.brush
-    return brush
+    if context.active_object != None:
+        mode = context.active_object.mode
+        if mode == 'TEXTURE_PAINT':
+            brush = context.tool_settings.image_paint.brush
+        if mode == 'SCULPT':
+            brush = context.tool_settings.sculpt.brush
+        if mode == 'VERTEX_PAINT':
+            brush = context.tool_settings.vertex_paint.brush
+        if mode == 'WEIGHT_PAINT':
+            brush = context.tool_settings.weight_paint.brush
+        if mode == 'PAINT_GPENCIL':
+            brush = context.tool_settings.gpencil_paint.brush
+        return brush
 
 def get_tex_previews(self, context,tex_type="BRUSH"):  
     misc_icons = preview_collections["xm_misc_icons"]
@@ -181,6 +182,7 @@ def setup_brush_tex(img_path,tex_type="BRUSH"):
         else:
             brush_tex = bpy.data.textures["xm_brush_tex"]
         brush_tex.xm_invert_mask = brush_tex.xm_invert_mask
+
     elif tex_type == "STENCIL":
         if "xm_stencil_img" not in bpy.data.images:
             brush_img = bpy.data.images.new("xm_stencil_img",1024,1024)
@@ -272,7 +274,6 @@ def _tonemap(self,context,tex_type="BRUSH"):
             bpy.data.textures["xm_brush_tex"].color_ramp.elements[1].position = context.tool_settings.image_paint.brush.xm_stencil_ramp_tonemap_r
 
 
-
 def _mute_ramp(self,context):
     brush = get_brush_mode(self, context)
     if "xm_brush_tex" in bpy.data.textures:
@@ -281,7 +282,7 @@ def _mute_ramp(self,context):
         else:
             bpy.data.textures["xm_brush_tex"].use_color_ramp = False
 
-    if brush != None:    
+    if brush != None:
         brush.xm_brush_texture = brush.xm_brush_texture
 
 
@@ -439,7 +440,7 @@ def refresh_stencil_category(self,context):
             context.tool_settings.image_paint.brush.mask_texture = None            
     bpy.ops.xm.refresh_previews()
 
-#/////////////////////////////////////////////////////////////////////#
+ 
 #/////////////////////////////////////////////////////////////////////#
 class XM_OT_RefreshPreviews(bpy.types.Operator):
     bl_idname = "xm.refresh_previews"
@@ -452,7 +453,7 @@ class XM_OT_RefreshPreviews(bpy.types.Operator):
         return True
 
     def execute(self, context):
-        #refresh_previews()
+        refresh_previews()
         context.window_manager.xm_brush_textures_loaded = False
         context.window_manager.xm_stencil_textures_loaded = False
         return {"FINISHED"}
@@ -483,7 +484,6 @@ def register():
     bpy.types.Brush.xm_ramp_tonemap_r = FloatProperty(default=1.0,min=0.0,max=1.0,update=tonemap)
     bpy.types.Brush.xm_stencil_ramp_tonemap_l = FloatProperty(default=0.0,min=0.0,max=1.0,update=tonemap_stencil)
     bpy.types.Brush.xm_stencil_ramp_tonemap_r = FloatProperty(default=1.0,min=0.0,max=1.0,update=tonemap_stencil)
-
 
     bpy.utils.register_class(XM_OT_RefreshPreviews)
    
