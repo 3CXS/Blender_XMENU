@@ -3,52 +3,7 @@ import bpy
 from bpy.props import StringProperty, IntProperty, BoolProperty, EnumProperty
 
 import rna_keymap_ui
-keymaps_items_dict = {
-                      "ModesMenu":['wm.call_menu_pie', 'XM_MT_modes_menu', '3D View '
-                                      'Generic', 'VIEW_3D', 'WINDOW',
-                                      'TAB', 'PRESS', False, False, False
-                                      ],
-                      "MainMenu":['wm.call_menu', 'XM_MT_main_menu', '3D View '
-                                      'Generic', 'VIEW_3D', 'WINDOW',
-                                      'D', 'PRESS', False, False, False
-                                      ],
-                      "ToolMenu":['wm.call_menu', 'XM_MT_tool_menu', '3D View '
-                                      'Generic', 'VIEW_3D', 'WINDOW',
-                                      'SPACE', 'PRESS', False, False, False
-                                      ],
-                      "SelectMenu":['wm.call_menu', 'XM_MT_select_menu', '3D View '
-                                      'Generic', 'VIEW_3D', 'WINDOW',
-                                      'A', 'PRESS', False, False, False
-                                      ],
-                      "Floater01":['xmenu.floater_01', None, 'Window'
-                                      '', 'EMPTY', 'WINDOW',
-                                      'FOUR', 'PRESS', False, False, False
-                                      ],
-                      "Floater02":['xmenu.floater_02', None, 'Window'
-                                      '', 'EMPTY', 'WINDOW',
-                                      'FIVE', 'PRESS', False, False, False
-                                      ],
-                      "Floater03":['xmenu.floater_03', None, 'Window'
-                                      '', 'EMPTY', 'WINDOW',
-                                      'SIX', 'PRESS', False, False, False
-                                      ],
-                      "Floater04":['xmenu.floater_04', None, 'Window'
-                                      '', 'EMPTY', 'WINDOW',
-                                      'SEVEN', 'PRESS', False, False, False
-                                      ],
-                      "Floater05":['xmenu.floater_05', None, 'Window'
-                                      '', 'EMPTY', 'WINDOW',
-                                      'EIGHT', 'PRESS', False, False, False
-                                      ],
-                      "Floater06":['xmenu.floater_06', None, 'Window'
-                                      '', 'EMPTY', 'WINDOW',
-                                      'NINE', 'PRESS', False, False, False
-                                      ],
-                      "Floater07":['xmenu.floater_07', None, 'Window'
-                                      '', 'EMPTY', 'WINDOW',
-                                      'ZERO', 'PRESS', False, False, False
-                                      ],
-                     }
+
 
 #////////////////////////////////////////////////////////////////////////////////////////////#
 #////////////////////////////////////////////////////////////////////////////////////////////#
@@ -137,7 +92,7 @@ class XPrefs(bpy.types.AddonPreferences):
     floaters : bpy.props.EnumProperty(default="01",items=[("01","Outliner",""),("02","Properties",""),("03","Modifiers",""),("04","Shader",""),("05","UV",""),("06","Image",""),("07","GeoNode",""),("08","Cam","")])
 
     hud_items : bpy.props.EnumProperty(default="01",items=[("01","MODE",""),("02","TOOL",""),("03","DATA","")])
-    prefs_tabs : EnumProperty(default='info', items=[('info', "Info", "INFO"),('options', "Options", "OPTIONS"),('floaters', "Floaters", "FLOATERS"),('keymap', "Keymap", "KEYMAP")])
+    prefs_tabs : EnumProperty(default='info', items=[('info', "Info", "INFO"),('options', "Options", "OPTIONS"),('floaters', "Floaters", "FLOATERS")])
 
     #///////////////////////////MENU/////////////////////////////////#
 
@@ -218,128 +173,17 @@ class XPrefs(bpy.types.AddonPreferences):
             propcol.prop(self,f"floater_{istr}_alpha",)
             propcol.separator()
 
-        if self.prefs_tabs == 'keymap':
-            col = layout.column()
-            col.label(text="KEYMAP:")
-
-            sub = col.column()
-            draw_keymap_items(wm, sub)
-
 
 #////////////////////////////////////////////////////////////////////////////////////////////#
-#////////////////////////////////////////////////////////////////////////////////////////////#
-
-addon_keymaps = []
-
-def draw_keymap_items(wm, layout):
-    kc = wm.keyconfigs.user
-
-    for name, items in keymaps_items_dict.items():
-        kmi_name, kmi_value, km_name = items[:3]
-        box = layout.box()
-        split = box.split()
-        col = split.column()
-        col.label(text=name)
-        col.separator()
-        km = kc.keymaps[km_name]
-        get_hotkey_entry_item(kc, km, kmi_name, kmi_value, col)
-
-
-def get_hotkey_entry_item(kc, km, kmi_name, kmi_value, col):
-
-    # for menus and pie_menu
-    if kmi_value:
-        for km_item in km.keymap_items:
-            if km_item.idname == kmi_name and km_item.properties.name == kmi_value:
-                col.context_pointer_set('keymap', km)
-                rna_keymap_ui.draw_kmi([], kc, km, km_item, col, 0)
-                return
-
-        col.label(text = "No hotkey entry found for {}".format(kmi_value))
-        col.operator(AddHotkey.bl_idname, icon='NONE')
-
-    # for operators
-    else:
-        if km.keymap_items.get(kmi_name):
-            col.context_pointer_set('keymap', km)
-            rna_keymap_ui.draw_kmi(
-                    [], kc, km, km.keymap_items[kmi_name], col, 0)
-        else:
-            col.label(text = "No hotkey entry found for {}".format(kmi_name))
-            col.operator(AddHotkey.bl_idname, icon='NONE')
-
-
-class AddHotkey(bpy.types.Operator):
-    bl_idname = "xm.add_hotkey"
-    bl_label = "Add Hotkeys"
-    bl_options = {'REGISTER', 'INTERNAL'}
-
-    def execute(self, context):
-        add_hotkey()
-
-        self.report({'INFO'},
-                    "Hotkey added in User Preferences -> Input -> Screen -> Screen (Global)")
-        return {'FINISHED'}
-
-def add_hotkey():
-    wm = bpy.context.window_manager
-    kc = wm.keyconfigs.addon
-
-    if not kc:
-        return
-
-    for items in keymaps_items_dict.values():
-        kmi_name, kmi_value, km_name, space_type, region_type = items[:5]
-        eventType, eventValue, ctrl, shift, alt = items[5:]
-        km = kc.keymaps.new(name = km_name, space_type = space_type,
-                            region_type=region_type)
-
-        kmi = km.keymap_items.new(kmi_name, eventType,
-                                  eventValue, ctrl = ctrl, shift = shift,
-                                  alt = alt
-
-                                  )
-        if kmi_value:
-            kmi.properties.name = kmi_value
-
-        kmi.active = True
-
-    addon_keymaps.append((km, kmi))
-
-
-def remove_hotkey():
-    kmi_values = [item[1] for item in keymaps_items_dict.values() if item]
-    kmi_names = [item[0] for item in keymaps_items_dict.values() if item not in ['wm.call_menu', 'wm.call_menu_pie']]
-
-    for km, kmi in addon_keymaps:
-        # remove addon keymap for menu and pie menu
-        if hasattr(kmi.properties, 'name'):
-            if kmi_values:
-                if kmi.properties.name in kmi_values:
-                    km.keymap_items.remove(kmi)
-
-        # remove addon_keymap for operators
-        else:
-            if kmi_names:
-                if kmi.name in kmi_names:
-                    km.keymap_items.remove(kmi)
-
-    addon_keymaps.clear()
-
 
 #////////////////////////////////////////////////////////////////////////////////////////////#
-#////////////////////////////////////////////////////////////////////////////////////////////#
-classes = (XPrefs, AddHotkey)
 
 
 def register() :
-    for cls in classes:
-        bpy.utils.register_class(cls)
-    add_hotkey()
+    bpy.utils.register_class(XPrefs)
 
 
 def unregister() :
-    for cls in classes:
-        bpy.utils.unregister_class(cls)
-    remove_hotkey()
+    bpy.utils.unregister_class(XPrefs)
+
 
