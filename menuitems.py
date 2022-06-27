@@ -8,25 +8,33 @@ from bpy.props import StringProperty, IntProperty, BoolProperty
 from bl_ui.space_toolsystem_common import (ToolSelectPanelHelper,ToolDef)
 from bpy.app.translations import contexts as i18n_contexts
 
-from bpy.types import Menu, Panel, UIList
+from bpy.types import Menu, Panel, UIList, AddonPreferences
 from rna_prop_ui import PropertyPanel
 from collections import defaultdict
 
+def HeaderInset(self, context):
+
+    inset = bpy.context.preferences.addons[__package__].preferences.header_inset
+
+    ob = context.active_object
+    row = self.layout.row(align=True)
+    row.ui_units_x = inset
+    row.label(text=' ')
 
 def SaveScene(self, context, parent):
-        layout = parent
-        box = layout.box()
+    layout = parent
+    box = layout.box()
 
-        col = box.column(align=True)
-        col.ui_units_x = 4
-        col.operator("wm.save_as_mainfile", text="SAVE AS")
-        col.separator()
-        col.operator("wm.open_mainfile", text="OPEN")
-        col.menu("TOPBAR_MT_file_open_recent", text="RECENT")
-        col.separator()
-        sub = col.row(align=True)
-        sub.operator("wm.link", icon='LINK_BLEND', text="LINK")
-        sub.operator("wm.append", icon='APPEND_BLEND', text="APND")
+    col = box.column(align=True)
+    col.ui_units_x = 4
+    col.operator("wm.save_as_mainfile", text="SAVE AS")
+    col.separator()
+    col.operator("wm.open_mainfile", text="OPEN")
+    col.menu("TOPBAR_MT_file_open_recent", text="RECENT")
+    col.separator()
+    sub = col.row(align=True)
+    sub.operator("wm.link", icon='LINK_BLEND', text="LINK")
+    sub.operator("wm.append", icon='APPEND_BLEND', text="APND")
 
 class VIEW3D_MT_Import(bpy.types.Menu):
     bl_label = "Import"
@@ -91,6 +99,40 @@ class VIEW3D_MT_Import(bpy.types.Menu):
             op.axis_forward = 'Y'
             op.axis_up = 'Z'
 
+
+def HideObject(self, context, parent):
+        ob = context.active_object
+
+        row = parent.row(align=True)
+        row.ui_units_x = 3
+
+        if ob != None:
+            if ob.hide_viewport == True:
+                state = True
+                label = 'UNHIDE'
+            else:
+                state = False
+                label = 'HIDE'
+            row.operator("xmenu.hide", text=label)
+        else: 
+            row.label(text='')
+
+def HideObjectMenuBt(self, context):
+        ob = context.active_object
+
+        row = self.layout.row(align=True)
+        row.ui_units_x = 2.4
+
+        if ob != None:
+            if ob.hide_viewport == True:
+                state = True
+                label = 'UNHIDE'
+            else:
+                state = False
+                label = 'HIDE'
+            row.operator("xmenu.hide", text=label)
+        else: 
+            row.label(text='')
 
 def History(self, context, parent):
         layout = parent
@@ -263,29 +305,52 @@ def VertexColor(self, context, parent):
 def Normals(self, context, parent):
     layout = parent
     layout.use_property_split = False
+    scene = context.scene
     ob = context.active_object
+
     col = layout.column(align=False)
     row = col.row(align=True)
 
     if ob != None and ob.type == 'MESH':
         mesh = context.active_object.data
         sub = row.row(align=True)
-        sub.ui_units_x = 4
-        sub.operator("object.shade_flat", text="FLAT")
-        sub.operator("object.shade_smooth", text="SMTH")
-        sub.separator()
-
+        sub.ui_units_x = 2
+        sub.operator("xmenu.normalshading", text="SMTH", depress=updatenormaldisp(self, context))
+        #sub.separator()
         sub = row.row(align=True)
-        sub.ui_units_x = 1
-        sub.prop(mesh, "use_auto_smooth", text="")
+        sub.ui_units_x = 2
+        sub.active = updatenormaldisp(self, context)
+        sub.prop(mesh, "use_auto_smooth", text="ANGL", toggle=True)
         sub = row.row(align=True)
         sub.ui_units_x = 4
         sub.active = mesh.use_auto_smooth and not mesh.has_custom_normals
         sub.prop(mesh, "auto_smooth_angle", text="")
-        #row.prop_decorator(mesh, "auto_smooth_angle")
     else:
         sub = row.row(align=True)
         sub.label(text=">")
+
+def updatenormaldisp(self, context):
+    ob = context.active_object
+    polygons = ob.data.polygons
+    state = ob.data.polygons[0].use_smooth
+    return state
+
+class NormalShading(bpy.types.Operator):
+    bl_idname = "xmenu.normalshading"
+    bl_label = "NORMALS"
+      
+    def execute(self, context):
+        ob = context.active_object
+        polygons = ob.data.polygons
+        for window in bpy.context.window_manager.windows:
+            screen = window.screen
+            for area in screen.areas:
+                if area.type == 'VIEW_3D':
+                    for polygons in ob.data.polygons:
+                        polygons.use_smooth  = not polygons.use_smooth
+        return {'FINISHED'}
+
+
 
 def GPLayers(self, context, parent):
     if context.active_object.type == "GPENCIL":
@@ -395,7 +460,7 @@ def ModeSelector(self, context, parent):
             sub.label(text="NONE")
     else:
         sub = row.row(align=True)
-        sub.label(text="NONE")
+        sub.label(text="<<")
 
 def Transforms(self, context, parent):
     layout = parent
@@ -1537,14 +1602,23 @@ def brush_texture_settings(layout, brush, sculpt):
     sub.prop(tex_slot, 'scale', text='')
     '''
 
-classes = (VIEW3D_MT_Material, VIEW3D_MT_Import, VIEW3D_MT_dynamesh, VIEW3D_MT_remesh, VIEW3D_MT_sculpt_sym, VIEW3D_MT_sym, VIEW3D_MT_BrushTexture, VIEW3D_MT_TextureMask, VIEW3D_MT_StrokeAdv, VIEW3D_MT_Falloff)
+classes = (VIEW3D_MT_Material, NormalShading, VIEW3D_MT_Import, VIEW3D_MT_dynamesh, VIEW3D_MT_remesh, VIEW3D_MT_sculpt_sym, VIEW3D_MT_sym, VIEW3D_MT_BrushTexture, VIEW3D_MT_TextureMask, VIEW3D_MT_StrokeAdv, VIEW3D_MT_Falloff)
 
 def register():
     bpy.types.Scene.import_items = bpy.props.EnumProperty(default="01",items=[("01","IMPORT",""),("02","EXPORT","")])
+    bpy.types.WindowManager.normalshading_state = bpy.props.BoolProperty(default = False)
 
     for cls in classes:
         bpy.utils.register_class(cls)
-    
+
+    bpy.types.VIEW3D_HT_header.prepend(HeaderInset)
+    bpy.types.VIEW3D_HT_header.append(HeaderInset)
+    bpy.types.OUTLINER_HT_header.prepend(HideObjectMenuBt) 
+
 def unregister():
+
+    bpy.types.OUTLINER_HT_header.remove(HideObjectMenuBt)
+    bpy.types.OUTLINER_HT_header.remove(HeaderInset)
+
     for cls in classes:
         bpy.utils.unregister_class(cls)

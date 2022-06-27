@@ -71,7 +71,7 @@ Tools_Edit = [
                 ('BUILD',               'builtin.poly_build',               '',             'ops.mesh.polybuild_hover',         ''),
                 ('SPIN',                'builtin.spin',                     '',             'ops.mesh.spin',                    ''),
                 ('SPIN DUB',            'builtin.spin_dublicates',          '',             'ops.mesh.spin.duplicate',          ''),
-                ('SMOOTH',              'builtin.smooth',                   '',             'ops.mesh.vertices_smooth',         ''),
+                ('SMTH',                'builtin.smooth',                   '',             'ops.mesh.vertices_smooth',         ''),
                 ('RAND',                'builtin.randomize',                '',             'ops.transform.vertex_random',      ''),
                 ('SLIDE E',             'builtin.edge_slide',               '',             'ops.transform.edge_slide',         ''),
                 ('SLIDE V',             'builtin.vertex_slide',             '',             'ops.transform.vert_slide',         ''),

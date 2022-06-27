@@ -249,6 +249,25 @@ def initvoxelsize(self, context):
     return {'FINISHED'}
 
 
+class Hide(bpy.types.Operator):
+    bl_idname = "xmenu.hide"
+    bl_label = "TogHide"
+
+    def execute(self, context):
+
+        ob = context.active_object
+
+        if ob.hide_render == True:
+            ob.hide_viewport = False
+            ob.hide_render = False 
+            ob.hide_set(False)  
+        else:
+            ob.hide_viewport = True
+            ob.hide_render = True
+            ob.hide_set(True)
+
+        return {'FINISHED'}
+
 class Wire(bpy.types.Operator):
     bl_idname = "xmenu.wire"
     bl_label = "Wireframe"
@@ -262,6 +281,7 @@ class Wire(bpy.types.Operator):
                     space.overlay.show_wireframes = not space.overlay.show_wireframes
                     bpy.types.WindowManager.wire_state = space.overlay.show_wireframes
         return {'FINISHED'}
+
 
 class XRay(bpy.types.Operator):
     bl_idname = "xmenu.xray"
@@ -279,7 +299,7 @@ class XRay(bpy.types.Operator):
 
 class FaceOrient(bpy.types.Operator):
     bl_idname = "xmenu.faceorient"
-    bl_label = "Wireframe"
+    bl_label = "FaceOrient"
 
     bpy.types.WindowManager.faceorient_state = bpy.props.BoolProperty(default = False)   
 
@@ -564,7 +584,7 @@ class Override2(bpy.types.Operator):
 
         prop1 = self.prop1
         keyword1 = prop1.split('=')
-        prop2 = self.prop1
+        prop2 = self.prop2
         keyword2 = prop2.split('=')
         op = 'bpy.ops.'
         op += self.cmd
@@ -671,7 +691,9 @@ class SurfaceDrawMode(bpy.types.Operator):
 
 #////////////////////////////////////////////////////////////////////////////////////////////#
 
-classes = (XRay, ViewCam, Grid, Axis, FrameS, FrameA, LocalView, MaxArea, Persp, LockCam, SetTool, Wire, SetActive, Detailsize, Voxelsize, Mask, SurfaceDrawMode, FaceOrient, Override, Override1, Override2)
+classes = (XRay, ViewCam, Grid, Axis, FrameS, FrameA, LocalView, MaxArea, Persp, LockCam, SetTool, Wire, Hide, 
+            SetActive, Detailsize, Voxelsize, Mask, SurfaceDrawMode, FaceOrient, Override, Override1, Override2
+            )
 
 def register():
     for cls in classes:

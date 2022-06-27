@@ -162,12 +162,12 @@ def draw_callback_2d(self, context):
     toolname = activetool()
     blf.draw(font_id, toolname)
 
-    blf.position(font_id, view_width - data_pos_x, data_pos_y, 0)
+    blf.position(font_id, data_pos_x, data_pos_y, 0)
     blf.size(font_id, data_size*0.6, 72)
     blf.color(font_id, 1, 1, 1, 1)
     blf.draw(font_id, 'POLYCOUNT')
 
-    blf.position(font_id, view_width - data_pos_x, data_pos_y-22*(data_size*0.05), 0)
+    blf.position(font_id, data_pos_x, data_pos_y-22*(data_size*0.05), 0)
     blf.size(font_id, data_size, 72)
     blf.color(font_id, 0, 0.7, 1, 1)
     count = polycount()
@@ -175,19 +175,19 @@ def draw_callback_2d(self, context):
 
     if obj.type in ['MESH', 'CURVE', 'FONT']:
         if obj.material_slots:
-            blf.position(font_id, view_width-data_pos_x, data_pos_y-38*(data_size*0.05), 0)
+            blf.position(font_id, data_pos_x, data_pos_y-38*(data_size*0.05), 0)
             blf.size(font_id, data_size*0.5, 72)
             blf.color(font_id, 1, 1, 1, 1)
             blf.draw(font_id, "MAT:")
 
             if obj.active_material:
-                blf.position(font_id, view_width-data_pos_x, data_pos_y-54*(data_size*0.05), 0)
+                blf.position(font_id, data_pos_x, data_pos_y-54*(data_size*0.05), 0)
                 blf.size(font_id, data_size*0.6, 72)
                 blf.color(font_id, 0, 0.6, 1, 1)
                 mat = material()
                 blf.draw(font_id, str(mat[0]))
 
-                blf.position(font_id, (view_width-data_pos_x)+15*(data_size*0.05), data_pos_y-54*(data_size*0.05), 0)
+                blf.position(font_id, (data_pos_x)+15*(data_size*0.05), data_pos_y-54*(data_size*0.05), 0)
                 blf.size(font_id, data_size*0.6, 72)
                 blf.color(font_id, 1, 1, 1, 1)  
                 mat = material()
@@ -195,18 +195,18 @@ def draw_callback_2d(self, context):
 
         if obj.type == 'MESH':
             if obj.data.uv_layers:
-                blf.position(font_id, (view_width-data_pos_x)+100*(data_size*0.05), data_pos_y-38*(data_size*0.05), 0)
+                blf.position(font_id, (data_pos_x)+100*(data_size*0.05), data_pos_y-38*(data_size*0.05), 0)
                 blf.size(font_id, data_size*0.5, 72)
                 blf.color(font_id, 1, 1, 1, 1)
                 blf.draw(font_id, "UV:")
 
-                blf.position(font_id, (view_width-data_pos_x)+100*(data_size*0.05), data_pos_y-54*(data_size*0.05), 0)
+                blf.position(font_id, (data_pos_x)+100*(data_size*0.05), data_pos_y-54*(data_size*0.05), 0)
                 blf.size(font_id, data_size*0.6, 72)
                 blf.color(font_id, 0, 0.6, 1, 1)
                 uv = uvcord()
                 blf.draw(font_id, str(uv[0]))
 
-                blf.position(font_id, (view_width-data_pos_x)+115*(data_size*0.05), data_pos_y-54*(data_size*0.05), 0)
+                blf.position(font_id, (data_pos_x)+115*(data_size*0.05), data_pos_y-54*(data_size*0.05), 0)
                 blf.size(font_id, data_size*0.6, 72)
                 blf.color(font_id, 1, 1, 1, 1)  
                 uv = uvcord()

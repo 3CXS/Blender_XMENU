@@ -21,7 +21,8 @@ class XPanel(bpy.types.Panel):
     bl_options = {'DEFAULT_CLOSED',}
 
     def draw(self, context):
-        
+        ob = context.active_object
+
         layout = self.layout
 
         #LAYOUT-STRUCTURE/////////////////////////////////////////
@@ -113,6 +114,8 @@ class XPanel(bpy.types.Panel):
             #TOP-ROW//////////////////////////////////////////////////////////////////#
             #TOP-LEFT/////////////////////////////////////////////////////////////////#
             row = top_left.row()
+            HideObject(self, context, parent=row)
+            row.separator()
             Normals(self, context, parent=row)
 
             #row.operator('object.hide_view_set', text='HIDE').unselected=False
@@ -269,7 +272,7 @@ class XPanel(bpy.types.Panel):
 
             # MID 2 //////////////////////////////////////////////////////////////////#
             col = main_midrow.column(align=False)
-
+            '''
             row = col.row(align=True)
             tool_bt(parent=row, cmd=13, w=2, h=1.4, text=True, icon='LARGE')
             tool_bt(parent=row, cmd=14, w=2, h=1.4, text=True, icon='LARGE')
@@ -310,7 +313,7 @@ class XPanel(bpy.types.Panel):
             row.separator(factor = 2)
             tool_bt(parent=row, cmd=35, w=2, h=1.4, text=True, icon='LARGE')
             tool_bt(parent=row, cmd=36, w=2, h=1.4, text=True, icon='LARGE')
-
+            '''
             # MID 3 //////////////////////////////////////////////////////////////////#
             col = main_midrow.column(align=False)
 

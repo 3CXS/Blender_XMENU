@@ -761,12 +761,123 @@ class Floater_08(bpy.types.Operator):
 
         return {'FINISHED'}
 
+class Floater_09(bpy.types.Operator):
+    bl_idname = "xmenu.floater_09"
+    bl_label = "BAKE_NODES"
 
+    bpy.types.WindowManager.floater_09_init = bpy.props.BoolProperty(default = False) 
+    bpy.types.WindowManager.floater_09_state = bpy.props.BoolProperty(default = False)  
+    bpy.types.WindowManager.hWnd_09 = bpy.props.StringProperty()
+
+    def execute(self, context):
+        if bpy.types.WindowManager.floater_09_init == False:
+            label = bpy.context.preferences.addons[__package__].preferences.floater_09_name
+            ui_type = bpy.context.preferences.addons[__package__].preferences.floater_09_type
+            loc = bpy.context.preferences.addons[__package__].preferences.floater_09_pos
+            size = bpy.context.preferences.addons[__package__].preferences.floater_09_size
+            alpha = bpy.context.preferences.addons[__package__].preferences.floater_09_alpha
+
+            bpy.ops.screen.area_dupli('INVOKE_DEFAULT')
+            new_window = bpy.context.window_manager.windows[-1]
+            area = new_window.screen.areas[-1]
+            space_data = bpy.context.space_data
+            
+            C_dict = gen_C_dict(bpy.context, new_window, area_type='VIEW_3D')
+            C_dict.update(space_data=space_data)
+
+            hWnd = get_active_win()
+            bpy.types.WindowManager.hWnd_09 = hWnd
+            
+            set_win_transforms(hWnd, location=loc, size=size, )
+            set_win_text(hWnd, label,)
+
+            if (alpha!=100):
+                set_win_transparency(hWnd, percentage=alpha, )
+
+            area.ui_type = ui_type
+
+            sv3d = area.spaces.active
+            
+            sv3d.show_region_ui = False
+            sv3d.show_region_toolbar = False 
+            sv3d.show_region_header = True
+
+            bpy.types.WindowManager.floater_09_init = True
+            bpy.types.WindowManager.floater_09_state = True
+
+        else:           
+            if bpy.types.WindowManager.floater_09_state == True:
+                hWnd = bpy.types.WindowManager.hWnd_09
+                show_win(hWnd, show=False)
+                bpy.types.WindowManager.floater_09_state = False
+            else:
+                hWnd = bpy.types.WindowManager.hWnd_09
+                show_win(hWnd, show=True)
+                bpy.types.WindowManager.floater_09_state = True
+
+        return {'FINISHED'}
+
+
+class Floater_10(bpy.types.Operator):
+    bl_idname = "xmenu.floater_10"
+    bl_label = "BAKE_NODES"
+
+    bpy.types.WindowManager.floater_10_init = bpy.props.BoolProperty(default = False) 
+    bpy.types.WindowManager.floater_10_state = bpy.props.BoolProperty(default = False)  
+    bpy.types.WindowManager.hWnd_10 = bpy.props.StringProperty()
+
+    def execute(self, context):
+        if bpy.types.WindowManager.floater_10_init == False:
+            label = bpy.context.preferences.addons[__package__].preferences.floater_10_name
+            ui_type = bpy.context.preferences.addons[__package__].preferences.floater_10_type
+            loc = bpy.context.preferences.addons[__package__].preferences.floater_10_pos
+            size = bpy.context.preferences.addons[__package__].preferences.floater_10_size
+            alpha = bpy.context.preferences.addons[__package__].preferences.floater_10_alpha
+
+            bpy.ops.screen.area_dupli('INVOKE_DEFAULT')
+            new_window = bpy.context.window_manager.windows[-1]
+            area = new_window.screen.areas[-1]
+            space_data = bpy.context.space_data
+            
+            C_dict = gen_C_dict(bpy.context, new_window, area_type='VIEW_3D')
+            C_dict.update(space_data=space_data)
+
+            hWnd = get_active_win()
+            bpy.types.WindowManager.hWnd_10 = hWnd
+            
+            set_win_transforms(hWnd, location=loc, size=size, )
+            set_win_text(hWnd, label,)
+
+            if (alpha!=100):
+                set_win_transparency(hWnd, percentage=alpha, )
+
+            area.ui_type = ui_type
+
+            sv3d = area.spaces.active
+            
+            sv3d.show_region_ui = False
+            sv3d.show_region_toolbar = False 
+            sv3d.show_region_header = True
+
+            bpy.types.WindowManager.floater_10_init = True
+            bpy.types.WindowManager.floater_10_state = True
+
+        else:           
+            if bpy.types.WindowManager.floater_10_state == True:
+                hWnd = bpy.types.WindowManager.hWnd_10
+                show_win(hWnd, show=False)
+                bpy.types.WindowManager.floater_10_state = False
+            else:
+                hWnd = bpy.types.WindowManager.hWnd_10
+                show_win(hWnd, show=True)
+                bpy.types.WindowManager.floater_10_state = True
+
+        return {'FINISHED'}
 #////////////////////////////////////////////////////////////////////////////////////////////#
 
 addon_keymaps = []
 
-classes = (Floater_01, Floater_02, Floater_03, Floater_04, Floater_05, Floater_06, Floater_07, Floater_08)
+classes = (Floater_01, Floater_02, Floater_03, Floater_04, Floater_05, Floater_06, Floater_07, Floater_08, Floater_09, Floater_10)
 
 def register():
     if platform.system() != 'Windows':
@@ -789,6 +900,10 @@ def register():
     bpy.types.WindowManager.floater_07_state = False
     bpy.types.WindowManager.floater_08_init = False
     bpy.types.WindowManager.floater_08_state = False
+    bpy.types.WindowManager.floater_09_init = False
+    bpy.types.WindowManager.floater_09_state = False
+    bpy.types.WindowManager.floater_10_init = False
+    bpy.types.WindowManager.floater_10_state = False
 
     for cls in classes:
         bpy.utils.register_class(cls)

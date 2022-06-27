@@ -176,12 +176,13 @@ def draw(self, context):
         else:
             subsub.prop(ob, "show_wire", text="", icon="MOD_WIREFRAME", toggle=True)
     else:
-        subsub.label(text='')
+        subsub.prop(overlay, "show_occlude_wire", text="", icon="MOD_WIREFRAME", toggle=True)
+
     #funct_bt(parent=sub, cmd='wire', tog=True, w=2, h=1, label='WIRE', icon="NONE")#global wireframe
     funct_bt(parent=sub, cmd='faceorient', tog=True, w=1.6, h=1, label='', icon="NORMALS_FACE")
     funct_bt(parent=sub, cmd='xray', tog=True, w=1.6, h=1, label='', icon="XRAY")
 
-    sub.separator(factor = 4)
+    sub.separator(factor = 2)
     subsub = sub.row(align=True)
     funct_bt(parent=subsub, cmd='floater_01', tog=True, w=2, h=1, label='', icon="OUTLINER")
     funct_bt(parent=subsub, cmd='floater_02', tog=True, w=2, h=1, label='', icon="PROPERTIES")
@@ -189,8 +190,9 @@ def draw(self, context):
     funct_bt(parent=subsub, cmd='floater_04', tog=True, w=2, h=1, label='', icon="NODE_MATERIAL")
     funct_bt(parent=subsub, cmd='floater_05', tog=True, w=2, h=1, label='', icon="UV")
     funct_bt(parent=subsub, cmd='floater_06', tog=True, w=2, h=1, label='', icon="IMAGE")
-    funct_bt(parent=subsub, cmd='floater_07', tog=True, w=2, h=1, label='', icon="NODETREE")
-    funct_bt(parent=subsub, cmd='floater_08', tog=True, w=2, h=1, label='', icon="VIEW_CAMERA")
+    #subsub.menu("VIEW3D_MT_Floater", text=">>")
+    subsub.popover("OBJECT_PT_floater", text=' ', text_ctxt='', icon='MENU_PANEL')
+
     subsub.separator(factor = 2)
 
     #subsub.menu("VIEW3D_MT_Material")
@@ -198,7 +200,26 @@ def draw(self, context):
     redraw_regions()
 
 #////////////////////////////////////////////////////////////////////////////////////////////#
- 
+class FloaterPanel(bpy.types.Panel):
+    bl_idname = "OBJECT_PT_floater"
+    bl_label = "Floaters"
+    bl_space_type = 'PROPERTIES'
+    bl_region_type = 'WINDOW'
+    bl_context = "scene"
+    bl_order = 1000
+    bl_options = {'DEFAULT_CLOSED',}
+
+    def draw(self, context):
+        layout = self.layout
+
+        col = layout.column(align=True)
+        row = col.row(align=True)
+
+        funct_bt(parent=row, cmd='floater_07', tog=True, w=2, h=1, label='GEO',)
+        funct_bt(parent=row, cmd='floater_09', tog=True, w=2, h=1, label='BAKE',)
+        funct_bt(parent=row, cmd='floater_08', tog=True, w=2, h=1, label='CAM',)
+        funct_bt(parent=row, cmd='floater_10', tog=True, w=2, h=1, label='COMP',)
+
 
 def paint_hud(parent, brush, self, context):
     ts = context.tool_settings
@@ -301,10 +322,16 @@ def gp_select_hud(parent, self, context):
 
 
 #////////////////////////////////////////////////////////////////////////////////////////////#
+classes = (FloaterPanel,)
 
-def register() :
+def register():
+    for cls in classes:
+        bpy.utils.register_class(cls)
+
     bpy.types.VIEW3D_HT_tool_header.prepend(draw)
 
-def unregister() :
+def unregister():
     bpy.types.VIEW3D_HT_tool_header.remove(draw)
 
+    for cls in classes:
+        bpy.utils.unregister_class(cls)
