@@ -79,16 +79,19 @@ class XPanel(bpy.types.Panel):
         main_rightrow.alignment = 'LEFT'
 
         row = top_left_outer.row()
-        row.ui_units_x = 0.2
+        row.ui_units_x = 1.4
         row.label(text='')
 
         row = top_left_outer.row()
-        row.ui_units_x = 4
+        row.ui_units_x = 5
         row.operator("wm.save_mainfile", icon='FILE_TICK', text="SAVE")
 
+        top_left_outer.separator(factor=2)
+
         row = top_left_outer.row()
-        row.ui_units_x = 4
-        row.operator("screen.redo_last", text="CMD")
+        row.scale_x = 1.2
+        row.operator("script.reload", icon='FILE_REFRESH', text="")
+
 
         row = top_right_outer.row(align=True)
 
@@ -140,7 +143,9 @@ class XPanel(bpy.types.Panel):
             col = main_leftrow.column(align=True)
             SaveScene(self, context, parent=col)
             col = main_leftrow.column(align=True)
-            col.menu_contents("VIEW3D_MT_Import")
+            box = col.box()
+            box.ui_units_x = 4
+            box.menu_contents("OBJECT_MT_import_menu")
 
             box = main_leftrow.box()
             box.ui_units_x = 4
@@ -252,11 +257,22 @@ class XPanel(bpy.types.Panel):
             #MAIN-ROW/////////////////////////////////////////////////////////////////#
             #MAIN-LEFT////////////////////////////////////////////////////////////////#
             col = main_leftrow.column(align=True)
+            col.ui_units_x = 5
+            col.operator('uv.smart_project', text="AUTO UV")
+            col.operator('uv.unwrap', text="UNWRAP")
+            col.operator('uv.follow_active_quads', text="FOLLOW Q")
+            op = col.operator('uv.project_from_view', text="FROM VIEW")
+            op.scale_to_bounds = True
+            col.operator('uv.reset', text="RESET")
+            col = main_leftrow.column(align=True)
             UVTexture(self, context, parent=col)
+
             #MAIN-MID/////////////////////////////////////////////////////////////////#
             # MID 1 //////////////////////////////////////////////////////////////////#
             col = main_midrow.column(align=False)
-
+            col.ui_units_x = 5
+            col.operator('mesh.remove_doubles', text="MERGE BY DIST")
+            col = main_midrow.column(align=False)
             row = col.row(align=True)
             tool_bt(parent=row, cmd=5, w=2, h=1.4, text=False, icon='LARGE')
             tool_bt(parent=row, cmd=6, w=2, h=1.4, text=False, icon='LARGE')
@@ -283,37 +299,8 @@ class XPanel(bpy.types.Panel):
             tool_bt(parent=row, cmd=18, w=2, h=1.4, text=True, icon='LARGE')
             row.separator(factor = 2)
             tool_bt(parent=row, cmd=19, w=2, h=1.4, text=True, icon='LARGE')
-
-            #col.separator(factor = 1)
-            row = col.row(align=True)
-            tool_bt(parent=row, cmd=20, w=2, h=1.4, text=True, icon='LARGE')
-            tool_bt(parent=row, cmd=21, w=2, h=1.4, text=True, icon='LARGE')
-            row.separator(factor = 2)
-            tool_bt(parent=row, cmd=22, w=2, h=1.4, text=True, icon='LARGE')
-            tool_bt(parent=row, cmd=23, w=2, h=1.4, text=True, icon='LARGE')
-            row.separator(factor = 2)
-            tool_bt(parent=row, cmd=24, w=2, h=1.4, text=True, icon='LARGE')
-            row.separator(factor = 2)
-            tool_bt(parent=row, cmd=25, w=2, h=1.4, text=True, icon='LARGE')
-            tool_bt(parent=row, cmd=26, w=2, h=1.4, text=True, icon='LARGE')
-
-            #col.separator(factor = 1)
-            row = col.row(align=True)
-            tool_bt(parent=row, cmd=27, w=2, h=1.4, text=True, icon='LARGE')
-            tool_bt(parent=row, cmd=28, w=2, h=1.4, text=True, icon='LARGE')
-            row.separator(factor = 2)
-            tool_bt(parent=row, cmd=29, w=2, h=1.4, text=True, icon='LARGE')
-            tool_bt(parent=row, cmd=30, w=2, h=1.4, text=True, icon='LARGE')
-            row.separator(factor = 2)
-            tool_bt(parent=row, cmd=31, w=2, h=1.4, text=True, icon='LARGE')
-            tool_bt(parent=row, cmd=32, w=2, h=1.4, text=True, icon='LARGE')
-            row.separator(factor = 2)
-            tool_bt(parent=row, cmd=33, w=2, h=1.4, text=True, icon='LARGE')
-            tool_bt(parent=row, cmd=34, w=2, h=1.4, text=True, icon='LARGE')
-            row.separator(factor = 2)
-            tool_bt(parent=row, cmd=35, w=2, h=1.4, text=True, icon='LARGE')
-            tool_bt(parent=row, cmd=36, w=2, h=1.4, text=True, icon='LARGE')
             '''
+
             # MID 3 //////////////////////////////////////////////////////////////////#
             col = main_midrow.column(align=False)
 

@@ -1,6 +1,6 @@
 import os
 import bpy
-from bpy.props import StringProperty, IntProperty, BoolProperty, EnumProperty
+from bpy.props import StringProperty, IntProperty, FloatProperty, BoolProperty, EnumProperty
 
 import rna_keymap_ui
 
@@ -37,7 +37,7 @@ class XPrefs(bpy.types.AddonPreferences):
 
     tool_icon: BoolProperty(name="TOOL ICON", default=True)
     tool_text: BoolProperty(name="TOOL TEXT", default=True)
-    header_inset: IntProperty(name="Header Inset", default=13)
+    header_inset: FloatProperty(name="Header Inset", default=15)
 
 
     tex_path: StringProperty(name="Tex Folder Path",subtype='DIR_PATH',default="")

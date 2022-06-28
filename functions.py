@@ -117,7 +117,7 @@ def tool_op(parent, cmd ,w=1, h=1, small=False, text=False, icon="NONE"):
 class SetTool(bpy.types.Operator):
     bl_idname = "xmenu.settool"
     bl_label = "SETTOOL"
-    bl_options = {'REGISTER', 'UNDO',}
+    bl_options = {'REGISTER'}
     tool_index: bpy.props.IntProperty()
 
     def execute(self, context):
@@ -254,7 +254,6 @@ class Hide(bpy.types.Operator):
     bl_label = "TogHide"
 
     def execute(self, context):
-
         ob = context.active_object
 
         if ob.hide_render == True:
@@ -526,24 +525,29 @@ class Mask(bpy.types.Operator):
             bpy.ops.mesh.paint_mask_slice()
         return {'FINISHED'}
 
+
 class Override(bpy.types.Operator):
     bl_idname = "xmenu.override"
     bl_label = "Operator Override"
-
+    bl_options = {'REGISTER', 'UNDO'}
     cmd: bpy.props.StringProperty()
 
     def execute(self, context):
         op = 'bpy.ops.'
         op += self.cmd
-        op += '(override)'
+        op += '()'
 
-        for screen in bpy.data.screens:
-            for area in (a for a in screen.areas if a.type == 'VIEW_3D'):
-                region = next((region for region in area.regions if region.type == 'WINDOW'), None)
-                if region is not None:
-                    override = {'area': area, 'region': region}
-                    eval(op)
-                    return {'FINISHED'}
+        area = [area for area in bpy.context.screen.areas if area.type == "VIEW_3D"][0]
+        
+        window = bpy.context.window
+        screen =  bpy.context.screen
+        region = area.regions[-1]
+        scene = bpy.context.scene
+        space_data = area.spaces.active
+        ob = context.active_object
+        with context.temp_override(area=area, region=region, object=ob):
+            eval(op)
+            return {'FINISHED'}
 
 class Override1(bpy.types.Operator):
     bl_idname = "xmenu.override1"

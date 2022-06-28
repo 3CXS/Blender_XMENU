@@ -4,7 +4,7 @@ from bpy.types import Operator, AddonPreferences, Preferences, Header, Panel, Me
 from bl_ui.space_toolsystem_common import (ToolSelectPanelHelper, ToolDef)
 from .hud import redraw_regions
 from .functions import tool_grid, tool_bt, funct_bt, paint_settings
-from .menuitems import BrushCopy, ModeSelector, Overlay
+from .menuitems import BrushCopy, ModeSelector, Overlay, HideObject
 
 #////////////////////////////////////////////////////////////////////////////////////////////#
 
@@ -33,6 +33,11 @@ def draw(self, context):
     left = row.row()
     left.ui_units_x = view_width/2-15  
     left.alignment = 'RIGHT'
+    
+    #sub = left.row(align=True)
+    #sub.scale_x = 1.4
+    #sub.operator("screen.redo_last", text="", icon='PREFERENCES')
+    left.separator(factor = 2)
     ModeSelector(self, context, left)
     left.separator(factor = 2)
 
@@ -51,8 +56,8 @@ def draw(self, context):
                     icon_view = "VIEW_PERSPECTIVE"
                 else:
                     icon_view = "VIEW_ORTHO"
-    funct_bt(parent=sub, cmd='persp', tog=False, w=1.2, h=1, label='', icon=icon_view)
 
+    funct_bt(parent=sub, cmd='persp', tog=False, w=1.2, h=1, label='', icon=icon_view)
 
     if bpy.types.WindowManager.maxarea_state == False:
         icon_area = 'TRIA_DOWN'
@@ -60,16 +65,20 @@ def draw(self, context):
         icon_area = 'TRIA_UP'
     funct_bt(parent=sub, cmd='maxarea', tog=False, w=1.2, h=1, label='', icon=icon_area)
 
-    row.separator(factor = 2)
+    row.separator(factor = 1)
 
     mid = row.row()
     mid.ui_units_x = 24
     mid.alignment = 'CENTER'
     if context.mode == 'OBJECT':
+        #HideObject(self, context, parent=mid)
         select_hud(mid, self, context)
     if context.mode == 'EDIT_MESH':
-        sub = mid.row()
+        sub = mid.row(align=True)
         #sub.ui_units_x = 6
+        sub.operator('mesh.reveal', icon='HIDE_OFF', text="")
+        sub.operator('mesh.hide', text="HIDE").unselected=False
+        sub.separator(factor=4)
         sub.template_edit_mode_selection()  
         select_hud(mid, self, context)
         sub = mid.row()

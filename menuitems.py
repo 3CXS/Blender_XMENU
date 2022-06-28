@@ -36,8 +36,14 @@ def SaveScene(self, context, parent):
     sub.operator("wm.link", icon='LINK_BLEND', text="LINK")
     sub.operator("wm.append", icon='APPEND_BLEND', text="APND")
 
-class VIEW3D_MT_Import(bpy.types.Menu):
-    bl_label = "Import"
+class ImportPanel(bpy.types.Panel):
+    bl_label = "IMPORT"
+    bl_idname = "OBJECT_PT_import_panel"
+    bl_space_type = 'PROPERTIES'
+    bl_region_type = 'WINDOW'
+    bl_context = "scene"
+    bl_order = 1000
+    bl_options = {'DEFAULT_CLOSED',}
 
     def draw(self, context):
         layout = self.layout
@@ -47,8 +53,23 @@ class VIEW3D_MT_Import(bpy.types.Menu):
         file_path = bpy.context.preferences.addons[__package__].preferences.file_path              
         scene = context.scene
 
-        box = layout.box()
-        col = box.column(align=True)
+        col = layout.column(align=True)
+        col.ui_units_x = 4.5
+        col.menu_contents("OBJECT_MT_import_menu")
+
+class ImportMenu(bpy.types.Menu):
+    bl_label = "IMPORT"
+    bl_idname = "OBJECT_MT_import_menu"
+
+    def draw(self, context):
+        layout = self.layout
+        layout.use_property_split = False
+        layout.use_property_decorate = False
+
+        file_path = bpy.context.preferences.addons[__package__].preferences.file_path              
+        scene = context.scene
+
+        col = layout.column(align=True)
         col.ui_units_x = 4.5
         sub = col.row(align=True)
         sub.prop(scene, "import_items", expand=True)
@@ -78,7 +99,7 @@ class VIEW3D_MT_Import(bpy.types.Menu):
             op.axis_up = 'Z'
         else:
             subsub = sub.row(align=True)
-            subsub.label(text='<--')
+            subsub.label(text='                                                                -->')
             subsub.scale_y = 0.7
             subsub = sub.row(align=True)
             op = subsub.operator("export_mesh.ply", text="PLY")
@@ -99,7 +120,6 @@ class VIEW3D_MT_Import(bpy.types.Menu):
             op.axis_forward = 'Y'
             op.axis_up = 'Z'
 
-
 def HideObject(self, context, parent):
         ob = context.active_object
 
@@ -114,8 +134,7 @@ def HideObject(self, context, parent):
                 state = False
                 label = 'HIDE'
             row.operator("xmenu.hide", text=label)
-        else: 
-            row.label(text='')
+
 
 def HideObjectMenuBt(self, context):
         ob = context.active_object
@@ -154,14 +173,16 @@ def ShadingMode(self, context, parent):
         tool_settings = context.tool_settings
         view = context.space_data
         shading = view.shading
+        overlay = view.overlay
 
         row = layout.row(align=True)
-        row.ui_units_x = 6
-
         row.prop(shading, "type", text="", expand=True)
         sub = row.row(align=True)
         sub.popover(panel="VIEW3D_PT_shading", text="")
 
+        #row.prop(overlay, "show_overlays", text="", icon='OVERLAY', expand=True)
+        #row.popover(panel="VIEW3D_PT_overlay", text="")
+        #row.separator(factor=1)
 
 
 def VertexGroups(self, context, parent):
@@ -180,7 +201,7 @@ def VertexGroups(self, context, parent):
     col.operator("xmenu.override", icon='ADD', text="").cmd ='object.vertex_group_add'
     col.operator("xmenu.override", icon='REMOVE', text="").cmd='object.vertex_group_remove'
     col.separator()
-    #col.menu("MESH_MT_vertex_group_context_menu", icon='DOWNARROW_HLT', text="")   
+    col.menu("MESH_MT_vertex_group_context_menu", icon='DOWNARROW_HLT', text="")   
     if group:
         col.separator()
         op = col.operator("xmenu.override1", icon='TRIA_UP', text="")
@@ -227,10 +248,12 @@ class VIEW3D_MT_Material(bpy.types.Menu):
 
         layout.use_property_split = False
         layout.use_property_decorate = False
-        mat = context.material
-        ob = context.active_object
 
-        slot = context.material_slot
+        ob = context.active_object
+        mat = ob.active_material
+
+        slot = ob.material_slots
+
         space = context.space_data
 
         box = layout.box()
@@ -242,13 +265,13 @@ class VIEW3D_MT_Material(bpy.types.Menu):
             col = row.column(align=True)
             col.ui_units_x = 7
             col.template_list("MATERIAL_UL_matslots", "", ob, "material_slots", ob, "active_material_index", rows=4)
-            col.template_ID(ob, "active_material", new="material.new")
+            col.template_ID(ob, "active_material")
             col = row.column(align=True)
             col.ui_units_x = 1
             col.operator("xmenu.override", icon='ADD', text="").cmd='object.material_slot_add'
             col.operator("xmenu.override", icon='REMOVE', text="").cmd='object.material_slot_remove'
             col.separator()
-            #col.menu("MATERIAL_MT_context_menu", icon='DOWNARROW_HLT', text="")
+            col.menu("MATERIAL_MT_context_menu", icon='DOWNARROW_HLT', text="")
             if is_sortable:
                 col.separator()
                 op = col.operator("xmenu.override1", icon='TRIA_UP', text="")
@@ -258,11 +281,13 @@ class VIEW3D_MT_Material(bpy.types.Menu):
                 op.cmd='object.material_slot_move'
                 op.prop1 ='direction="DOWN"'
 
-            
+            '''
             if slot:
                 icon_link = 'MESH_DATA' if slot.link == 'DATA' else 'OBJECT_DATA'
                 row.prop(slot, "link", icon=icon_link, icon_only=True)
-            if ob.mode == 'EDIT':
+            '''
+
+            if context.mode == 'EDIT_MESH':
                 col = row.column(align=True)
                 col.ui_units_x = 3
                 col.operator("xmenu.override", text="Assign").cmd='object.material_slot_assign'
@@ -271,6 +296,18 @@ class VIEW3D_MT_Material(bpy.types.Menu):
 
         elif mat:
             row.template_ID(space, "pin_id")
+
+def newmaterial(self, context):
+        area = [area for area in bpy.context.screen.areas if area.type == "VIEW_3D"][0]
+        
+        window = bpy.context.window
+        screen =  bpy.context.screen
+        region = area.regions[-1]
+        scene = bpy.context.scene
+        space_data = area.spaces.active
+        ob = bpy.context.active_object
+        with context.temp_override(area=area, region=region, space_data=space_data):
+            bpy.ops.material.new()
 
 
 def UVTexture(self, context, parent):
@@ -1602,7 +1639,7 @@ def brush_texture_settings(layout, brush, sculpt):
     sub.prop(tex_slot, 'scale', text='')
     '''
 
-classes = (VIEW3D_MT_Material, NormalShading, VIEW3D_MT_Import, VIEW3D_MT_dynamesh, VIEW3D_MT_remesh, VIEW3D_MT_sculpt_sym, VIEW3D_MT_sym, VIEW3D_MT_BrushTexture, VIEW3D_MT_TextureMask, VIEW3D_MT_StrokeAdv, VIEW3D_MT_Falloff)
+classes = (VIEW3D_MT_Material, NormalShading,  ImportMenu, ImportPanel, VIEW3D_MT_dynamesh, VIEW3D_MT_remesh, VIEW3D_MT_sculpt_sym, VIEW3D_MT_sym, VIEW3D_MT_BrushTexture, VIEW3D_MT_TextureMask, VIEW3D_MT_StrokeAdv, VIEW3D_MT_Falloff)
 
 def register():
     bpy.types.Scene.import_items = bpy.props.EnumProperty(default="01",items=[("01","IMPORT",""),("02","EXPORT","")])
