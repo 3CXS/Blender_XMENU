@@ -1,6 +1,6 @@
 import bpy
 from bpy.types import Menu
-from .menuitems import ModeSelector, VertexGroups, ShadingMode, Transforms, UVTexture
+from .menuitems import *
 from .functions import tool_bt, funct_bt
 
 
@@ -74,6 +74,32 @@ class PropMenu(bpy.types.Panel):
             VertexGroups(self, context, parent=col)
             col.menu_contents("VIEW3D_MT_Material")
             UVTexture(self, context, parent=col)
+        if context.mode == 'PAINT_TEXTURE':
+            col = layout.column()
+            TexSlots(self, context, parent=col)
+            col.menu_contents("VIEW3D_MT_Material")
+            UVTexture(self, context, parent=col)
+        if context.mode == 'SCULPT':
+            col = layout.column()
+            col.menu_contents("VIEW3D_MT_dynamesh")
+            col.menu_contents("VIEW3D_MT_remesh")
+
+            subrow = col.row(align=False)
+            subcol = subrow.column(align=False)
+            subcol.ui_units_x = 3
+            item = subcol.row()
+            item.scale_y = 0.5
+            item.label(text='FILTER')
+            item = subcol.row()
+            tool_bt(parent=item, cmd=33, w=3, h=1, text=False, icon='OFF')
+            item = subcol.row()
+            tool_bt(parent=item, cmd=34, w=3, h=1, text=False, icon='OFF')
+            item = subcol.row()
+            tool_bt(parent=item, cmd=35, w=3, h=1, text=False, icon='OFF')
+
+            SculptFilterSettings(self, context, parent=subrow)
+
+            VertexColor(self, context, parent=col)
 
 class ToolMenu(bpy.types.Panel):
     bl_idname = "OBJECT_PT_tool_menu"
@@ -90,110 +116,6 @@ class ToolMenu(bpy.types.Panel):
         layout.use_property_decorate = False
 
         col = layout.column()
-
-        if context.mode == 'EDIT_MESH':
-
-            sub = col.row()
-            subsub = sub.column()
-            subsub.scale_x=2.5
-            subsub.template_edit_mode_selection()
-            sub.separator(factor=3)
-            funct_bt(parent=sub, cmd='xray', tog=True, w=2.4, h=1, label='', icon="XRAY")
-
-            col.separator(factor=1)
-            sub = col.column()
-            grid = sub.grid_flow(row_major=True, columns=4, align=True)
-            grid.ui_units_x = 6
-            tool_bt(parent=grid, cmd=0, w=2, h=1.2, text=False, icon='LARGE')
-            tool_bt(parent=grid, cmd=1, w=2, h=1.2, text=False, icon='LARGE')
-            tool_bt(parent=grid, cmd=2, w=2, h=1.2, text=False, icon='LARGE')
-            tool_bt(parent=grid, cmd=3, w=2, h=1.2, text=False, icon='LARGE')
-
-            sub.separator(factor=2)
-            grid = sub.grid_flow(row_major=True, columns=4)
-            tool_bt(parent=grid, cmd=20, w=2, h=1.4, text=True, icon='LARGE')
-            subsub = grid.column()
-            subsub.ui_units_x = 2
-            subsub.label(text=' ')
-            tool_bt(parent=grid, cmd=24, w=2, h=1.4, text=True, icon='LARGE')
-            tool_bt(parent=grid, cmd=22, w=2, h=1.4, text=True, icon='LARGE')
-
-            tool_bt(parent=grid, cmd=19, w=2, h=1.4, text=True, icon='LARGE')
-            tool_bt(parent=grid, cmd=18, w=2, h=1.4, text=True, icon='LARGE')
-            tool_bt(parent=grid, cmd=15, w=2, h=1.4, text=True, icon='LARGE')
-            tool_bt(parent=grid, cmd=16, w=2, h=1.4, text=True, icon='LARGE')
-            sub.separator(factor=2)
-
-            grid = sub.grid_flow(row_major=True, columns=4, align=True)
-            tool_bt(parent=grid, cmd=29, w=2, h=1, text=False, icon='OFF')
-            tool_bt(parent=grid, cmd=30, w=2, h=1, text=False, icon='OFF')
-            subsub = grid.column()
-            subsub.ui_units_x = 2
-            subsub.label(text='X')
-            tool_bt(parent=grid, cmd=27, w=2, h=1, text=False, icon='OFF')
-
-            tool_bt(parent=grid, cmd=31, w=2, h=1, text=False, icon='OFF')
-            tool_bt(parent=grid, cmd=32, w=2, h=1, text=False, icon='OFF')
-            tool_bt(parent=grid, cmd=35, w=2, h=1, text=False, icon='OFF')
-            tool_bt(parent=grid, cmd=34, w=2, h=1, text=False, icon='OFF')
-
-            sub.separator(factor=2)
-            sub = col.row(align=True)
-
-            subsub = sub.column()
-            subsubsub = subsub.row()
-            item = subsubsub.column(align=True)
-            item.scale_y=0.8
-            item.operator('mesh.flip_normals', text='FLIP')
-
-            item = subsubsub.column(align=True)
-            item.scale_y=0.8
-            item.operator('mesh.remove_doubles', text='CLEAN')
-            item.operator('mesh.delete_loose', text='LOOSE')
-            item.operator('mesh.fill_holes', text='FILL')
-
-            subsub.separator(factor=0.4)
-            item = subsub.row(align=True)
-            item.scale_y=0.8
-            item.operator('mesh.symmetrize', text='SYM')
-            op = item.operator('transform.mirror', text='MIRROR')
-            op.orient_type='GLOBAL'
-            op.constraint_axis=(True, False, False)
-
-            #subsub.separator(factor=0.2)
-            item = subsub.row(align=True)
-            item.scale_y=0.8
-            item.operator('mesh.split', text='SPLIT')
-            item.operator('mesh.duplicate_move', text='DUB')
-
-            #subsub.separator(factor=0.2)
-            item = subsub.row(align=True)
-            item.scale_y=0.8
-            item.operator('mesh.separate', text='SLCT').type='SELECTED'
-            item.operator('mesh.separate', text='MAT').type='MATERIAL'
-            item.operator('mesh.separate', text='LSE').type='LOOSE'
-
-            subsub.separator(factor=0.2)
-            item = subsub.row(align=True)
-            item.scale_y=0.8
-            item.operator('uv.smart_project', text="AUTO")
-            item.operator('uv.unwrap', text="UNWRP")
-
-            sub.separator(factor=2)
-            subsub = sub.column(align=True)
-            #subsub.ui_units_x = 8
-            subsub.operator('mesh.mark_sharp', text='SHARP')
-            op = subsub.operator('mesh.mark_sharp', text='CLEAR')
-            op.clear = True
-
-            subsub.separator(factor=2)
-            subsub = subsub.column(align=True)
-            op = subsub.operator('mesh.mark_seam', text='SEAM')
-            op = subsub.operator('mesh.mark_seam', text='CLEAR')
-            op.clear = True
-
-
-
 
         if context.mode == 'OBJECT':
             sub = col.row(align=True)
@@ -247,15 +169,279 @@ class ToolMenu(bpy.types.Panel):
             subsub.operator('object.convert', text='GPENCIL').target='GPENCIL'
             subsub.operator('gpencil.trace_image', text='IMG TRACE')
 
-        col.separator(factor=2)
-        sub = col.row()
-        subsub = sub.column()
-        subsub.label(text='')
-        subsub = sub.column()
-        subsub.ui_units_x = 4
-        subsub.operator("screen.redo_last", text="CMD >>")
+        if context.mode == 'EDIT_MESH':
+
+            sub = col.row()
+            subsub = sub.column()
+            subsub.scale_x=2.5
+            subsub.template_edit_mode_selection()
+            sub.separator(factor=3)
+            funct_bt(parent=sub, cmd='xray', tog=True, w=2.4, h=1, label='', icon="XRAY")
+
+            col.separator(factor=1)
+
+            sub = col.column()
+            #sub.ui_units_x = 6
+            grid = sub.grid_flow(row_major=True, columns=4, align=True)
+
+            tool_bt(parent=grid, cmd=0, w=2, h=1.2, text=False, icon='LARGE')
+            tool_bt(parent=grid, cmd=1, w=2, h=1.2, text=False, icon='LARGE')
+            tool_bt(parent=grid, cmd=2, w=2, h=1.2, text=False, icon='LARGE')
+            tool_bt(parent=grid, cmd=3, w=2, h=1.2, text=False, icon='LARGE')
+
+            col.separator(factor=1)
+
+
+            sub = col.column()
+            grid = sub.grid_flow(row_major=True, columns=4, align=True)
+            tool_bt(parent=grid, cmd=20, w=1, h=1.4, text=False, icon='LARGE')
+            subsub = grid.column()
+            subsub.label(text=' ')
+            tool_bt(parent=grid, cmd=24, w=1, h=1.4, text=False, icon='LARGE')
+            tool_bt(parent=grid, cmd=22, w=1, h=1.4, text=False, icon='LARGE')
+
+            tool_bt(parent=grid, cmd=19, w=1, h=1.4, text=False, icon='LARGE')
+            tool_bt(parent=grid, cmd=18, w=1, h=1.4, text=False, icon='LARGE')
+            tool_bt(parent=grid, cmd=15, w=1, h=1.4, text=False, icon='LARGE')
+            tool_bt(parent=grid, cmd=16, w=1, h=1.4, text=False, icon='LARGE')
+
+            sub.separator(factor=1)
+
+            split = col.split(factor=0.75)
+            sub = split.column(align=True)
+            subrow = sub.row(align=True)
+            item = subrow.column(align=True)
+            tool_bt(parent=item, cmd=29, w=2, h=1, text=False, icon='OFF')
+            tool_bt(parent=item, cmd=30, w=2, h=1, text=False, icon='OFF')
+            item = subrow.column(align=True)
+            tool_bt(parent=item, cmd=32, w=2, h=1, text=False, icon='OFF')
+            tool_bt(parent=item, cmd=31, w=2, h=1, text=False, icon='OFF')
+            item = subrow.column(align=True)
+            tool_bt(parent=item, cmd=35, w=2, h=1, text=False, icon='OFF')
+            tool_bt(parent=item, cmd=34, w=2, h=1, text=False, icon='OFF')
+
+
+            subrow = sub.row(align=True)    
+            item = subrow.row(align=True)
+            tool_bt(parent=item, cmd=27, w=2, h=1, text=False, icon='OFF')
+            item.label(text=' ')
+
+
+            sub = split.column()
+            sub.scale_y=0.8
+            item = sub.column(align=True)
+            item.operator('mesh.merge', text="MERGE").type='CENTER'
+            item.operator('mesh.split', text='SPLIT')
+            item.operator('mesh.duplicate_move', text='DUB')
+            item.operator('mesh.edge_face_add', text='FILL')
+            col.separator(factor=1)
+
+            sub = col.row(align=True)
+
+            subsub = sub.column()
+            subsubsub = subsub.row()
+            item = subsubsub.column(align=True)
+            item.scale_y=0.8
+            item.operator('mesh.flip_normals', text='FLIP')
+            item.operator('mesh.fill_holes', text='FILL HOLES')
+
+            item = subsubsub.column(align=True)
+            item.scale_y=0.8
+            item.operator('mesh.remove_doubles', text='CLEAN')
+            item.operator('mesh.delete_loose', text='LOOSE')
+
+            subsub.separator(factor=1)
+            split = subsub.split(factor=0.25)
+
+            item = split.column(align=True)
+            item.scale_y=0.8
+            item.operator('mesh.separate', text='SLCT').type='SELECTED'
+            item.operator('mesh.separate', text='MAT').type='MATERIAL'
+            item.operator('mesh.separate', text='LSE').type='LOOSE'
+
+            subsplit = split.row()
+            item = subsplit.column(align=True)
+            item.scale_y=0.8
+            item.operator('mesh.symmetrize', text='SYM')
+            op = item.operator('transform.mirror', text='MIRROR')
+            op.orient_type='GLOBAL'
+            op.constraint_axis=(True, False, False)
+
+            subsub.separator(factor=0.2)
+            item = subsplit.column(align=True)
+            item.scale_y=0.8
+            item.operator('uv.smart_project', text="A-UV")
+            item.operator('uv.unwrap', text="UNWRP")
+
+            sub.separator(factor=2)
+            subsub = sub.column(align=True)
+            #subsub.ui_units_x = 8
+            subsub.operator('mesh.mark_sharp', text='SHARP')
+            op = subsub.operator('mesh.mark_sharp', text='CLEAR')
+            op.clear = True
+
+            subsub = subsub.column(align=True)
+            op = subsub.operator('mesh.mark_seam', text='SEAM')
+            op = subsub.operator('mesh.mark_seam', text='CLEAR')
+            op.clear = True
+
+            subsub.separator(factor=2)
+            subsub.operator("screen.redo_last", text="CMD >")
+
+        if context.mode == 'SCULPT':
+            brush = context.tool_settings.image_paint.brush
+            #sub = col.row(align=True)
+            #sub.scale_y = 1.4
+            #SculptBrushSettings(self, context, parent=sub)
+            #sub = col.row(align=True)
+            #ToolOptions(self, context, parent=sub)
+            #col.separator(factor = 1)
+
+            #sub = col.row(align=True)
+            #SculptToolSettings(self, context, parent=sub)
+            #BrushCopy(self, context, parent=sub)
+            sub = col.row(align=True)
+            subsub = sub.column(align=True)
+            subsub.ui_units_x = 2
+            subsub.scale_y = 0.7
+            subsub.operator('xmenu.mask', text='PVT M').cmd='PMASKED'
+            subsub.operator('xmenu.mask', text='RESET').cmd='ORIGIN'
+            tool_bt(parent=sub, cmd=18, w=2, h=1.4, text=False, icon='LARGE')
+            sub.separator(factor = 1)
+            tool_bt(parent=sub, cmd=0, w=2, h=1.4, text=False, icon='LARGE')
+            subsub = sub.column(align=True)
+            tool_bt(parent=subsub, cmd=19, w=1.2, h=1, text=False, icon='CUSTOM')
+            tool_bt(parent=subsub, cmd=21, w=1.2, h=1, text=False, icon='CUSTOM')
+
+            sub = col.row(align=True)
+            tool_grid(parent=sub, col=3, align=True, slotmin=1, slotmax=4, w=2, h=1.4, text=True, icon='LARGE')
+            sub.separator(factor = 1)
+            tool_bt(parent=sub, cmd=7, w=2, h=1.4, text=True, icon='LARGE')
+            col.separator(factor = 0.4)
+            sub = col.row(align=True)
+            tool_grid(parent=sub, col=3, align=True, slotmin=4, slotmax=7, w=2, h=1.4, text=True, icon='LARGE')
+            sub.separator(factor = 1)
+            tool_bt(parent=sub, cmd=8, w=2, h=1.4, text=True, icon='LARGE')
+
+            sub = col.row(align=True)
+            tool_bt(parent=sub, cmd=9, w=2, h=1.4, text=True, icon='LARGE')
+            tool_bt(parent=sub, cmd=10, w=2, h=1.4, text=True, icon='LARGE')
+            tool_bt(parent=sub, cmd=11, w=2, h=1.4, text=True, icon='LARGE')
+            tool_bt(parent=sub, cmd=12, w=2, h=1.4, text=True, icon='LARGE')
+
+            sub = col.row(align=True)
+            sub.menu_contents("VIEW3D_MT_Falloff")
+            sub = col.row(align=True)
+            SculptExtra(self, context, parent=sub)
+            tool = context.workspace.tools.from_space_view3d_mode(bpy.context.mode).idname
+            if tool == 'builtin_brush.Paint':
+                brush = context.tool_settings.sculpt.brush
+                subsub = sub.column(align=True)
+                subsub.ui_units_x = 4
+                subsub.prop(brush, "blend", text="")
+            else:
+                SculptRake(self, context, parent=sub)
+
+
+            sub = col.row(align=True)
+            subsub = sub.column(align=True)
+            subsubsub = subsub.row(align=True)
+            tool_bt(parent=subsubsub, cmd=36, w=2, h=1.4, text=True, icon='LARGE')
+            tool_bt(parent=subsubsub, cmd=37, w=2, h=1.4, text=True, icon='LARGE')
+            Color(self, context, parent=subsub)   
+
+            Stroke(self, context, parent=sub)
+
+            sub = col.row(align=True)
+            col.menu_contents("VIEW3D_MT_TextureMask")
+            sub = col.row(align=True)
+            sub.menu_contents("VIEW3D_MT_BrushTexture")
+
+            #sub = col.row(align=True)
+            #ColorPalette(self, context, parent=sub)
+
+
+
+        if context.mode == 'PAINT_TEXTURE':
+            brush = context.tool_settings.image_paint.brush
+
+            sub = col.row(align=True)
+            sub.prop(brush, "blend", text="")
+            TextureBrushSettings(self, context, parent=sub)
+
+            sub = col.row(align=True)
+            ToolOptions(self, context, parent=sub)
+            col.separator(factor = 1)
+            sub = col.row(align=True)
+            tool_bt(parent=sub, cmd=0, w=2, h=1.4, text=False, icon='LARGE')
+            BrushCopy(self, context, parent=sub)
+            sub = col.row(align=True)            
+            tool_grid(parent=sub, col=5, align=True, slotmin=1, slotmax=6, w=2, h=1.4, text=True, icon='LARGE')
+            sub = col.row(align=True)
+            Color(self, context, parent=sub)   
+
+            Stroke(self, context, parent=sub)
+
+            sub = col.row(align=True)
+            col.menu_contents("VIEW3D_MT_TextureMask")
+            sub = col.row(align=True)
+            sub.menu_contents("VIEW3D_MT_BrushTexture")
+
+            sub = col.row(align=True)
+            ColorPalette(self, context, parent=sub)
+
+        if context.mode == 'PAINT_VERTEX':
+            brush = context.tool_settings.vertex_paint.brush
+
+            sub = col.row(align=True)
+            sub.prop(brush, "blend", text="")
+            VertexBrushSettings(self, context, parent=sub)
+
+            sub = col.row(align=True)
+            ToolOptions(self, context, parent=sub)
+            col.separator(factor = 1)
+            sub = col.row(align=True)
+            tool_bt(parent=sub, cmd=0, w=2, h=1.4, text=False, icon='LARGE')
+            BrushCopy(self, context, parent=sub)
+            sub = col.row(align=True)            
+            tool_grid(parent=sub, col=5, align=True, slotmin=1, slotmax=4, w=2, h=1.4, text=True, icon='LARGE')
+
+
+            sub = col.row(align=True)
+            Color(self, context, parent=sub)   
+
+            Stroke(self, context, parent=sub)
+
+            sub = col.row(align=True)
+            col.menu_contents("VIEW3D_MT_TextureMask")
+            sub = col.row(align=True)
+            sub.menu_contents("VIEW3D_MT_BrushTexture")
+
+            sub = col.row(align=True)
+            ColorPalette(self, context, parent=sub)
+
+        if context.mode == 'PAINT_WEIGHT':
+            brush = context.tool_settings.vertex_paint.brush
+
+            sub = col.row(align=True)
+            sub.prop(brush, "blend", text="")
+            VertexBrushSettings(self, context, parent=sub)
+
+            sub = col.row(align=True)
+            ToolOptions(self, context, parent=sub)
+            col.separator(factor = 1)
+            sub = col.row(align=True)
+            tool_bt(parent=sub, cmd=0, w=2, h=1.4, text=False, icon='LARGE')
+            BrushCopy(self, context, parent=sub)
+            sub = col.row(align=True)            
+            tool_grid(parent=sub, col=5, align=True, slotmin=1, slotmax=7, w=2, h=1.4, text=True, icon='LARGE')
+            sub = col.row(align=True)
+  
+            Stroke(self, context, parent=sub)
 
 #WindowManager.invoke_props_dialog(operator, width=300, height=20)
+
+
 class SelectMenu(bpy.types.Panel):
     bl_label = "SELECTIONS"
     bl_idname = "OBJECT_PT_select_menu"
@@ -291,6 +477,13 @@ class SelectMenu(bpy.types.Panel):
             op.prop1 ='direction="CHILD"'
             op.prop2 ='extend=True'
 
+            sub = col.row()
+            subsub = sub.column()
+            subsub.label(text='')
+            subsub = sub.column()
+            subsub.ui_units_x = 4
+            subsub.operator("screen.redo_last", text="CMD >>")
+
         if context.mode == 'EDIT_MESH':
             sub = col.row(align=True)
             sub.scale_y = 1
@@ -323,8 +516,8 @@ class SelectMenu(bpy.types.Panel):
             col.separator(factor = 2)
             sub = col.row(align=True)
             sub.operator('mesh.select_linked',text='LINKED')
-            sub.operator('mesh.shortest_path_select',text='SHRT')
-            sub.operator('mesh.faces_select_linked_flat',text='L-FLAT')
+            sub.operator('mesh.shortest_path_select',text='PATH')
+            sub.operator('mesh.faces_select_linked_flat',text='FLAT')
 
             col.separator(factor = 2)
             sub = col.row(align=True)
@@ -338,12 +531,51 @@ class SelectMenu(bpy.types.Panel):
             subsub.operator('mesh.select_interior_faces',text='INTERIOR')
             subsub.operator('mesh.select_face_by_sides',text='COUNT')
 
-        sub = col.row()
-        subsub = sub.column()
-        subsub.label(text='')
-        subsub = sub.column()
-        subsub.ui_units_x = 4
-        subsub.operator("screen.redo_last", text="CMD >>")
+            sub = col.row()
+            subsub = sub.column()
+            subsub.label(text='')
+            subsub = sub.column()
+            subsub.ui_units_x = 4
+            subsub.operator("screen.redo_last", text="CMD >>")
+
+
+        if context.mode == 'SCULPT':
+            sub = col.row()
+            SculptMask(self, context, parent=sub)
+
+            sub = col.row()
+            tool_bt(parent=sub, cmd=13, w=2, h=1.4, text=False, icon='LARGE') 
+            subsub = sub.column()
+            subsub.ui_units_x = 3.4
+            item = subsub.column()
+            item.scale_y = 0.5
+            item.label(text="MASK")
+            grid = subsub.grid_flow(columns=3, align=True)
+            tool_bt(parent=grid, cmd=27, w=1.2, h=0.8, text=False, icon='CUSTOM')
+            tool_bt(parent=grid, cmd=28, w=1, h=0.8, text=False, icon='CUSTOM')
+            tool_bt(parent=grid, cmd=29, w=1.2, h=0.8, text=False, icon='CUSTOM')
+
+            subsub = sub.column()
+            subsub.ui_units_x = 2.4
+            item = subsub.column()
+            item.scale_y = 0.5
+            item.label(text="TRIM")
+            grid = subsub.grid_flow(columns=2, align=True)
+            tool_bt(parent=grid, cmd=16, w=1.2, h=0.8, icon="CUSTOM", text=False)
+            tool_bt(parent=grid, cmd=17, w=1.2, h=0.8, icon="CUSTOM", text=False)
+
+            col.separator(factor = 0.4)
+            sub = col.row()
+            tool_bt(parent=sub, cmd=14, w=2, h=1.4, text=False, icon='LARGE')
+            subsub = sub.column()       
+            grid = subsub.grid_flow(columns=2, align=True)
+            tool_bt(parent=grid, cmd=30, w=1.5, h=0.75, text=False, icon='CUSTOM')
+            tool_bt(parent=grid, cmd=31, w=1.5, h=0.75, text=False, icon='CUSTOM')
+            tool_bt(parent=subsub, cmd=32, w=1.2, h=0.5, text=False, icon='OFF')
+            tool_bt(parent=sub, cmd=15, w=2.4, h=1.4, text=False, icon='LARGE')
+
+            sub = col.row()
+            SculptFaceSet(self, context, parent=sub)
 
 
 addon_keymaps = []
@@ -362,14 +594,6 @@ def register():
         kmi.properties.name = ModesMenu.bl_idname
         addon_keymaps.append((km, kmi))
 
-        kmi = km.keymap_items.new('wm.call_menu_pie', 'S', 'PRESS', ctrl=True, shift=False, alt=False)
-        kmi.properties.name = FileMenu.bl_idname
-        addon_keymaps.append((km, kmi))
-
-        kmi = km.keymap_items.new('wm.call_panel', 'D', 'PRESS', ctrl=False, shift=False, alt=False)
-        kmi.properties.name = PropMenu.bl_idname
-        addon_keymaps.append((km, kmi))
-
         kmi = km.keymap_items.new('wm.call_panel', 'SPACE', 'PRESS', ctrl=False, shift=False, alt=False)
         kmi.properties.name = ToolMenu.bl_idname
         #kmi.properties.keep_open = True
@@ -379,6 +603,17 @@ def register():
         kmi.properties.name = SelectMenu.bl_idname
         addon_keymaps.append((km, kmi))
     
+        km = wm.keyconfigs.addon.keymaps.new(name='Window', space_type='EMPTY')
+
+        kmi = km.keymap_items.new('wm.call_menu_pie', 'S', 'PRESS', ctrl=True, shift=False, alt=False)
+        kmi.properties.name = FileMenu.bl_idname
+        addon_keymaps.append((km, kmi))
+
+        kmi = km.keymap_items.new('wm.call_panel', 'D', 'PRESS', ctrl=False, shift=False, alt=False)
+        kmi.properties.name = PropMenu.bl_idname
+        addon_keymaps.append((km, kmi))
+
+
 def unregister():
     for cls in classes:
         bpy.utils.unregister_class(cls)

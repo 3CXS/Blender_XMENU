@@ -64,7 +64,7 @@ def tool_grid(parent, col, align, slotmin, slotmax, h=1, w=1, text=False, icon="
     grid = parent.grid_flow(columns=col, align=align)
     update_toolset()
     for i in range(slotmin,slotmax):
-        col = grid.column()
+        col = grid.column(align=True)
         tool_op(parent=col, cmd=i, w=w, h=h, text=text, icon=icon)
 
 def tool_op(parent, cmd ,w=1, h=1, small=False, text=False, icon="NONE"):    
@@ -537,14 +537,19 @@ class Override(bpy.types.Operator):
         op += self.cmd
         op += '()'
 
-        area = [area for area in bpy.context.screen.areas if area.type == "VIEW_3D"][0]
-        
+        for window in bpy.context.window_manager.windows:
+            screen = window.screen
+            for area in screen.areas:
+                if area.type == "VIEW_3D":
+                    area = area
+
         window = bpy.context.window
         screen =  bpy.context.screen
         region = area.regions[-1]
         scene = bpy.context.scene
         space_data = area.spaces.active
         ob = context.active_object
+
         with context.temp_override(area=area, region=region, object=ob):
             eval(op)
             return {'FINISHED'}

@@ -120,6 +120,27 @@ class ImportMenu(bpy.types.Menu):
             op.axis_forward = 'Y'
             op.axis_up = 'Z'
 
+
+
+def ViewCamSettings(self, context, layout):
+
+    view = context.space_data
+
+    layout.use_property_split = False
+    layout.use_property_decorate = False  # No animation.
+
+    row = layout.row(align=True)
+
+    subcol = row.column()
+    #   subcol.active = bool(view.region_3d.view_perspective != 'CAMERA' or view.region_quadviews)
+    subcol.prop(view, "lens", text="F")
+
+    subsub = row.column(align=True)
+    subsub.scale_y = 0.7    
+    subsub.prop(view, "clip_start", text="Clip")
+    subsub.prop(view, "clip_end", text="End")
+
+
 def HideObject(self, context, parent):
         ob = context.active_object
 
@@ -895,7 +916,7 @@ def SculptExtra(self, context, parent):
 
     col = layout.column()
     col.alignment = 'RIGHT'
-    col.ui_units_x = 3
+    col.ui_units_x = 4
     col.scale_y = 0.7
 
     if capabilities.has_plane_offset:
@@ -904,6 +925,8 @@ def SculptExtra(self, context, parent):
         sub = col.row(align = True)
         sub.prop(brush, "use_plane_trim", slider=False, toggle=True, text='TRIM')
         sub.prop(brush, "plane_trim", slider=True)
+        sub = col.row(align=True)
+        sub.label(text='')
 
     elif sculpt_tool == 'PAINT':
         sub = col.row(align=True)
@@ -918,6 +941,10 @@ def SculptExtra(self, context, parent):
         sub.prop(brush, "tip_scale_x", slider=True, text='SCALE')
 
     else:
+        sub = col.row(align=True)
+        sub.label(text='')
+        sub = col.row(align=True)
+        sub.label(text='')
         sub = col.row(align=True)
         sub.label(text='')
 
@@ -1037,9 +1064,6 @@ def VertexBrushSettings(self, context, parent):
     else:
         col.label(text="")
 
-    col = row.column()
-    col.ui_units_x = 1.7
-    col.label(text="")
 
 def BrushCopy(self, context, parent):
     layout = parent
@@ -1308,21 +1332,22 @@ class VIEW3D_MT_StrokeAdv(bpy.types.Menu):
 
 def SculptMask(self, context, parent):
     col = parent.column(align=True)
-    col.scale_y = 0.7 
     row = col.row()
 
     sub = row.column(align=True)
+    sub.scale_y = 1
     sub.ui_units_x = 4
     subrow = sub.row(align=True)
     #subrow.operator('xmenu.mask', text='FILL').cmd='FILL'
     subrow.operator('xmenu.mask', text='CLR').cmd='CLEAR'
     subrow.operator('xmenu.mask', text='INV').cmd='INVERT'
-    subrow = sub.row(align=True)
-    subrow.operator('xmenu.mask', text='DIRT').cmd='DIRTMASK'
-    subrow.operator('xmenu.mask', text='SLICE').cmd='SLICEOBJ'
+    #subrow = sub.row(align=True)
+    #subrow.operator('xmenu.mask', text='DIRT').cmd='DIRTMASK'
+    #subrow.operator('xmenu.mask', text='SLICE').cmd='SLICEOBJ'
 
     sub = row.column(align=True)
     sub.ui_units_x = 4
+    sub.scale_y = 0.7
     subrow = sub.row(align=True)
     subrow.operator('xmenu.mask', text='-').cmd='SHRINK'
     subrow.operator('xmenu.mask', text='+').cmd='GROW'

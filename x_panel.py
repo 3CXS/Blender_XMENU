@@ -100,9 +100,7 @@ class XPanel(bpy.types.Panel):
         funct_bt(parent=row, cmd='hud', tog=True, w=2, h=1.4, label='INFO', icon="NONE") 
         funct_bt(parent=row, cmd='pivot', tog=True, w=1.2, h=1.4, label='ORIG', icon="OUTLINER_DATA_EMPTY")
 
-        row = top_right_outer.row(align=True)
-        row.ui_units_x = 4
-        History(self, context, parent=row)
+
 
         col = top_right_outer.column()
         col.ui_units_x = 0.2
@@ -126,18 +124,37 @@ class XPanel(bpy.types.Panel):
 
             #TOP-MID//////////////////////////////////////////////////////////////////#
             col = top_mid.column()
-            col.ui_units_x = 6
-            #col.alignment = 'CENTER'
-            ObjectToolSettings(self, context, parent=top_mid)
-            col = top_mid.column()
-            #col.ui_units_x = 6
-            #col.scale_y = 0.7
-            col.label(text="")
+            row = col.row(align=True)
+            #row.ui_units_x = 22
+            sub = row.column()
+            sub.ui_units_x = 3    
+            sub.menu("VIEW3D_MT_add", text="Add", text_ctxt=i18n_contexts.operator_default)
+
+            row.separator(factor = 2)
+            tool_bt(parent=row, cmd=5, w=2, h=1.4, text=False, icon='LARGE')
+            tool_bt(parent=row, cmd=6, w=2, h=1.4, text=False, icon='LARGE')
+            tool_bt(parent=row, cmd=7, w=2, h=1.4, text=False, icon='LARGE')
+            tool_bt(parent=row, cmd=8, w=2, h=1.4, text=False, icon='LARGE')
+            row.separator(factor = 2)
+            tool_bt(parent=row, cmd=0, w=2, h=1.4, text=False, icon='LARGE')
+            tool_bt(parent=row, cmd=1, w=2, h=1.4, text=False, icon='LARGE')
+            tool_bt(parent=row, cmd=2, w=2, h=1.4, text=False, icon='LARGE')
+            tool_bt(parent=row, cmd=3, w=2, h=1.4, text=False, icon='LARGE')
+            tool_bt(parent=row, cmd=4, w=2, h=1.4, text=False, icon='LARGE')
+
+            row.separator(factor = 2)
+            col = row.column()
+            col.ui_units_x = 5
+            ObjectToolSettings(self, context, parent=col)
+
+            row.separator(factor = 2)
+            tool_bt(parent=row, cmd=13, w=2, h=1.4, text=False, icon='LARGE')
+            row.separator(factor = 1)
+            tool_bt(parent=row, cmd=14, w=2, h=1.4, text=False, icon='LARGE')
             #TOP-RIGHT////////////////////////////////////////////////////////////////#
 
             ToolOptions(self, context, parent=top_right)
             top_right.separator(factor = 2)
-            ViewCam(self, context, parent=top_right)
             #MAIN-ROW/////////////////////////////////////////////////////////////////#
             #MAIN-LEFT////////////////////////////////////////////////////////////////#
             col = main_leftrow.column(align=True)
@@ -188,18 +205,7 @@ class XPanel(bpy.types.Panel):
 
             #MAIN-MID//////////////////////////////////////////////////////////////////#
             col = main_midrow.column(align=False)
-            row = col.row(align=True)
-            row.ui_units_x = 18
-            tool_bt(parent=row, cmd=5, w=2, h=1.4, text=False, icon='LARGE')
-            tool_bt(parent=row, cmd=6, w=2, h=1.4, text=False, icon='LARGE')
-            tool_bt(parent=row, cmd=7, w=2, h=1.4, text=False, icon='LARGE')
-            tool_bt(parent=row, cmd=8, w=2, h=1.4, text=False, icon='LARGE')
-            row.separator(factor = 2)
-            tool_bt(parent=row, cmd=0, w=2, h=1.4, text=False, icon='LARGE')
-            tool_bt(parent=row, cmd=1, w=2, h=1.4, text=False, icon='LARGE')
-            tool_bt(parent=row, cmd=2, w=2, h=1.4, text=False, icon='LARGE')
-            tool_bt(parent=row, cmd=3, w=2, h=1.4, text=False, icon='LARGE')
-            tool_bt(parent=row, cmd=4, w=2, h=1.4, text=False, icon='LARGE')
+
             col.separator(factor = 1)
             row = col.row(align=True)
             row.ui_units_x = 18
@@ -208,14 +214,11 @@ class XPanel(bpy.types.Panel):
             tool_bt(parent=row, cmd=11, w=2, h=1.4, text=False, icon='LARGE')
             tool_bt(parent=row, cmd=12, w=2, h=1.4, text=False, icon='LARGE')
             row.separator(factor = 4)
-            tool_bt(parent=row, cmd=13, w=2, h=1.4, text=False, icon='LARGE')
-            row.separator(factor = 2)
-            tool_bt(parent=row, cmd=14, w=2, h=1.4, text=False, icon='LARGE')
+
             col.separator(factor = 1)
 
             row = col.row(align=False)
             row.ui_units_x = 4
-            row.menu("VIEW3D_MT_add", text="Add", text_ctxt=i18n_contexts.operator_default)
             row.operator('mesh.primitive_plane_add', text="", icon='MESH_PLANE')
             row.operator('mesh.primitive_cube_add', text="", icon='MESH_CUBE')
             row.operator('mesh.primitive_uv_sphere_add', text="", icon='MESH_UVSPHERE')
@@ -243,11 +246,27 @@ class XPanel(bpy.types.Panel):
             col.label(text="")
 
             #TOP-MID//////////////////////////////////////////////////////////////////#
-            col = top_mid.column()
+            col = top_mid.column(align=False)
             col.alignment = 'CENTER'
-            col.scale_y = 0.7
-            col.label(text="---------")
-            col.label(text="")
+
+            row = col.row(align=True)
+            tool_bt(parent=row, cmd=5, w=2, h=1.4, text=False, icon='LARGE')
+            tool_bt(parent=row, cmd=6, w=2, h=1.4, text=False, icon='LARGE')
+            tool_bt(parent=row, cmd=7, w=2, h=1.4, text=False, icon='LARGE')
+            tool_bt(parent=row, cmd=8, w=2, h=1.4, text=False, icon='LARGE')
+
+            row.separator(factor = 2)
+            tool_bt(parent=row, cmd=0, w=2, h=1.4, text=False, icon='LARGE')
+            tool_bt(parent=row, cmd=1, w=2, h=1.4, text=False, icon='LARGE')
+            tool_bt(parent=row, cmd=2, w=2, h=1.4, text=False, icon='LARGE')
+            tool_bt(parent=row, cmd=3, w=2, h=1.4, text=False, icon='LARGE')
+            tool_bt(parent=row, cmd=4, w=2, h=1.4, text=False, icon='LARGE')
+
+            row.separator(factor = 2)
+            tool_bt(parent=row, cmd=9, w=2, h=1.4, text=False, icon='LARGE')
+            tool_bt(parent=row, cmd=10, w=2, h=1.4, text=False, icon='LARGE')
+            tool_bt(parent=row, cmd=11, w=2, h=1.4, text=False, icon='LARGE')
+            tool_bt(parent=row, cmd=12, w=2, h=1.4, text=False, icon='LARGE')
             #col.menu_contents("OBJECT_MT_edgedata")
 
             #TOP-RIGHT////////////////////////////////////////////////////////////////#
@@ -269,22 +288,6 @@ class XPanel(bpy.types.Panel):
 
             #MAIN-MID/////////////////////////////////////////////////////////////////#
             # MID 1 //////////////////////////////////////////////////////////////////#
-            col = main_midrow.column(align=False)
-            col.ui_units_x = 5
-            col.operator('mesh.remove_doubles', text="MERGE BY DIST")
-            col = main_midrow.column(align=False)
-            row = col.row(align=True)
-            tool_bt(parent=row, cmd=5, w=2, h=1.4, text=False, icon='LARGE')
-            tool_bt(parent=row, cmd=6, w=2, h=1.4, text=False, icon='LARGE')
-            tool_bt(parent=row, cmd=7, w=2, h=1.4, text=False, icon='LARGE')
-            tool_bt(parent=row, cmd=8, w=2, h=1.4, text=False, icon='LARGE')
-
-            col.separator(factor = 1)
-            row = col.row(align=True)
-            tool_bt(parent=row, cmd=9, w=2, h=1.4, text=False, icon='LARGE')
-            tool_bt(parent=row, cmd=10, w=2, h=1.4, text=False, icon='LARGE')
-            tool_bt(parent=row, cmd=11, w=2, h=1.4, text=False, icon='LARGE')
-            tool_bt(parent=row, cmd=12, w=2, h=1.4, text=False, icon='LARGE')
 
             # MID 2 //////////////////////////////////////////////////////////////////#
             col = main_midrow.column(align=False)
@@ -304,12 +307,7 @@ class XPanel(bpy.types.Panel):
             # MID 3 //////////////////////////////////////////////////////////////////#
             col = main_midrow.column(align=False)
 
-            row = col.row(align=True)
-            tool_bt(parent=row, cmd=0, w=2, h=1.4, text=False, icon='LARGE')
-            tool_bt(parent=row, cmd=1, w=2, h=1.4, text=False, icon='LARGE')
-            tool_bt(parent=row, cmd=2, w=2, h=1.4, text=False, icon='LARGE')
-            tool_bt(parent=row, cmd=3, w=2, h=1.4, text=False, icon='LARGE')
-            tool_bt(parent=row, cmd=4, w=2, h=1.4, text=False, icon='LARGE')
+
 
             #MAIN-RIGHT///////////////////////////////////////////////////////////////#
 
@@ -412,10 +410,10 @@ class XPanel(bpy.types.Panel):
             main_midrow.separator(factor = 0.4)
             col = main_midrow.column()
             row = col.row(align=True)
-            tool_grid(parent=row, col=3, align=True, slotmin=1, slotmax=4, w=2, h=1.4, text=True, icon='LARGE')
+            tool_grid(parent=row, col=3, align=False, slotmin=1, slotmax=4, w=2, h=1.4, text=True, icon='LARGE')
             col.separator(factor = 0.4)
             row = col.row(align=True)
-            tool_grid(parent=row, col=3, align=True, slotmin=4, slotmax=7, w=2, h=1.4, text=True, icon='LARGE')
+            tool_grid(parent=row, col=3, align=False, slotmin=4, slotmax=7, w=2, h=1.4, text=True, icon='LARGE')
             col.separator(factor = 0.4)
             row = col.row(align=True)
             SculptRake(self, context, parent=row)
@@ -423,7 +421,7 @@ class XPanel(bpy.types.Panel):
             col = main_midrow.column()
             row = col.row()
             row.separator(factor = 0.4)
-            tool_grid(parent=row, col=2, align=True, slotmin=7, slotmax=9, w=2, h=1.4, text=True, icon='LARGE')
+            tool_grid(parent=row, col=2, align=False, slotmin=7, slotmax=9, w=2, h=1.4, text=True, icon='LARGE')
             row.separator(factor = 0.4)
             col.separator(factor = 0.4)
             row = col.row()

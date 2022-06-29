@@ -4,7 +4,7 @@ from bpy.types import Operator, AddonPreferences, Preferences, Header, Panel, Me
 from bl_ui.space_toolsystem_common import (ToolSelectPanelHelper, ToolDef)
 from .hud import redraw_regions
 from .functions import tool_grid, tool_bt, funct_bt, paint_settings
-from .menuitems import BrushCopy, ModeSelector, Overlay, HideObject
+from .menuitems import BrushCopy, ModeSelector, Overlay, HideObject, ViewCamSettings, History
 
 #////////////////////////////////////////////////////////////////////////////////////////////#
 
@@ -37,16 +37,17 @@ def draw(self, context):
     #sub = left.row(align=True)
     #sub.scale_x = 1.4
     #sub.operator("screen.redo_last", text="", icon='PREFERENCES')
-    left.separator(factor = 2)
     ModeSelector(self, context, left)
-    left.separator(factor = 2)
+    left.separator(factor = 1)
 
     sub = left.row(align=True)
+    sub.popover("OBJECT_PT_viewcam", text='', icon="CAMERA_DATA")
     funct_bt(parent=sub, cmd='framea', w=2, h=1, label='ALL', icon="NONE")
     funct_bt(parent=sub, cmd='frames', w=2, h=1, label='FRME', icon="NONE")
     funct_bt(parent=sub, cmd='localview',tog=True, w=2, h=1, label='ISO', icon="NONE")
 
     sub.separator(factor = 1)
+
     for window in bpy.context.window_manager.windows:
         screen = window.screen
         for area in screen.areas:
@@ -65,27 +66,34 @@ def draw(self, context):
         icon_area = 'TRIA_UP'
     funct_bt(parent=sub, cmd='maxarea', tog=False, w=1.2, h=1, label='', icon=icon_area)
 
-    row.separator(factor = 1)
+    #row.separator(factor = 1)
 
     mid = row.row()
-    mid.ui_units_x = 24
+    mid.ui_units_x = 27
     mid.alignment = 'CENTER'
     if context.mode == 'OBJECT':
         #HideObject(self, context, parent=mid)
         select_hud(mid, self, context)
     if context.mode == 'EDIT_MESH':
         sub = mid.row(align=True)
-        #sub.ui_units_x = 6
+        subsub = sub.row()
+        subsub.ui_units_x = 1
         sub.operator('mesh.reveal', icon='HIDE_OFF', text="")
-        sub.operator('mesh.hide', text="HIDE").unselected=False
+        subsub = sub.row()
+        subsub.ui_units_x = 2
+        subsub.operator('mesh.hide', text="HIDE").unselected=False
         sub.separator(factor=4)
-        sub.template_edit_mode_selection()  
+        subsub = sub.row()
+        subsub.scale_x = 1.5
+        subsub.template_edit_mode_selection()  
         select_hud(mid, self, context)
         sub = mid.row()
         subsub = sub.row()
-        subsub.ui_units_x = 5
-        subsub.separator(factor = 1)
+        subsub.ui_units_x = 4
         subsub.menu_contents("VIEW3D_MT_sym")
+        subsub = sub.row()
+        subsub.ui_units_x = 1
+        subsub.label(text="")
     if context.mode == 'SCULPT':
         brush = context.tool_settings.sculpt.brush
         ColorHud(self, context, parent=mid)
@@ -199,16 +207,38 @@ def draw(self, context):
     funct_bt(parent=subsub, cmd='floater_04', tog=True, w=2, h=1, label='', icon="NODE_MATERIAL")
     funct_bt(parent=subsub, cmd='floater_05', tog=True, w=2, h=1, label='', icon="UV")
     funct_bt(parent=subsub, cmd='floater_06', tog=True, w=2, h=1, label='', icon="IMAGE")
-    #subsub.menu("VIEW3D_MT_Floater", text=">>")
     subsub.popover("OBJECT_PT_floater", text=' ', text_ctxt='', icon='MENU_PANEL')
 
-    subsub.separator(factor = 2)
-
-    #subsub.menu("VIEW3D_MT_Material")
+    subsub = sub.row(align=True)
+    subsub.ui_units_x = 3
+    subsub.label(text='')
+    subsub = sub.row(align=True)
+    subsub.ui_units_x = 4
+    History(self, context, parent=subsub)
 
     redraw_regions()
 
 #////////////////////////////////////////////////////////////////////////////////////////////#
+class ViewCamPanel(bpy.types.Panel):
+    bl_idname = "OBJECT_PT_viewcam"
+    bl_label = "ViewCam"
+    bl_space_type = 'PROPERTIES'
+    bl_region_type = 'WINDOW'
+    bl_context = "scene"
+    bl_order = 1000
+    bl_options = {'DEFAULT_CLOSED',}
+
+    def draw(self, context):
+        layout = self.layout
+
+        view = context.space_data
+
+        col = layout.column(align=True)
+        col.prop(view, "lens", text="F")    
+        col.prop(view, "clip_start", text="Clip")
+        col.prop(view, "clip_end", text="End")
+
+
 class FloaterPanel(bpy.types.Panel):
     bl_idname = "OBJECT_PT_floater"
     bl_label = "Floaters"
@@ -272,7 +302,7 @@ def ColorHud(self, context, parent):
 
 def select_hud(parent, self, context):
     sub = parent.row()
-    sub.alignment = 'CENTER'
+    sub.alignment = 'LEFT'
     sub.ui_units_x = 12
     tool = context.workspace.tools.from_space_view3d_mode(context.mode)
     toolname = context.workspace.tools.from_space_view3d_mode(context.mode).idname
@@ -331,7 +361,7 @@ def gp_select_hud(parent, self, context):
 
 
 #////////////////////////////////////////////////////////////////////////////////////////////#
-classes = (FloaterPanel,)
+classes = (FloaterPanel, ViewCamPanel)
 
 def register():
     for cls in classes:
