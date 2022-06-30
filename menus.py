@@ -55,11 +55,11 @@ class FileMenu(bpy.types.Menu):
         sub.menu("TOPBAR_MT_file_open_recent", text="RECENT")
 
 class PropMenu(bpy.types.Panel):
-    bl_label = "MAIN"
+    bl_label = "PROPMENU"
     bl_idname = "OBJECT_PT_main_menu"
-    bl_space_type = 'PROPERTIES'
+    bl_space_type = 'VIEW_3D'
     bl_region_type = 'WINDOW'
-    bl_context = "material"
+    bl_context = "scene"
     bl_order = 1000
     bl_options = {'DEFAULT_CLOSED',}
 
@@ -100,11 +100,27 @@ class PropMenu(bpy.types.Panel):
             SculptFilterSettings(self, context, parent=subrow)
 
             VertexColor(self, context, parent=col)
+        if context.mode == 'PAINT_VERTEX':
+            col = layout.column()
+            VertexColor(self, context, parent=col)
+
+        if context.mode == 'PAINT_WEIGHT':
+            col = layout.column()
+            VertexGroups(self, context, parent=col)
+
+        if bpy.context.mode == 'PAINT_GPENCIL':
+            col = layout.column()
+            GPLayers(self, context, parent=col)
+            col.menu_contents("VIEW3D_MT_Material")
+            col.menu("GPENCIL_MT_material_context_menu")
+            col.menu_contents("VIEW3D_MT_GPStroke")
+            col.menu_contents("VIEW3D_MT_GPFill")
+
 
 class ToolMenu(bpy.types.Panel):
     bl_idname = "OBJECT_PT_tool_menu"
     bl_label = "TOOLS"
-    bl_space_type = 'PROPERTIES'
+    bl_space_type = 'VIEW_3D'
     bl_region_type = 'WINDOW'
     bl_context = "scene"
     bl_order = 1000
@@ -290,16 +306,7 @@ class ToolMenu(bpy.types.Panel):
 
         if context.mode == 'SCULPT':
             brush = context.tool_settings.image_paint.brush
-            #sub = col.row(align=True)
-            #sub.scale_y = 1.4
-            #SculptBrushSettings(self, context, parent=sub)
-            #sub = col.row(align=True)
-            #ToolOptions(self, context, parent=sub)
-            #col.separator(factor = 1)
-
-            #sub = col.row(align=True)
-            #SculptToolSettings(self, context, parent=sub)
-            #BrushCopy(self, context, parent=sub)
+ 
             sub = col.row(align=True)
             subsub = sub.column(align=True)
             subsub.ui_units_x = 2
@@ -324,23 +331,16 @@ class ToolMenu(bpy.types.Panel):
             tool_bt(parent=sub, cmd=8, w=2, h=1.4, text=True, icon='LARGE')
 
             sub = col.row(align=True)
-            tool_bt(parent=sub, cmd=9, w=2, h=1.4, text=True, icon='LARGE')
-            tool_bt(parent=sub, cmd=10, w=2, h=1.4, text=True, icon='LARGE')
-            tool_bt(parent=sub, cmd=11, w=2, h=1.4, text=True, icon='LARGE')
+            tool_grid(parent=sub, col=3, align=True, slotmin=9, slotmax=12, w=2, h=1.4, text=True, icon='LARGE')
+            sub.separator(factor = 1)
             tool_bt(parent=sub, cmd=12, w=2, h=1.4, text=True, icon='LARGE')
 
-            sub = col.row(align=True)
-            sub.menu_contents("VIEW3D_MT_Falloff")
-            sub = col.row(align=True)
-            SculptExtra(self, context, parent=sub)
             tool = context.workspace.tools.from_space_view3d_mode(bpy.context.mode).idname
             if tool == 'builtin_brush.Paint':
                 brush = context.tool_settings.sculpt.brush
                 subsub = sub.column(align=True)
                 subsub.ui_units_x = 4
                 subsub.prop(brush, "blend", text="")
-            else:
-                SculptRake(self, context, parent=sub)
 
 
             sub = col.row(align=True)
@@ -348,12 +348,15 @@ class ToolMenu(bpy.types.Panel):
             subsubsub = subsub.row(align=True)
             tool_bt(parent=subsubsub, cmd=36, w=2, h=1.4, text=True, icon='LARGE')
             tool_bt(parent=subsubsub, cmd=37, w=2, h=1.4, text=True, icon='LARGE')
+            subsub.separator(factor = 1)
             Color(self, context, parent=subsub)   
-
+            sub.separator(factor = 1)
             Stroke(self, context, parent=sub)
 
+            col.separator(factor = 1)
             sub = col.row(align=True)
             col.menu_contents("VIEW3D_MT_TextureMask")
+            col.separator(factor = 1)
             sub = col.row(align=True)
             sub.menu_contents("VIEW3D_MT_BrushTexture")
 
@@ -365,21 +368,29 @@ class ToolMenu(bpy.types.Panel):
         if context.mode == 'PAINT_TEXTURE':
             brush = context.tool_settings.image_paint.brush
 
-            sub = col.row(align=True)
+            split = col.split(factor=0.5)
+            sub = split.row()
             sub.prop(brush, "blend", text="")
-            TextureBrushSettings(self, context, parent=sub)
+            sub = split.row()
+            subsub = sub.column()
+            subsub.ui_units_x = 2
+            subsub.menu_contents("VIEW3D_MT_Falloff")
 
             sub = col.row(align=True)
-            ToolOptions(self, context, parent=sub)
-            col.separator(factor = 1)
+
+            TextureBrushSettings(self, context, parent=sub)
+
             sub = col.row(align=True)
             tool_bt(parent=sub, cmd=0, w=2, h=1.4, text=False, icon='LARGE')
             BrushCopy(self, context, parent=sub)
             sub = col.row(align=True)            
-            tool_grid(parent=sub, col=5, align=True, slotmin=1, slotmax=6, w=2, h=1.4, text=True, icon='LARGE')
+            tool_grid(parent=sub, col=5, align=True, slotmin=1, slotmax=6, w=2, h=1.4, text=False, icon='LARGE')
+            col.separator(factor = 1)
+            sub = col.row(align=True)
+            ToolOptions(self, context, parent=sub)
+            col.separator(factor = 1)
             sub = col.row(align=True)
             Color(self, context, parent=sub)   
-
             Stroke(self, context, parent=sub)
 
             sub = col.row(align=True)
@@ -393,12 +404,15 @@ class ToolMenu(bpy.types.Panel):
         if context.mode == 'PAINT_VERTEX':
             brush = context.tool_settings.vertex_paint.brush
 
-            sub = col.row(align=True)
+            split = col.split(factor=0.5)
+            sub = split.row()
             sub.prop(brush, "blend", text="")
-            VertexBrushSettings(self, context, parent=sub)
-
+            sub = split.row()
+            subsub = sub.column()
+            subsub.ui_units_x = 2
+            subsub.menu_contents("VIEW3D_MT_Falloff")
             sub = col.row(align=True)
-            ToolOptions(self, context, parent=sub)
+            VertexBrushSettings(self, context, parent=sub)
             col.separator(factor = 1)
             sub = col.row(align=True)
             tool_bt(parent=sub, cmd=0, w=2, h=1.4, text=False, icon='LARGE')
@@ -423,12 +437,27 @@ class ToolMenu(bpy.types.Panel):
         if context.mode == 'PAINT_WEIGHT':
             brush = context.tool_settings.vertex_paint.brush
 
-            sub = col.row(align=True)
+            split = col.split(factor=0.5)
+            sub = split.row()
             sub.prop(brush, "blend", text="")
-            VertexBrushSettings(self, context, parent=sub)
+            sub = split.row()
+            subsub = sub.column()
+            subsub.ui_units_x = 2
+            subsub.menu_contents("VIEW3D_MT_Falloff")
 
             sub = col.row(align=True)
-            ToolOptions(self, context, parent=sub)
+
+            sub.prop(brush, "use_frontface", text="FRONT", toggle=True)
+            sub.prop(brush, "use_accumulate", text="ACCU", toggle=True)
+
+            sub = col.row(align=True)
+            ts = context.tool_settings
+            wp = ts.weight_paint
+            sub.prop(ts, "use_auto_normalize", text="NORM", toggle=True)
+            sub.prop(ts, "use_lock_relative", text="RELAT", toggle=True)
+            sub.prop(ts, "use_multipaint", text="MPAINT", toggle=True)
+            sub.prop(wp, "use_group_restrict", text="RESTR", toggle=True)
+
             col.separator(factor = 1)
             sub = col.row(align=True)
             tool_bt(parent=sub, cmd=0, w=2, h=1.4, text=False, icon='LARGE')
@@ -436,16 +465,13 @@ class ToolMenu(bpy.types.Panel):
             sub = col.row(align=True)            
             tool_grid(parent=sub, col=5, align=True, slotmin=1, slotmax=7, w=2, h=1.4, text=True, icon='LARGE')
             sub = col.row(align=True)
-  
             Stroke(self, context, parent=sub)
-
-#WindowManager.invoke_props_dialog(operator, width=300, height=20)
 
 
 class SelectMenu(bpy.types.Panel):
     bl_label = "SELECTIONS"
     bl_idname = "OBJECT_PT_select_menu"
-    bl_space_type = 'PROPERTIES'
+    bl_space_type = 'VIEW_3D'
     bl_region_type = 'WINDOW'
     bl_context = "scene"
     bl_order = 1000
@@ -455,7 +481,7 @@ class SelectMenu(bpy.types.Panel):
         layout = self.layout
 
         edit_mode = context.scene.tool_settings.mesh_select_mode
-        col = layout.column()
+        col = layout.column(align=True)
 
         if context.mode == 'OBJECT':
 
@@ -543,6 +569,17 @@ class SelectMenu(bpy.types.Panel):
             sub = col.row()
             SculptMask(self, context, parent=sub)
 
+            sub = col.row(align=True)
+            op = sub.operator("sculpt.expand", text="EXP NORM")
+            op.target='MASK'
+            op.falloff_type='NORMALS'
+            op.invert=False
+
+            op = sub.operator("sculpt.expand", text="EXP TOPO")
+            op.target='MASK'
+            op.falloff_type='GEODESIC'
+            op.invert=True
+
             sub = col.row()
             tool_bt(parent=sub, cmd=13, w=2, h=1.4, text=False, icon='LARGE') 
             subsub = sub.column()
@@ -574,8 +611,31 @@ class SelectMenu(bpy.types.Panel):
             tool_bt(parent=subsub, cmd=32, w=1.2, h=0.5, text=False, icon='OFF')
             tool_bt(parent=sub, cmd=15, w=2.4, h=1.4, text=False, icon='LARGE')
 
+            sub = col.row(align=True)
+
+            op = sub.operator('sculpt.expand',text='EXP ACTIVE')
+            op.target='FACE_SETS'
+            op.falloff_type='BOUNDARY_FACE_SET'
+            op.invert=False
+            op.use_modify_active=True
+
+            op = sub.operator('sculpt.expand',text='EXP TOPO')
+            op.target='FACE_SETS'
+            op.falloff_type='GEODESIC'
+            op.invert=False
+            op.use_modify_active=False
+
+            sub.operator('sculpt.face_set_edit',text='+').mode='GROW'
+            sub.operator('sculpt.face_set_edit',text='-').mode='SHRINK'
+
+            col.separator()
             sub = col.row()
             SculptFaceSet(self, context, parent=sub)
+            col.separator()
+            sub = col.row(align=True)
+            sub.operator('mesh.face_set_extract', text='EXT FSET')
+            sub.operator('mesh.paint_mask_extract', text='EXT MASK')
+
 
 
 addon_keymaps = []

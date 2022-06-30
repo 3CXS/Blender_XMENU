@@ -119,18 +119,10 @@ class XPanel(bpy.types.Panel):
             row.separator()
             Normals(self, context, parent=row)
 
-            #row.operator('object.hide_view_set', text='HIDE').unselected=False
-            #row.operator('object.hide_view_clear', text='UNHIDE')
-
             #TOP-MID//////////////////////////////////////////////////////////////////#
             col = top_mid.column()
             row = col.row(align=True)
-            #row.ui_units_x = 22
-            sub = row.column()
-            sub.ui_units_x = 3    
-            sub.menu("VIEW3D_MT_add", text="Add", text_ctxt=i18n_contexts.operator_default)
 
-            row.separator(factor = 2)
             tool_bt(parent=row, cmd=5, w=2, h=1.4, text=False, icon='LARGE')
             tool_bt(parent=row, cmd=6, w=2, h=1.4, text=False, icon='LARGE')
             tool_bt(parent=row, cmd=7, w=2, h=1.4, text=False, icon='LARGE')
@@ -148,9 +140,16 @@ class XPanel(bpy.types.Panel):
             ObjectToolSettings(self, context, parent=col)
 
             row.separator(factor = 2)
+            tool_bt(parent=row, cmd=9, w=2, h=1.4, text=False, icon='LARGE')
+            tool_bt(parent=row, cmd=12, w=2, h=1.4, text=False, icon='LARGE')
             tool_bt(parent=row, cmd=13, w=2, h=1.4, text=False, icon='LARGE')
             row.separator(factor = 1)
-            tool_bt(parent=row, cmd=14, w=2, h=1.4, text=False, icon='LARGE')
+            #tool_bt(parent=row, cmd=14, w=2, h=1.4, text=False, icon='LARGE')
+
+            sub = row.column()
+            sub.ui_units_x = 3
+            sub.scale_y = 1.4
+            sub.menu("VIEW3D_MT_add", text="Add", text_ctxt=i18n_contexts.operator_default)
             #TOP-RIGHT////////////////////////////////////////////////////////////////#
 
             ToolOptions(self, context, parent=top_right)
@@ -205,16 +204,7 @@ class XPanel(bpy.types.Panel):
 
             #MAIN-MID//////////////////////////////////////////////////////////////////#
             col = main_midrow.column(align=False)
-
-            col.separator(factor = 1)
-            row = col.row(align=True)
-            row.ui_units_x = 18
-            tool_bt(parent=row, cmd=9, w=2, h=1.4, text=False, icon='LARGE')
-            tool_bt(parent=row, cmd=10, w=2, h=1.4, text=False, icon='LARGE')
-            tool_bt(parent=row, cmd=11, w=2, h=1.4, text=False, icon='LARGE')
-            tool_bt(parent=row, cmd=12, w=2, h=1.4, text=False, icon='LARGE')
-            row.separator(factor = 4)
-
+            col.ui_units_x= 12
             col.separator(factor = 1)
 
             row = col.row(align=False)
@@ -242,8 +232,8 @@ class XPanel(bpy.types.Panel):
         if context.mode == 'EDIT_MESH':
             #TOP-ROW//////////////////////////////////////////////////////////////////#
             #TOP-LEFT/////////////////////////////////////////////////////////////////# 
-            col = top_left.column()
-            col.label(text="")
+            row = top_left.row()
+            Normals(self, context, parent=row)
 
             #TOP-MID//////////////////////////////////////////////////////////////////#
             col = top_mid.column(align=False)
@@ -263,19 +253,28 @@ class XPanel(bpy.types.Panel):
             tool_bt(parent=row, cmd=4, w=2, h=1.4, text=False, icon='LARGE')
 
             row.separator(factor = 2)
+            col = row.column()
+            col.ui_units_x = 5
+            ObjectToolSettings(self, context, parent=col)
+
+            row.separator(factor = 2)
             tool_bt(parent=row, cmd=9, w=2, h=1.4, text=False, icon='LARGE')
             tool_bt(parent=row, cmd=10, w=2, h=1.4, text=False, icon='LARGE')
             tool_bt(parent=row, cmd=11, w=2, h=1.4, text=False, icon='LARGE')
-            tool_bt(parent=row, cmd=12, w=2, h=1.4, text=False, icon='LARGE')
+            row.separator(factor = 1)
+            #tool_bt(parent=row, cmd=12, w=2, h=1.4, text=False, icon='LARGE')
+            sub = row.column()
+            sub.ui_units_x = 3
+            sub.scale_y = 1.4
+            sub.menu("VIEW3D_MT_add", text="Add", text_ctxt=i18n_contexts.operator_default)
+
             #col.menu_contents("OBJECT_MT_edgedata")
 
             #TOP-RIGHT////////////////////////////////////////////////////////////////#
             col = top_right.column(align=True)
             ToolOptions(self, context, parent=col)
 
-            #MAIN-ROW/////////////////////////////////////////////////////////////////#
-            #MAIN-LEFT////////////////////////////////////////////////////////////////#
-            col = main_leftrow.column(align=True)
+            '''
             col.ui_units_x = 5
             col.operator('uv.smart_project', text="AUTO UV")
             col.operator('uv.unwrap', text="UNWRAP")
@@ -285,71 +284,46 @@ class XPanel(bpy.types.Panel):
             col.operator('uv.reset', text="RESET")
             col = main_leftrow.column(align=True)
             UVTexture(self, context, parent=col)
-
-            #MAIN-MID/////////////////////////////////////////////////////////////////#
-            # MID 1 //////////////////////////////////////////////////////////////////#
-
-            # MID 2 //////////////////////////////////////////////////////////////////#
-            col = main_midrow.column(align=False)
             '''
-            row = col.row(align=True)
-            tool_bt(parent=row, cmd=13, w=2, h=1.4, text=True, icon='LARGE')
-            tool_bt(parent=row, cmd=14, w=2, h=1.4, text=True, icon='LARGE')
-            tool_bt(parent=row, cmd=15, w=2, h=1.4, text=True, icon='LARGE')
-            tool_bt(parent=row, cmd=16, w=2, h=1.4, text=True, icon='LARGE')
-            tool_bt(parent=row, cmd=17, w=2, h=1.4, text=True, icon='LARGE')
-            row.separator(factor = 2)
-            tool_bt(parent=row, cmd=18, w=2, h=1.4, text=True, icon='LARGE')
-            row.separator(factor = 2)
-            tool_bt(parent=row, cmd=19, w=2, h=1.4, text=True, icon='LARGE')
-            '''
-
-            # MID 3 //////////////////////////////////////////////////////////////////#
-            col = main_midrow.column(align=False)
-
-
-
-            #MAIN-RIGHT///////////////////////////////////////////////////////////////#
-
-            col = main_rightrow.column(align=False)
-            VertexGroups(self, context, parent=col)
-
-            col = main_rightrow.column(align=False)
-            col.menu_contents("VIEW3D_MT_Material")
-
-
         #/////////////////////////////////////////////////////////////////////////////#
         #                               SCULPT                                        #
         #/////////////////////////////////////////////////////////////////////////////#
         if bpy.context.mode == 'SCULPT':
             #TOP-ROW//////////////////////////////////////////////////////////////////#
             #TOP-LEFT/////////////////////////////////////////////////////////////////#
-            col = top_left.column(align=True)    
+            col = top_left.column()
             col.ui_units_x = 3
+            col.operator('sculpt.optimize', text='OPTIMIZE')
+            col = top_left.column()
+            col.ui_units_x = 2
+            col.operator("xmenu.normalshading", text="SMTH", depress=updatenormaldisp(self, context))
+            col = top_left.column(align=True)    
+            col.ui_units_x = 4
             col.scale_y = 0.7
             sub = col.column(align=True)
             sub.operator("sculpt.symmetrize", text='SYM')
             col.menu("VIEW3D_MT_sculpt_sym")
 
             col = top_left.column()
-            col.ui_units_x = 8
-            col.menu_contents("VIEW3D_MT_TextureMask")
-
-            col = top_left.column()
             col.ui_units_x = 4
             BrushCopy(self, context, parent=col)
             #TOP-MID//////////////////////////////////////////////////////////////////#
             col = top_mid.column()
-            col.ui_units_x = 4
+            col.ui_units_x = 6
             SculptToolSettings(self, context, parent=col)
-            col = top_mid.column()
-            col.ui_units_x = 3
-            col.label(text='')
+
             col = top_mid.column()
             col.ui_units_x = 17
             SculptBrushSettings(self, context, parent=col)
+
             col = top_mid.column()
-            col.ui_units_x = 12
+            col.ui_units_x = 2
+            col.scale_y = 1.4
+            col.menu_contents("VIEW3D_MT_Falloff")
+
+
+            col = top_mid.column()
+            col.ui_units_x = 4
             SculptMask(self, context, parent=top_mid)
 
             #TOP-RIGHT////////////////////////////////////////////////////////////////#
@@ -366,6 +340,8 @@ class XPanel(bpy.types.Panel):
 
             box = main_leftrow.box()     
             box.ui_units_x = 8
+            subrow = box.row()
+            subrow.menu_contents("VIEW3D_MT_TextureMask")
             subrow = box.row()
             subrow.menu_contents("VIEW3D_MT_BrushTexture")
 
@@ -401,11 +377,7 @@ class XPanel(bpy.types.Panel):
             tool_bt(parent=subsub, cmd=37, w=2, h=1.4, text=False, icon='LARGE')
             row.separator(factor = 1)
             tool_grid(parent=row, col=3, align=True, slotmin=19, slotmax=23, w=1.2, h=1, icon='CUSTOM')
-            #TRIM
-            col.separator(factor = 0.4)
-            row = col.row()
-            row.separator(factor = 4)
-            SculptExtra(self, context, parent=row)
+
             #CLAY////////////////
             main_midrow.separator(factor = 0.4)
             col = main_midrow.column()
@@ -415,8 +387,7 @@ class XPanel(bpy.types.Panel):
             row = col.row(align=True)
             tool_grid(parent=row, col=3, align=False, slotmin=4, slotmax=7, w=2, h=1.4, text=True, icon='LARGE')
             col.separator(factor = 0.4)
-            row = col.row(align=True)
-            SculptRake(self, context, parent=row)
+
             #CREASE///////////////
             col = main_midrow.column()
             row = col.row()
@@ -429,8 +400,6 @@ class XPanel(bpy.types.Panel):
             #tool_grid(parent=row, col=1, align=True, slotmin=23, slotmax=25, w=1.2, h=1, icon='CUSTOM')
             sub = row.column()
             #tool_bt(parent=sub, cmd=25, w=1.8, h=1, text=False, icon='OFF')
-            sub.menu_contents("VIEW3D_MT_Falloff")
-            row.separator(factor = 0.4)
             #tool_grid(parent=row, col=1, align=True, slotmin=26, slotmax=28, w=1.2, h=1, icon='CUSTOM')
 
             #POLISH//////////// 
@@ -515,66 +484,32 @@ class XPanel(bpy.types.Panel):
             #TOP-ROW///////////////////////////////////////////////////////////////////#
             #TOP-LEFT////////////////////////////////////////////
             col = top_left.column()
-            col.ui_units_x = 8
-            col.menu_contents("VIEW3D_MT_TextureMask")
+            col.ui_units_x = 2
+            col.operator("xmenu.normalshading", text="SMTH", depress=updatenormaldisp(self, context))
             row = top_left.row()
-            row.ui_units_x = 4
-            row.operator("object.shade_flat", text="FLAT")
-            row.operator("object.shade_smooth", text="SMOOTH")
-
+            row.ui_units_x = 4       
+            BrushCopy(self, context, parent=row )
             #TOP-MID//////////////////////////////////////////////
             col = top_mid.column()
             col.ui_units_x = 4
-            col.label(text="")            
+            col.prop(brush, "blend", text="")
+            row = top_mid.row()
+            tool_bt(parent=row, cmd=0, w=2, h=1.4, text=False, icon='LARGE')
+            tool_grid(parent=row, col=5, align=True, slotmin=1, slotmax=4, w=2, h=1.4, text=False, icon='LARGE')
+
+            col = top_mid.column()
+            col.ui_units_x = 2
+            col.scale_y = 1.4
+            col.menu_contents("VIEW3D_MT_Falloff")
 
             col = top_mid.column()
             col.ui_units_x = 6
-            col.prop(brush, "blend", text="")
-            col = top_mid.column()
-            VertexBrushSettings(self, context, parent=top_mid)
+            VertexBrushSettings(self, context, parent=col)
 
             #TOP-RIGHT////////////////////////////////////////////
-            ToolOptions(self, context, parent=top_right)
+            top_right.label(text='')
 
-            #MAIN-ROW////////////////////////////////////////////////////////////////////////////////#
-            #MAIN-LEFT////////////////////////////////////////////           
-            box = main_leftrow.box()     
-            box.ui_units_x = 8
-            subrow = box.row()
-            subrow.menu_contents("VIEW3D_MT_BrushTexture")
 
-            box = main_leftrow.box()     
-            box.ui_units_x = 4
-            Stroke(self, context, parent=box)
-
-            #MAIN-MID//////////////////////////////////////////////
-            col = main_midrow.column()
-            col.ui_units_x = 4
-            Color(self, context, parent=col)
-
-            main_midrow.separator(factor = 1)
-
-            col = main_midrow.column()
-            row = col.row()
-            tool_bt(parent=row, cmd=0, w=2, h=1.4, text=False, icon='LARGE')
-            row.separator(factor = 4)
-            sub = row.column()
-            sub.ui_units_x = 4         
-            BrushCopy(self, context, parent=sub)
-
-            col.separator(factor = 1)
-            row = col.row(align=True)
-            tool_grid(parent=row, col=5, align=True, slotmin=1, slotmax=4, w=2, h=1.4, text=True, icon='LARGE')
-            col.separator(factor = 1)
-
-            main_midrow.separator(factor = 2)
-            col = main_midrow.column()
-            col.ui_units_x = 8
-            ColorPalette(self, context, parent=col)
-
-            #MAIN-RIGHT/////////////////////////////////////////////////////////////////////////////////////
-            col = main_rightrow.column(align=False)
-            VertexColor(self, context, parent=col)
 
         #/////////////////////////////////////////////////////////////////////////////#
         #                               PAINT_TEXTURE                                 #
@@ -586,63 +521,33 @@ class XPanel(bpy.types.Panel):
             #TOP-ROW////////////////////////////////////////////////////////////////////////////////#
             #TOP-LEFT////////////////////////////////////////////
             col = top_left.column()
-            col.ui_units_x = 8
-            col.menu_contents("VIEW3D_MT_TextureMask")
+            col.ui_units_x = 2
+            col.operator("xmenu.normalshading", text="SMTH", depress=updatenormaldisp(self, context))
 
             row = top_left.row()
-            row.ui_units_x = 4
-            row.operator("object.shade_flat", text="FLAT")
-            row.operator("object.shade_smooth", text="SMOOTH")
+            row.ui_units_x = 4      
+            BrushCopy(self, context, parent=row )
 
             #TOP-MID//////////////////////////////////////////////
             col = top_mid.column()
-            col.ui_units_x = 6
+            col.ui_units_x = 4
             col.prop(brush, "blend", text="")
+            row = top_mid.row()
+            tool_bt(parent=row, cmd=0, w=2, h=1.4, text=False, icon='LARGE')
+            tool_grid(parent=row, col=5, align=True, slotmin=1, slotmax=6, w=2, h=1.4, text=False, icon='LARGE')
+
+            col = top_mid.column()
+            col.ui_units_x = 2
+            col.scale_y = 1.4
+            col.menu_contents("VIEW3D_MT_Falloff")
+
             col = top_mid.column()
             TextureBrushSettings(self, context, parent=top_mid)
 
+
+
             #TOP-RIGHT////////////////////////////////////////////
             ToolOptions(self, context, parent=top_right)
-
-            #MAIN-ROW////////////////////////////////////////////////////////////////////////////////#
-            #MAIN-LEFT////////////////////////////////////////////           
-            box = main_leftrow.box()     
-            box.ui_units_x = 8
-            subrow = box.row()
-            subrow.menu_contents("VIEW3D_MT_BrushTexture")
-
-            box = main_leftrow.box()     
-            box.ui_units_x = 4
-            Stroke(self, context, parent=box)
-
-            #MAIN-MID//////////////////////////////////////////////
-            col = main_midrow.column()
-            col.ui_units_x = 4
-            Color(self, context, parent=col)
-
-            main_midrow.separator(factor = 1)
-
-            col = main_midrow.column()
-            row = col.row()
-            tool_bt(parent=row, cmd=0, w=2, h=1.4, text=False, icon='LARGE')
-            row.separator(factor = 4)
-            sub = row.column()
-            sub.ui_units_x = 4         
-            BrushCopy(self, context, parent=sub)
-            col.separator(factor = 1)
-            row = col.row(align=True)
-            tool_grid(parent=row, col=5, align=True, slotmin=1, slotmax=6, w=2, h=1.4, text=True, icon='LARGE')
-            col.separator(factor = 1)
-
-
-            main_midrow.separator(factor = 2)
-            col = main_midrow.column()
-            col.ui_units_x = 8
-            ColorPalette(self, context, parent=col)
-
-            #MAIN-RIGHT/////////////////////////////////////////////////////////////////////////////////////
-            col = main_rightrow.column(align=False)
-            TexSlots(self, context, parent=col)
 
         #/////////////////////////////////////////////////////////////////////////////#
         #                               PAINT_WEIGHT                                  #
@@ -654,37 +559,32 @@ class XPanel(bpy.types.Panel):
             #TOP-ROW////////////////////////////////////////////////////////////////////////////////#
             #TOP-LEFT////////////////////////////////////////////
             row = top_left.row()
-            row.ui_units_x = 6
-            row.operator("object.shade_flat", text="FLAT")
-            row.operator("object.shade_smooth", text="SMOOTH")
+            row.ui_units_x = 4      
+            BrushCopy(self, context, parent=row )
 
             #TOP-MID//////////////////////////////////////////////
             col = top_mid.column()
-            col.alignment = 'CENTER'
-            col.scale_y = 0.7
-            col.label(text="---------")
-            col.label(text="")
-
-            #TOP-RIGHT////////////////////////////////////////////
-            col = top_right.column()
-            col.label(text="")
-
-            #MAIN-ROW////////////////////////////////////////////////////////////////////////////////#
-            #MAIN-LEFT////////////////////////////////////////////           
-            box = main_leftrow.box()     
-            box.ui_units_x = 4
-            Stroke(self, context, parent=box)
-            #MAIN-MID//////////////////////////////////////////////
-            col = main_midrow.column()
             row = col.row()
             tool_bt(parent=row, cmd=0, w=2, h=1.4, text=False, icon='LARGE')
-            row.separator(factor = 8)
-            #col.separator(factor = 1)
-            row = col.row(align=True)
-            tool_grid(parent=row, col=6, align=True, slotmin=1, slotmax=7, w=2, h=1.4, text=True, icon='LARGE')
-            main_midrow.separator(factor = 24)
-            #MAIN-RIGHT/////////////////////////////////////////////////////////////////////////////////////
-            col = main_rightrow.column(align=False)
+            tool_grid(parent=row, col=6, align=True, slotmin=1, slotmax=7, w=2, h=1.4, text=False, icon='LARGE')
+
+
+            sub = top_mid.row(align=True)
+            sub.ui_units_x = 4
+            sub.prop(brush, "use_frontface", text="FRONT", toggle=True)
+            sub.prop(brush, "use_accumulate", text="ACCU", toggle=True)
+
+            #TOP-RIGHT////////////////////////////////////////////
+
+
+            sub = top_right.row(align=True)
+            sub.ui_units_x = 10
+            ts = context.tool_settings
+            wp = ts.weight_paint
+            sub.prop(ts, "use_auto_normalize", text="NORM", toggle=True)
+            sub.prop(ts, "use_lock_relative", text="RELAT", toggle=True)
+            sub.prop(ts, "use_multipaint", text="MPAINT", toggle=True)
+            sub.prop(wp, "use_group_restrict", text="RESTR", toggle=True)
 
         #/////////////////////////////////////////////////////////////////////////////#
         #                               PAINT_GPENCIL                                  #
@@ -696,53 +596,46 @@ class XPanel(bpy.types.Panel):
             #TOP-ROW////////////////////////////////////////////////////////////////////////////////#
             #TOP-LEFT////////////////////////////////////////////
             row = top_left.row()
-            row.ui_units_x = 6
-            row.operator("object.shade_flat", text="FLAT")
-            row.operator("object.shade_smooth", text="SMOOTH")
+            sub = row.column()
+            sub.ui_units_x = 4
+            sub.label(text='')
+            sub = row.column()
+            sub.ui_units_x = 4
+            sub.operator("gpencil.blank_frame_add", text="INIT")
+
 
             #TOP-MID//////////////////////////////////////////////
-            col = top_mid.column()
-            col.alignment = 'CENTER'
-            col.scale_y = 0.7
-            col.label(text="---------")
-            col.label(text="")
-
-            #TOP-RIGHT////////////////////////////////////////////
-            col = top_right.column()
-            col.label(text="")
-
-            #MAIN-ROW////////////////////////////////////////////////////////////////////////////////#
-            #MAIN-LEFT////////////////////////////////////////////           
-            box = main_leftrow.box()     
-            box.ui_units_x = 4
-            #Stroke(self, context, parent=box)
-            #MAIN-MID//////////////////////////////////////////////
-            col = main_midrow.column()
-
-            row = col.row()
-            tool_bt(parent=row, cmd=0, w=2.4, h=1.4, text=False, icon='OFF')
-            tool_bt(parent=row, cmd=1, w=2.4, h=1.4, text=False, icon='OFF')
-            tool_bt(parent=row, cmd=2, w=2.4, h=1.4, text=False, icon='OFF')
-            tool_bt(parent=row, cmd=3, w=2.4, h=1.4, text=False, icon='OFF')
-            tool_bt(parent=row, cmd=4, w=2.4, h=1.4, text=False, icon='OFF')
-            tool_bt(parent=row, cmd=5, w=2.4, h=1.4, text=False, icon='OFF')
-            tool_bt(parent=row, cmd=6, w=2.4, h=1.4, text=False, icon='OFF')
-            tool_bt(parent=row, cmd=7, w=2.4, h=1.4, text=False, icon='OFF')
-            col.separator(factor = 2)
-            row = col.row(align=True)
-            tool_grid(parent=row, col=8, align=True, slotmin=8, slotmax=14, w=2, h=1.4, text=True, icon='LARGE')
-            row = col.row(align=True)
-
+            row = top_mid.row(align=True)
+            row.alignment = 'CENTER'
             sub = row.column()
             sub.ui_units_x = 4         
             BrushCopy(self, context, parent=sub)
-            sub = row.column()
-            sub.ui_units_x = 8        
-            sub.label(text="")
+            row.separator()
+            tool_bt(parent=row, cmd=0, w=2.4, h=1.4, text=False, icon='LARGE')
+            row.separator()
+            tool_bt(parent=row, cmd=1, w=2.4, h=1.4, text=False, icon='LARGE')
+            tool_bt(parent=row, cmd=2, w=2.4, h=1.4, text=False, icon='LARGE')
+            tool_bt(parent=row, cmd=3, w=2.4, h=1.4, text=False, icon='LARGE')
+            tool_bt(parent=row, cmd=4, w=2.4, h=1.4, text=False, icon='LARGE')
+            tool_bt(parent=row, cmd=5, w=2.4, h=1.4, text=False, icon='LARGE')
+            row.separator()
+            tool_bt(parent=row, cmd=6, w=1.2, h=1, text=False, icon='IPO_LINEAR')
+            tool_bt(parent=row, cmd=7, w=1.2, h=1, text=False, icon='IPO_CONSTANT')
+            tool_bt(parent=row, cmd=8, w=1.2, h=1, text=False, icon='IPO_EASE_OUT')
+            tool_bt(parent=row, cmd=9, w=1.2, h=1, text=False, icon='IPO_EASE_IN_OUT')
+            tool_bt(parent=row, cmd=10, w=1.2, h=1, text=False, icon='MESH_PLANE')
+            tool_bt(parent=row, cmd=11, w=1.2, h=1, text=False, icon='MESH_CIRCLE')
 
-            #MAIN-RIGHT/////////////////////////////////////////////////////////////////////////////////////
-            col = main_rightrow.column(align=False)
-            GPLayers(self, context, parent=col)
+            #TOP-RIGHT////////////////////////////////////////////
+            col = top_right.column()
+            sub = row.column()
+            sub.ui_units_x = 4
+            sub.popover("VIEW3D_PT_tools_grease_pencil_brush_advanced")
+
+            if brush.gpencil_tool not in {'FILL', 'TINT'}:
+                sub = row.column()
+                sub.ui_units_x = 4
+                sub.popover("VIEW3D_PT_tools_grease_pencil_brush_stroke")
 
         #/////////////////////////////////////////////////////////////////////////////#
         #                               EDIT_GPENCIL                                  #
@@ -753,56 +646,47 @@ class XPanel(bpy.types.Panel):
 
             #TOP-ROW////////////////////////////////////////////////////////////////////////////////#
             #TOP-LEFT////////////////////////////////////////////
-            row = top_left.row()
-            row.ui_units_x = 6
-            row.operator("object.shade_flat", text="FLAT")
-            row.operator("object.shade_smooth", text="SMOOTH")
-
-            #TOP-MID//////////////////////////////////////////////
-            col = top_mid.column()
-            col.alignment = 'CENTER'
-            col.scale_y = 0.7
-            col.label(text="---------")
+            col = top_left.column(align=True)
             col.label(text="")
+            #TOP-MID//////////////////////////////////////////////
+            col = top_mid.column(align=False)
+            col.alignment = 'CENTER'
+
+            row = col.row(align=True)
+            tool_bt(parent=row, cmd=5, w=2, h=1.4, text=False, icon='LARGE')
+            tool_bt(parent=row, cmd=6, w=2, h=1.4, text=False, icon='LARGE')
+            tool_bt(parent=row, cmd=7, w=2, h=1.4, text=False, icon='LARGE')
+            tool_bt(parent=row, cmd=8, w=2, h=1.4, text=False, icon='LARGE')
+
+            row.separator(factor = 2)
+            tool_bt(parent=row, cmd=0, w=2, h=1.4, text=False, icon='LARGE')
+            tool_bt(parent=row, cmd=1, w=2, h=1.4, text=False, icon='LARGE')
+            tool_bt(parent=row, cmd=2, w=2, h=1.4, text=False, icon='LARGE')
+            tool_bt(parent=row, cmd=3, w=2, h=1.4, text=False, icon='LARGE')
+            tool_bt(parent=row, cmd=4, w=2, h=1.4, text=False, icon='LARGE')
+
+            row.separator(factor = 2)
+            col = row.column()
+            col.ui_units_x = 5
+            GPToolSettings(self, context, parent=col)
+            row.separator(factor = 2)
+            col = row.column(align=True)
+            tool_bt(parent=col, cmd=9, w=2, h=0.7, text=True, icon='OFF')
+            tool_bt(parent=col, cmd=10, w=2, h=0.7, text=True, icon='OFF')
+            col = row.column(align=True)
+            tool_bt(parent=col, cmd=11, w=2, h=0.7, text=True, icon='OFF')
+            tool_bt(parent=col, cmd=12, w=2, h=0.7, text=True, icon='OFF')
+            col = row.column(align=True)
+            tool_bt(parent=col, cmd=13, w=2, h=0.7, text=True, icon='OFF')
+            col = row.column(align=True)
+            tool_bt(parent=col, cmd=14, w=2, h=0.7, text=True, icon='OFF')
+            tool_bt(parent=col, cmd=15, w=2, h=0.7, text=True, icon='OFF')
 
             #TOP-RIGHT////////////////////////////////////////////
             col = top_right.column()
-            col.label(text="")
+            ToolOptions(self, context, parent=col)
 
-            #MAIN-ROW////////////////////////////////////////////////////////////////////////////////#
-            #MAIN-LEFT////////////////////////////////////////////           
-            box = main_leftrow.box()     
-            box.ui_units_x = 4
-            #Stroke(self, context, parent=box)
-            #MAIN-MID//////////////////////////////////////////////
-            col = main_midrow.column()
 
-            row = col.row()
-            tool_bt(parent=row, cmd=5, w=2.2, h=1.4, text=True, icon='LARGE')
-            tool_bt(parent=row, cmd=6, w=2.2, h=1.4, text=True, icon='LARGE')
-            tool_bt(parent=row, cmd=7, w=2.2, h=1.4, text=True, icon='LARGE')
-            tool_bt(parent=row, cmd=8, w=2.2, h=1.4, text=True, icon='LARGE')
-            row.separator(factor = 1)
-            tool_bt(parent=row, cmd=0, w=2.2, h=1.4, text=True, icon='LARGE')
-            tool_bt(parent=row, cmd=1, w=2.2, h=1.4, text=True, icon='LARGE')
-            tool_bt(parent=row, cmd=2, w=2.2, h=1.4, text=True, icon='LARGE')
-            tool_bt(parent=row, cmd=3, w=2.2, h=1.4, text=True, icon='LARGE')
-            row.separator(factor = 1)
-            tool_bt(parent=row, cmd=4, w=2.2, h=1.4, text=True, icon='LARGE')
-
-            row = col.row()
-            tool_bt(parent=row, cmd=9, w=2.2, h=1.4, text=True, icon='LARGE')
-            tool_bt(parent=row, cmd=10, w=2.2, h=1.4, text=True, icon='LARGE')
-            tool_bt(parent=row, cmd=11, w=2.2, h=1.4, text=True, icon='LARGE')
-            tool_bt(parent=row, cmd=12, w=2.2, h=1.4, text=True, icon='LARGE')
-            tool_bt(parent=row, cmd=13, w=2.2, h=1.4, text=True, icon='LARGE')
-            row.separator(factor = 1)
-            tool_bt(parent=row, cmd=13, w=2.2, h=1.4, text=True, icon='LARGE')
-            tool_bt(parent=row, cmd=13, w=2.2, h=1.4, text=True, icon='LARGE')
-
-            #MAIN-RIGHT/////////////////////////////////////////////////////////////////////////////////////
-            col = main_rightrow.column(align=False)
-            GPLayers(self, context, parent=col)
 
         #/////////////////////////////////////////////////////////////////////////////#
         #                               SCULPT_GPENCIL                                #
@@ -815,44 +699,43 @@ class XPanel(bpy.types.Panel):
             #TOP-LEFT////////////////////////////////////////////
             row = top_left.row()
             row.ui_units_x = 6
-            row.operator("object.shade_flat", text="FLAT")
-            row.operator("object.shade_smooth", text="SMOOTH")
+            row.label(text="")
 
             #TOP-MID//////////////////////////////////////////////
             col = top_mid.column()
             col.alignment = 'CENTER'
-            col.scale_y = 0.7
-            col.label(text="---------")
-            col.label(text="")
-
+            row = col.row(align=True)
+            tool_bt(parent=row, cmd=4, w=2.2, h=1.4, text=False, icon='LARGE')
+            tool_bt(parent=row, cmd=5, w=2.2, h=1.4, text=False, icon='LARGE')
+            tool_bt(parent=row, cmd=6, w=2.2, h=1.4, text=False, icon='LARGE')
+            tool_bt(parent=row, cmd=7, w=2.2, h=1.4, text=False, icon='LARGE')
+            tool_bt(parent=row, cmd=8, w=2.2, h=1.4, text=False, icon='LARGE')
+            row.separator(factor=1)
+            tool_bt(parent=row, cmd=0, w=2.8, h=1, text=True, icon='OFF')
+            tool_bt(parent=row, cmd=1, w=2.8, h=1, text=True, icon='OFF')
+            tool_bt(parent=row, cmd=2, w=2.8, h=1, text=True, icon='OFF')
+            tool_bt(parent=row, cmd=3, w=2.8, h=1, text=True, icon='OFF')
             #TOP-RIGHT////////////////////////////////////////////
             col = top_right.column()
             col.label(text="")
 
-            #MAIN-ROW////////////////////////////////////////////////////////////////////////////////#
-            #MAIN-LEFT////////////////////////////////////////////           
-            box = main_leftrow.box()     
-            box.ui_units_x = 4
-            #Stroke(self, context, parent=box)
-            #MAIN-MID//////////////////////////////////////////////
-            col = main_midrow.column()
+            '''
 
-            row = col.row()
-            tool_bt(parent=row, cmd=0, w=2.2, h=1.4, text=True, icon='LARGE')
-            tool_bt(parent=row, cmd=1, w=2.2, h=1.4, text=True, icon='LARGE')
-            tool_bt(parent=row, cmd=2, w=2.2, h=1.4, text=True, icon='LARGE')
-            tool_bt(parent=row, cmd=3, w=2.2, h=1.4, text=True, icon='LARGE')
-            row = col.row()
-            tool_bt(parent=row, cmd=4, w=2.2, h=1.4, text=True, icon='LARGE')
-            tool_bt(parent=row, cmd=5, w=2.2, h=1.4, text=True, icon='LARGE')
-            tool_bt(parent=row, cmd=6, w=2.2, h=1.4, text=True, icon='LARGE')
-            tool_bt(parent=row, cmd=7, w=2.2, h=1.4, text=True, icon='LARGE')
-            row.separator(factor = 1)
-            tool_bt(parent=row, cmd=8, w=2.2, h=1.4, text=True, icon='LARGE')
+            elif tool_mode == 'SCULPT_GPENCIL':
+                if is_valid_context:
+                    brush = context.tool_settings.gpencil_sculpt_paint.brush
+                    tool = brush.gpencil_sculpt_tool
+                    if tool in {'SMOOTH', 'RANDOMIZE'}:
+                        layout.popover("VIEW3D_PT_tools_grease_pencil_sculpt_options")
+                    layout.popover("VIEW3D_PT_tools_grease_pencil_sculpt_appearance")
+            elif tool_mode == 'WEIGHT_GPENCIL':
+                if is_valid_context:
+                    layout.popover("VIEW3D_PT_tools_grease_pencil_weight_appearance")
+            elif tool_mode == 'VERTEX_GPENCIL':
+                if is_valid_context:
+                    layout.popover("VIEW3D_PT_tools_grease_pencil_vertex_appearance")
+            '''
 
-            #MAIN-RIGHT/////////////////////////////////////////////////////////////////////////////////////
-            col = main_rightrow.column(align=False)
-            GPLayers(self, context, parent=col)
 
         #/////////////////////////////////////////////////////////////////////////////#
         #                               WEIGHT_GPENCIL                                #
@@ -861,39 +744,20 @@ class XPanel(bpy.types.Panel):
 
             brush = context.tool_settings.vertex_paint.brush
 
-            #TOP-ROW////////////////////////////////////////////////////////////////////////////////#
             #TOP-LEFT////////////////////////////////////////////
             row = top_left.row()
             row.ui_units_x = 6
-            row.operator("object.shade_flat", text="FLAT")
-            row.operator("object.shade_smooth", text="SMOOTH")
+            row.label(text="")
 
             #TOP-MID//////////////////////////////////////////////
             col = top_mid.column()
             col.alignment = 'CENTER'
-            col.scale_y = 0.7
-            col.label(text="---------")
-            col.label(text="")
+            tool_bt(parent=col, cmd=0, w=2.2, h=1.4, text=True, icon='LARGE')
 
             #TOP-RIGHT////////////////////////////////////////////
             col = top_right.column()
             col.label(text="")
 
-            #MAIN-ROW////////////////////////////////////////////////////////////////////////////////#
-            #MAIN-LEFT////////////////////////////////////////////           
-            box = main_leftrow.box()     
-            box.ui_units_x = 4
-            #Stroke(self, context, parent=box)
-            #MAIN-MID//////////////////////////////////////////////
-            col = main_midrow.column()
-
-            row = col.row()
-            tool_bt(parent=row, cmd=0, w=2.2, h=1.4, text=True, icon='LARGE')
-            row.separator(factor = 80)
-
-            #MAIN-RIGHT/////////////////////////////////////////////////////////////////////////////////////
-            col = main_rightrow.column(align=False)
-            GPLayers(self, context, parent=col)
 
         end = main_rightrow.row()
         end.ui_units_x = 0.2

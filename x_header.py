@@ -66,8 +66,6 @@ def draw(self, context):
         icon_area = 'TRIA_UP'
     funct_bt(parent=sub, cmd='maxarea', tog=False, w=1.2, h=1, label='', icon=icon_area)
 
-    #row.separator(factor = 1)
-
     mid = row.row()
     mid.ui_units_x = 27
     mid.alignment = 'CENTER'
@@ -99,10 +97,8 @@ def draw(self, context):
         ColorHud(self, context, parent=mid)
         paint_hud(mid, brush, self, context)
         sub = mid.row()
-        subsub = sub.row()
-        subsub.ui_units_x = 5
-        subsub.separator(factor = 1)
-        subsub.menu_contents("VIEW3D_MT_sym")
+        sub.ui_units_x = 5
+        sub.menu_contents("VIEW3D_MT_sym")
     if context.mode == 'PAINT_VERTEX':
         brush = context.tool_settings.vertex_paint.brush
         ColorHud(self, context, parent=mid)
@@ -132,17 +128,25 @@ def draw(self, context):
     if context.mode == 'PAINT_GPENCIL':
         brush = context.tool_settings.gpencil_paint.brush
         gp_settings = brush.gpencil_settings
-        #row = mid.row(align=True)
+        sub = mid.row()
+        GP_ColorHud(self, context, parent=sub)
+        subsub = sub.row(align=True)
+        subsub.scale_x = 1.2
+        subsub.operator("brush.scale_size", icon='BACK', text="").scalar=0.8
+        subsub.operator("brush.scale_size", icon='FORWARD', text="").scalar=1.2
         sub = mid.row(align=True)
-        sub.alignment = 'CENTER'
-        sub.ui_units_x = 8
+        sub.ui_units_x = 5
         sub.prop(brush, "size", text="Radius")
         sub.prop(gp_settings, "use_pressure", text="", icon='STYLUS_PRESSURE')
         sub.separator(factor = 1)
         sub = mid.row(align=True)
-        sub.ui_units_x = 8
+        sub.ui_units_x = 5
         sub.prop(gp_settings, "pen_strength", slider=True)
         sub.prop(gp_settings, "use_strength_pressure", text="", icon='STYLUS_PRESSURE')
+        sub = mid.row()
+        sub.prop(ts, "use_gpencil_draw_onback", text="BACK", toggle=True)
+
+
     if context.mode == 'EDIT_GPENCIL':
         gp_select_hud(mid, self, context)
     if context.mode == 'SCULPT_GPENCIL':
@@ -178,7 +182,7 @@ def draw(self, context):
         brush = context.tool_settings.gpencil_vertex_paint.brush
         paint_hud(mid, brush, self, context)
 
-    row.separator(factor = 2)
+    row.separator(factor = 1)
 
     right = row.row(align =True)
     right.alignment = 'LEFT'
@@ -222,7 +226,7 @@ def draw(self, context):
 class ViewCamPanel(bpy.types.Panel):
     bl_idname = "OBJECT_PT_viewcam"
     bl_label = "ViewCam"
-    bl_space_type = 'PROPERTIES'
+    bl_space_type = 'VIEW_3D'
     bl_region_type = 'WINDOW'
     bl_context = "scene"
     bl_order = 1000
@@ -241,8 +245,8 @@ class ViewCamPanel(bpy.types.Panel):
 
 class FloaterPanel(bpy.types.Panel):
     bl_idname = "OBJECT_PT_floater"
-    bl_label = "Floaters"
-    bl_space_type = 'PROPERTIES'
+    bl_label = "FLOATERS"
+    bl_space_type = 'VIEW_3D'
     bl_region_type = 'WINDOW'
     bl_context = "scene"
     bl_order = 1000
@@ -267,13 +271,19 @@ def paint_hud(parent, brush, self, context):
     pts = ups if ups.use_unified_strength else paint_settings(context).brush
 
     sub = parent.row(align=True)
-    sub.alignment = 'CENTER'
-    sub.ui_units_x = 7
+    sub.scale_x = 1.2
+    sub.operator("brush.scale_size", icon='BACK', text="").scalar=0.8
+    sub.operator("brush.scale_size", icon='FORWARD', text="").scalar=1.2
+
+
+
+    sub = parent.row(align=True)
+    sub.ui_units_x = 6
     sub.prop(ptr, "size", slider=True)
     sub.prop(brush, "use_pressure_size", slider=True, text="")
     sub = parent.row(align=True)
     sub.separator(factor = 0.4)
-    sub.ui_units_x = 7
+    sub.ui_units_x = 6
     sub.prop(pts, "strength", slider=True)
     sub.prop(brush, "use_pressure_strength", slider=True, text="") 
 
@@ -299,6 +309,36 @@ def ColorHud(self, context, parent):
     sub.ui_units_x = 2.4
     sub.operator("paint.brush_colors_flip", icon='FILE_REFRESH', text="")
     sub.operator("xmenu.override", icon='EYEDROPPER', text="").cmd ='ui.eyedropper_color'
+
+
+def GP_ColorHud(self, context, parent):
+
+    tool_settings = context.scene.tool_settings
+    settings = tool_settings.gpencil_paint
+    brush = context.tool_settings.gpencil_sculpt_paint.brush
+    gp_settings = brush.gpencil_settings
+    ma = gp_settings.material
+    layout = parent
+    row = layout.row(align=True)
+
+
+    if brush.gpencil_tool in {'DRAW', 'FILL'}:
+        row.separator(factor=1.0)
+        sub_row = row.row(align=True)
+        if gp_settings.pin_draw_mode:
+            sub_row.prop_enum(gp_settings, "brush_draw_mode", 'MATERIAL', text="", icon='MATERIAL')
+            sub_row.prop_enum(gp_settings, "brush_draw_mode", 'VERTEXCOLOR', text="", icon='VPAINT_HLT')
+        else:
+            sub_row.prop_enum(settings, "color_mode", 'MATERIAL', text="", icon='MATERIAL')
+            sub_row.prop_enum(settings, "color_mode", 'VERTEXCOLOR', text="", icon='VPAINT_HLT')
+
+        sub_row = row.row(align=True)
+        sub_row.ui_units_x = 2
+        sub_row.enabled = settings.color_mode == 'VERTEXCOLOR' or gp_settings.brush_draw_mode == 'VERTEXCOLOR'
+        sub_row.prop_with_popover(brush, "color", text="", panel="TOPBAR_PT_gpencil_vertexcolor")
+
+
+
 
 def select_hud(parent, self, context):
     sub = parent.row()

@@ -146,14 +146,7 @@ Tools_Weight= [
                 ('SAMPLE GRP',          'builtin.sample_vertex_group',      '',             'ops.paint.weight_sample_group',    '')
                 ]
 Tools_GP_Draw= [ 
-                ('PEN',                 'builtin_brush.Draw',               'Pen',          'brush.gpencil_draw.draw',          ''),
-                ('PENCIL H',            'builtin_brush.Draw',               'Pencil',       'brush.gpencil_draw.draw',          ''),
-                ('PENCIL S',            'builtin_brush.Draw',               'Pencil Soft',  'brush.gpencil_draw.draw',          ''),
-                ('MARKER',              'builtin_brush.Draw',               'Marker Chisel','brush.gpencil_draw.draw',          ''),
-                ('MARKER BOLD',         'builtin_brush.Draw',               'Marker Bold',  'brush.gpencil_draw.draw',          ''),
-                ('INK',                 'builtin_brush.Draw',               'Ink Pen',      'brush.gpencil_draw.draw',          ''),
-                ('INK RGH',             'builtin_brush.Draw',               'Ink Pen Rough','brush.gpencil_draw.draw',          ''),
-                ('AIRBRUSH',            'builtin_brush.Draw',               'Airbrush',     'brush.gpencil_draw.draw',          ''),
+                ('PEN',                 'builtin_brush.Draw',               '',             'brush.gpencil_draw.draw',          ''),
                 ('FILL',                'builtin_brush.Fill',               '',             'brush.gpencil_draw.fill',          ''),
                 ('ERASE',               'builtin_brush.Erase',              '',             'brush.gpencil_draw.erase',         ''),
                 ('TINT',                'builtin_brush.Tint',               '',             'brush.gpencil_draw.tint',          ''),
@@ -178,13 +171,13 @@ Tools_GP_Edit= [
                 ('ROTATE',              'builtin.rotate',                   '',             'ops.transform.rotate',             ''),
                 ('SCALE',               'builtin.scale',                    '',             'ops.transform.resize',             ''),
                 ('TRANSFORM',           'builtin.transform',                '',             'ops.transform.transform',          ''),
-                ('EXTRUDE',             'builtin.extrude',                  '',             'ops.gpencil.extrude_move',         ''),
-                ('RADIUS',              'builtin.radius',                   '',             'ops.gpencil.radius',               ''),
+                ('EXTR',                'builtin.extrude',                  '',             'ops.gpencil.extrude_move',         ''),
+                ('RAD',              'builtin.radius',                   '',             'ops.gpencil.radius',               ''),
                 ('BEND',                'builtin.bend',                     '',             'ops.gpencil.edit_bend',            ''),
                 ('SHEAR',               'builtin.shear',                    '',             'ops.gpencil.edit_shear',           ''),
-                ('TO SPHERE',           'builtin.to_sphetosphere',          '',             'ops.gpencil.edit_to_sphere',       ''),
-                ('TRANSFORM FILL',      'builtin.transform_fill',           '',             'ops.gpencil.transform_fill',       ''),
-                ('INTERPOLATE',         'builtin.interpolate',              '',             'ops.gpencil.primitive_line',       ''),
+                ('SPH',             'builtin.to_sphere',          '',             'ops.gpencil.edit_to_sphere',       ''),
+                ('X FILL',              'builtin.transform_fill',           '',             'ops.gpencil.transform_fill',       ''),
+                ('INTER',               'builtin.interpolate',              '',             'ops.gpencil.primitive_line',       ''),
                 ]
 Tools_GP_Sculpt= [ 
                 ('SMOOTH',              'builtin_brush.Smooth',             '',             'ops.gpencil.sculpt_smooth',        ''), 

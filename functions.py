@@ -537,10 +537,10 @@ class Override(bpy.types.Operator):
         op += self.cmd
         op += '()'
 
-        for window in bpy.context.window_manager.windows:
-            screen = window.screen
-            for area in screen.areas:
-                if area.type == "VIEW_3D":
+        for screen in bpy.data.screens:
+            for area in (a for a in screen.areas if a.type == 'VIEW_3D'):
+                region = next((region for region in area.regions if region.type == 'WINDOW'), None)
+                if region is not None:
                     area = area
 
         window = bpy.context.window
