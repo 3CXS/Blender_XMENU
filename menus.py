@@ -115,6 +115,13 @@ class PropMenu(bpy.types.Panel):
             col.menu("GPENCIL_MT_material_context_menu")
             col.menu_contents("VIEW3D_MT_GPStroke")
             col.menu_contents("VIEW3D_MT_GPFill")
+        if bpy.context.mode == 'EDIT_GPENCIL':
+            col = layout.column()
+            VertexGroups(self, context, parent=col)
+            GPLayers(self, context, parent=col)
+            col.menu_contents("VIEW3D_MT_Material")
+            col.menu("GPENCIL_MT_material_context_menu")
+
 
 
 class ToolMenu(bpy.types.Panel):
@@ -128,10 +135,11 @@ class ToolMenu(bpy.types.Panel):
 
     def draw(self, context):
         layout = self.layout
-        layout.use_property_split = False
-        layout.use_property_decorate = False
 
-        col = layout.column()
+        ts = context.tool_settings
+        gpd = context.gpencil_data
+
+        col = layout.column(align=True)
 
         if context.mode == 'OBJECT':
             sub = col.row(align=True)
@@ -140,7 +148,13 @@ class ToolMenu(bpy.types.Panel):
             tool_bt(parent=sub, cmd=2, w=2, h=1.4, text=False, icon='LARGE')
             tool_bt(parent=sub, cmd=3, w=2, h=1.4, text=False, icon='LARGE')
 
-            col.separator(factor=1)
+            sub = col.row(align=True)
+            tool_bt(parent=sub, cmd=5, w=2, h=1.4, text=False, icon='LARGE')
+            tool_bt(parent=sub, cmd=6, w=2, h=1.4, text=False, icon='LARGE')
+            tool_bt(parent=sub, cmd=7, w=2, h=1.4, text=False, icon='LARGE')
+            tool_bt(parent=sub, cmd=8, w=2, h=1.4, text=False, icon='LARGE')
+
+            col.separator(factor=2)
             sub = col.row(align=True)
             subsub = sub.column()
             subsub.ui_units_x = 1.2
@@ -151,21 +165,9 @@ class ToolMenu(bpy.types.Panel):
             subsub.ui_units_x = 1.2
             subsub.label(text='')
 
-            col.separator(factor=1)
-            sub = col.row(align=True)
-            #sub.ui_units_x = 4
-            sub.operator('mesh.primitive_plane_add', text="", icon='MESH_PLANE')
-            sub.operator('mesh.primitive_cube_add', text="", icon='MESH_CUBE')
-            sub.operator('mesh.primitive_uv_sphere_add', text="", icon='MESH_UVSPHERE')
-            sub.operator('mesh.primitive_cylinder_add', text="", icon='MESH_CYLINDER')
-            sub.operator('object.empty_add', text="", icon='EMPTY_DATA')
-            sub.operator('object.gpencil_add', text="", icon='GREASEPENCIL')
-            sub.operator('curve.primitive_bezier_curve_add', text="", icon='CURVE_DATA')
-            sub.separator(factor=1)
-            sub.operator('object.delete', text='DELETE').use_global=False
+            col.separator(factor=2)
 
             sub = col.row(align=True)
-
             subsub = sub.column(align=True)
             #sub.ui_units_x = 4
             subsub.scale_y = 0.8
@@ -185,6 +187,23 @@ class ToolMenu(bpy.types.Panel):
             subsub.operator('object.convert', text='GPENCIL').target='GPENCIL'
             subsub.operator('gpencil.trace_image', text='IMG TRACE')
 
+            sub = col.row(align=True)
+            sub.alignment = 'CENTER'
+            sub.label(text='-----------------------------------------------------')
+
+            col.separator(factor=1)
+            sub = col.row(align=True)
+            sub.operator('mesh.primitive_plane_add', text="", icon='MESH_PLANE')
+            sub.operator('mesh.primitive_cube_add', text="", icon='MESH_CUBE')
+            sub.operator('mesh.primitive_uv_sphere_add', text="", icon='MESH_UVSPHERE')
+            sub.operator('mesh.primitive_cylinder_add', text="", icon='MESH_CYLINDER')
+            sub.operator('object.empty_add', text="", icon='EMPTY_DATA')
+            sub.operator('object.gpencil_add', text="", icon='GREASEPENCIL')
+            sub.operator('curve.primitive_bezier_curve_add', text="", icon='CURVE_DATA')
+            sub.separator(factor=1)
+            #sub.operator('object.delete', text='DELETE').use_global=False
+            sub.operator("screen.redo_last", text="CMD >")
+
         if context.mode == 'EDIT_MESH':
 
             sub = col.row()
@@ -199,15 +218,12 @@ class ToolMenu(bpy.types.Panel):
             sub = col.column()
             #sub.ui_units_x = 6
             grid = sub.grid_flow(row_major=True, columns=4, align=True)
-
             tool_bt(parent=grid, cmd=0, w=2, h=1.2, text=False, icon='LARGE')
             tool_bt(parent=grid, cmd=1, w=2, h=1.2, text=False, icon='LARGE')
             tool_bt(parent=grid, cmd=2, w=2, h=1.2, text=False, icon='LARGE')
             tool_bt(parent=grid, cmd=3, w=2, h=1.2, text=False, icon='LARGE')
 
             col.separator(factor=1)
-
-
             sub = col.column()
             grid = sub.grid_flow(row_major=True, columns=4, align=True)
             tool_bt(parent=grid, cmd=20, w=1, h=1.4, text=False, icon='LARGE')
@@ -221,7 +237,9 @@ class ToolMenu(bpy.types.Panel):
             tool_bt(parent=grid, cmd=15, w=1, h=1.4, text=False, icon='LARGE')
             tool_bt(parent=grid, cmd=16, w=1, h=1.4, text=False, icon='LARGE')
 
-            sub.separator(factor=1)
+            sub = col.row(align=True)
+            sub.alignment = 'CENTER'
+            sub.label(text='-----------------------------------------------------')
 
             split = col.split(factor=0.75)
             sub = split.column(align=True)
@@ -235,7 +253,6 @@ class ToolMenu(bpy.types.Panel):
             item = subrow.column(align=True)
             tool_bt(parent=item, cmd=35, w=2, h=1, text=False, icon='OFF')
             tool_bt(parent=item, cmd=34, w=2, h=1, text=False, icon='OFF')
-
 
             subrow = sub.row(align=True)    
             item = subrow.row(align=True)
@@ -306,7 +323,16 @@ class ToolMenu(bpy.types.Panel):
 
         if context.mode == 'SCULPT':
             brush = context.tool_settings.image_paint.brush
- 
+
+
+            sub = col.split(factor=0.4)
+            BrushCopy(self, context, parent=sub)
+            subsub = sub.split(factor=0.2)
+            subsub.scale_y = 1.4
+            subsub.label(text='')
+            subsub.menu_contents("VIEW3D_MT_Falloff")
+
+            col.separator(factor=2)
             sub = col.row(align=True)
             subsub = sub.column(align=True)
             subsub.ui_units_x = 2
@@ -314,26 +340,37 @@ class ToolMenu(bpy.types.Panel):
             subsub.operator('xmenu.mask', text='PVT M').cmd='PMASKED'
             subsub.operator('xmenu.mask', text='RESET').cmd='ORIGIN'
             tool_bt(parent=sub, cmd=18, w=2, h=1.4, text=False, icon='LARGE')
-            sub.separator(factor = 1)
+            #sub.separator(factor = 1)
             tool_bt(parent=sub, cmd=0, w=2, h=1.4, text=False, icon='LARGE')
-            subsub = sub.column(align=True)
+            sub.separator(factor = 1)
+            subsub = sub.row(align=True)
             tool_bt(parent=subsub, cmd=19, w=1.2, h=1, text=False, icon='CUSTOM')
             tool_bt(parent=subsub, cmd=21, w=1.2, h=1, text=False, icon='CUSTOM')
 
+            col.separator(factor=1)
+            sub = col.row(align=True)
+            sub.scale_y = 1.4
+            SculptBrushSettings1(self, context, parent=sub)
+
+            col.separator(factor=1)
             sub = col.row(align=True)
             tool_grid(parent=sub, col=3, align=True, slotmin=1, slotmax=4, w=2, h=1.4, text=True, icon='LARGE')
             sub.separator(factor = 1)
             tool_bt(parent=sub, cmd=7, w=2, h=1.4, text=True, icon='LARGE')
-            col.separator(factor = 0.4)
+
             sub = col.row(align=True)
             tool_grid(parent=sub, col=3, align=True, slotmin=4, slotmax=7, w=2, h=1.4, text=True, icon='LARGE')
             sub.separator(factor = 1)
             tool_bt(parent=sub, cmd=8, w=2, h=1.4, text=True, icon='LARGE')
-
+            col.separator(factor=1)
             sub = col.row(align=True)
             tool_grid(parent=sub, col=3, align=True, slotmin=9, slotmax=12, w=2, h=1.4, text=True, icon='LARGE')
             sub.separator(factor = 1)
             tool_bt(parent=sub, cmd=12, w=2, h=1.4, text=True, icon='LARGE')
+
+            sub = col.row(align=True)
+            sub.alignment = 'CENTER'
+            sub.label(text='-----------------------------------------------------')
 
             tool = context.workspace.tools.from_space_view3d_mode(bpy.context.mode).idname
             if tool == 'builtin_brush.Paint':
@@ -353,6 +390,10 @@ class ToolMenu(bpy.types.Panel):
             sub.separator(factor = 1)
             Stroke(self, context, parent=sub)
 
+            sub = col.row(align=True)
+            sub.alignment = 'CENTER'
+            sub.label(text='-----------------------------------------------------')
+
             col.separator(factor = 1)
             sub = col.row(align=True)
             col.menu_contents("VIEW3D_MT_TextureMask")
@@ -362,8 +403,6 @@ class ToolMenu(bpy.types.Panel):
 
             #sub = col.row(align=True)
             #ColorPalette(self, context, parent=sub)
-
-
 
         if context.mode == 'PAINT_TEXTURE':
             brush = context.tool_settings.image_paint.brush
@@ -467,6 +506,174 @@ class ToolMenu(bpy.types.Panel):
             sub = col.row(align=True)
             Stroke(self, context, parent=sub)
 
+        if context.mode == 'PAINT_GPENCIL':
+            brush = context.tool_settings.gpencil_paint.brush
+            gp_settings = brush.gpencil_settings
+            sub = col.row(align=True)
+            sub.prop(ts, "use_gpencil_draw_onback", text="BACK", icon='MOD_OPACITY', toggle=True)
+            sub.separator(factor=0.4)
+            sub.prop(ts, "use_gpencil_automerge_strokes", text="AUTOMERGE", toggle=True)
+            sub = col.row(align=True)
+            split = sub.split(factor=0.5)         
+            BrushCopy(self, context, parent=split)
+            col.separator()
+            tool_bt(parent=split, cmd=0, w=2.4, h=1.4, text=False, icon='LARGE')
+            sub = col.row(align=True)
+            tool_bt(parent=sub, cmd=1, w=2.4, h=1.4, text=False, icon='LARGE')
+            tool_bt(parent=sub, cmd=2, w=2.4, h=1.4, text=False, icon='LARGE')
+            tool_bt(parent=sub, cmd=3, w=2.4, h=1.4, text=False, icon='LARGE')
+            tool_bt(parent=sub, cmd=4, w=2.4, h=1.4, text=False, icon='LARGE')
+            tool_bt(parent=sub, cmd=5, w=2.4, h=1.4, text=False, icon='LARGE')
+            sub = col.row(align=True)
+            tool_bt(parent=sub, cmd=6, w=1.2, h=1, text=False, icon='IPO_LINEAR')
+            tool_bt(parent=sub, cmd=7, w=1.2, h=1, text=False, icon='IPO_CONSTANT')
+            tool_bt(parent=sub, cmd=8, w=1.2, h=1, text=False, icon='IPO_EASE_OUT')
+            tool_bt(parent=sub, cmd=9, w=1.2, h=1, text=False, icon='IPO_EASE_IN_OUT')
+            tool_bt(parent=sub, cmd=10, w=1.2, h=1, text=False, icon='MESH_PLANE')
+            tool_bt(parent=sub, cmd=11, w=1.2, h=1, text=False, icon='MESH_CIRCLE')
+
+            col.separator()
+            sub = col.row()
+            subsub = sub.column(align=True)
+            item = subsub.column(align=True)
+            item.prop(gp_settings, "use_settings_stabilizer", text="SMTH", toggle=True)
+            item = subsub.column(align=True)
+            item.active = gp_settings.use_settings_stabilizer
+            item.prop(brush, "smooth_stroke_radius", text="Radius", slider=True)
+            item.prop(brush, "smooth_stroke_factor", text="Factor", slider=True)
+
+            col.separator()
+            subsub = sub.column(align=True)
+            subsub.prop(ts, "use_gpencil_weight_data_add", text="WPAINT", toggle=True)
+            subsub.prop(ts, "use_gpencil_draw_additive", text="FREEZE", toggle=True)
+            subsub.prop(gpd, "use_multiedit", text="MULTIFRAME", toggle=True)
+
+            col.separator()
+            sub = col.row(align=True)
+            sub.popover("VIEW3D_PT_tools_grease_pencil_brush_post_processing")
+            sub.popover("VIEW3D_PT_tools_grease_pencil_brush_random")
+            sub.popover("VIEW3D_PT_tools_grease_pencil_brush_advanced")
+
+
+        if context.mode == 'EDIT_GPENCIL':
+            brush = context.tool_settings.vertex_paint.brush
+
+            sub = col.row(align=True)
+            sub.prop_enum(ts, "gpencil_selectmode_edit", text="POINT", value='POINT', icon='NONE')
+            sub.prop_enum(ts, "gpencil_selectmode_edit", text="STROKE", value='STROKE', icon='NONE')
+            subrow = sub.row(align=True)
+            subrow.enabled = not gpd.use_curve_edit
+            subrow.prop_enum(ts, "gpencil_selectmode_edit", text="SEG", value='SEGMENT')
+
+            col.separator()
+            sub = col.row(align=True)
+            tool_bt(parent=sub, cmd=0, w=2, h=1.4, text=False, icon='LARGE')
+            tool_bt(parent=sub, cmd=1, w=2, h=1.4, text=False, icon='LARGE')
+            tool_bt(parent=sub, cmd=2, w=2, h=1.4, text=False, icon='LARGE')
+            tool_bt(parent=sub, cmd=3, w=2, h=1.4, text=False, icon='LARGE')
+            tool_bt(parent=sub, cmd=4, w=2, h=1.4, text=False, icon='LARGE')
+            sub = col.row(align=True)
+            tool_bt(parent=sub, cmd=5, w=2, h=1.4, text=False, icon='LARGE')
+            tool_bt(parent=sub, cmd=6, w=2, h=1.4, text=False, icon='LARGE')
+            tool_bt(parent=sub, cmd=7, w=2, h=1.4, text=False, icon='LARGE')
+            tool_bt(parent=sub, cmd=8, w=2, h=1.4, text=False, icon='LARGE')
+
+            col.separator()
+            sub = col.split(factor=0.75)
+            GPToolSettings(self, context, parent=sub)
+            sub.separator()
+            ToolOptions(self, context, parent=sub ) 
+
+
+            col.separator()
+            sub = col.row(align=True)
+            subsub = sub.column(align=True)
+            tool_bt(parent=subsub, cmd=9, w=2, h=1, text=True, icon='OFF')
+            tool_bt(parent=subsub, cmd=10, w=2, h=1, text=True, icon='OFF')
+            subsub = sub.column(align=True)
+            tool_bt(parent=subsub, cmd=11, w=2, h=1, text=True, icon='OFF')
+            tool_bt(parent=subsub, cmd=12, w=2, h=1, text=True, icon='OFF')
+            subsub = sub.column(align=True)
+            tool_bt(parent=subsub, cmd=13, w=2, h=1, text=True, icon='OFF')
+            sub.separator(factor=1)
+            subsub = sub.column(align=True)
+            tool_bt(parent=subsub, cmd=14, w=2, h=1, text=True, icon='OFF')
+            tool_bt(parent=subsub, cmd=15, w=2, h=1, text=True, icon='OFF')
+
+            col.separator(factor=2)
+            sub = col.row(align=True)
+            sub.alignment = 'CENTER'
+            sub.label(text='-----------------------------------------------------')
+            sub = col.row(align=True)
+
+            item = sub.column(align=True)
+            item.operator("gpencil.stroke_simplify", text="SIMPLIFY")
+            item.operator("gpencil.stroke_sample", text="RESAMPL")
+
+            item = sub.column(align=True)
+            item.operator("gpencil.stroke_subdivide", text="SUBDIV").only_selected=True
+            item.operator("gpencil.stroke_smooth", text="SMOTH").only_selected=True
+
+            sub.separator(factor=2)
+
+            item = sub.column(align=True)
+            op = item.operator("gpencil.stroke_cyclical_set", text="CLOSE")
+            op.type='CLOSE'
+            op.geometry=True
+            item.operator("gpencil.stroke_trim", text="TRIM")
+            item.separator(factor=2)
+            item.operator("gpencil.stroke_merge", text="MERGE")
+            item.operator("gpencil.stroke_join", text="JOIN")
+
+            sub = col.row(align=True)
+            sub.alignment = 'CENTER'
+            sub.label(text='-----------------------------------------------------')
+            sub = col.row(align=True)
+
+            col.separator()
+            sub = col.row(align=True)
+            sub.prop(gpd, "use_curve_edit", text="",icon='IPO_BEZIER')
+            subsub = sub.row(align=True)
+            subsub.active = gpd.use_curve_edit
+            subsub.popover(panel="VIEW3D_PT_gpencil_curve_edit", text="Curve Editing",)
+
+
+        if context.mode == 'SCULPT_GPENCIL':
+            brush = context.tool_settings.gpencil_paint.brush
+
+            sub = col.row(align=True)
+            sub.prop(ts, "use_gpencil_select_mask_point", text="POINT")
+            sub.prop(ts, "use_gpencil_select_mask_stroke", text="STROKE")
+            sub.prop(ts, "use_gpencil_select_mask_segment", text="SEG")
+
+            sub = col.row(align=True)
+            sub.alignment = 'CENTER'
+            sub.label(text='-----------------------------------------------------')
+
+            sub = col.split(factor=0.4)
+            BrushCopy(self, context, parent=sub)
+            subsub = sub.split(factor=0.2)
+            subsub.scale_y = 1.4
+            subsub.label(text='')
+            subsub.menu_contents("VIEW3D_MT_Falloff")
+            col.separator()
+            sub = col.row(align=True)
+            tool_bt(parent=sub, cmd=4, w=2.2, h=1.4, text=True, icon='LARGE')
+            tool_bt(parent=sub, cmd=5, w=2.2, h=1.4, text=True, icon='LARGE')
+            tool_bt(parent=sub, cmd=6, w=2.2, h=1.4, text=True, icon='LARGE')
+            tool_bt(parent=sub, cmd=7, w=2.2, h=1.4, text=True, icon='LARGE')
+            tool_bt(parent=sub, cmd=8, w=2.2, h=1.4, text=True, icon='LARGE')
+            col.separator()
+            sub = col.row(align=True)
+            tool_bt(parent=sub, cmd=0, w=2.8, h=1, text=False, icon='OFF')
+            tool_bt(parent=sub, cmd=1, w=2.8, h=1, text=False, icon='OFF')
+            tool_bt(parent=sub, cmd=2, w=2.8, h=1, text=False, icon='OFF')
+            tool_bt(parent=sub, cmd=3, w=2.8, h=1, text=False, icon='OFF')
+            sub = col.row(align=True)
+            sub.alignment = 'CENTER'
+            sub.label(text='-----------------------------------------------------')
+            sub = col.row(align=True)
+            GPSculptToolSettings(self, context, parent=col)
 
 class SelectMenu(bpy.types.Panel):
     bl_label = "SELECTIONS"
@@ -533,8 +740,6 @@ class SelectMenu(bpy.types.Panel):
             sub.operator('object.vertex_group_assign_new',text='NEW GRP')
             sub.operator('object.vertex_group_assign',text='ADD')
 
-
-
             col.separator(factor = 1)
             sub = col.row(align=True)
             sub.operator_menu_enum("mesh.select_similar", "type")
@@ -565,6 +770,49 @@ class SelectMenu(bpy.types.Panel):
             subsub.operator("screen.redo_last", text="CMD >>")
 
 
+        if context.mode == 'EDIT_GPENCIL':
+            sub = col.row(align=True)
+            sub.scale_y = 1
+            #sub.label(text="SELECT")
+            sub.ui_units_x = 4
+            sub.operator('gpencil.select_all',text='ALL').action='SELECT'
+            sub.operator('gpencil.select_all',text='CLR').action='DESELECT'
+            sub.operator('gpencil.select_all',text='INV').action='INVERT'
+
+            col.separator(factor = 2)
+            sub = col.column(align=True)
+            sub.scale_x = 2
+            #sub.label(text="SELECT")
+            subsub = sub.row(align=True)
+            subsub.alignment = 'CENTER'
+            subsub.operator('gpencil.select_less', icon='REMOVE', text='')
+            subsub.operator('gpencil.select_more', icon='ADD',text='')
+
+            col.separator(factor = 2)
+            sub = col.row(align=True)
+            subsub = sub.column()
+            subsub.label(text='')
+            subsub = sub.column()
+            subsub.operator('object.vertex_group_add',text='NEW GRP')
+            subsub = sub.column()
+            subsub.label(text='')
+
+            col.separator(factor = 2)
+            sub = col.row(align=True)
+            sub.operator('gpencil.select_grouped',text='LAYER').type='LAYER'
+            sub.operator('gpencil.select_grouped',text='MAT').type='MATERIAL'
+            sub.operator('gpencil.select_linked',text='LINKED')
+
+            col.separator(factor = 2)
+            sub = col.row()
+            subsub = sub.column()
+            subsub.label(text='')
+            subsub = sub.column()
+            subsub.ui_units_x = 4
+            subsub.operator("screen.redo_last", text="CMD >>")
+
+
+
         if context.mode == 'SCULPT':
             sub = col.row()
             SculptMask(self, context, parent=sub)
@@ -580,6 +828,7 @@ class SelectMenu(bpy.types.Panel):
             op.falloff_type='GEODESIC'
             op.invert=True
 
+            col.separator(factor=1)
             sub = col.row()
             tool_bt(parent=sub, cmd=13, w=2, h=1.4, text=False, icon='LARGE') 
             subsub = sub.column()
@@ -601,7 +850,10 @@ class SelectMenu(bpy.types.Panel):
             tool_bt(parent=grid, cmd=16, w=1.2, h=0.8, icon="CUSTOM", text=False)
             tool_bt(parent=grid, cmd=17, w=1.2, h=0.8, icon="CUSTOM", text=False)
 
-            col.separator(factor = 0.4)
+            sub = col.row(align=True)
+            sub.alignment = 'CENTER'
+            sub.label(text='-----------------------------------------------------')
+
             sub = col.row()
             tool_bt(parent=sub, cmd=14, w=2, h=1.4, text=False, icon='LARGE')
             subsub = sub.column()       
@@ -611,8 +863,8 @@ class SelectMenu(bpy.types.Panel):
             tool_bt(parent=subsub, cmd=32, w=1.2, h=0.5, text=False, icon='OFF')
             tool_bt(parent=sub, cmd=15, w=2.4, h=1.4, text=False, icon='LARGE')
 
+            col.separator(factor = 1)
             sub = col.row(align=True)
-
             op = sub.operator('sculpt.expand',text='EXP ACTIVE')
             op.target='FACE_SETS'
             op.falloff_type='BOUNDARY_FACE_SET'
@@ -631,7 +883,9 @@ class SelectMenu(bpy.types.Panel):
             col.separator()
             sub = col.row()
             SculptFaceSet(self, context, parent=sub)
-            col.separator()
+            sub = col.row(align=True)
+            sub.alignment = 'CENTER'
+            sub.label(text='-----------------------------------------------------')
             sub = col.row(align=True)
             sub.operator('mesh.face_set_extract', text='EXT FSET')
             sub.operator('mesh.paint_mask_extract', text='EXT MASK')

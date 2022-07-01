@@ -36,6 +36,8 @@ def get_brush_mode(self, context):
             brush = context.tool_settings.weight_paint.brush
         if mode == 'PAINT_GPENCIL':
             brush = context.tool_settings.gpencil_paint.brush
+        if mode == 'SCULPT_GPENCIL':
+            brush = context.tool_settings.gpencil_paint.brush
         return brush
 
 def get_tex_previews(self, context,tex_type="BRUSH"):  

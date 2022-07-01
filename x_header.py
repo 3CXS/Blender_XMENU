@@ -148,7 +148,16 @@ def draw(self, context):
 
 
     if context.mode == 'EDIT_GPENCIL':
+
+        sub = mid.row(align=True)
+        sub.ui_units_x = 4
+        sub.scale_y = 1
+        sub.operator("gpencil.stroke_arrange", text="UP").direction='UP'
+        sub.operator("gpencil.stroke_arrange", text="DOWN").direction='DOWN'
         gp_select_hud(mid, self, context)
+
+
+
     if context.mode == 'SCULPT_GPENCIL':
         brush = context.tool_settings.gpencil_sculpt_paint.brush
         gp_settings = brush.gpencil_settings

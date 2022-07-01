@@ -288,7 +288,7 @@ class XPanel(bpy.types.Panel):
         #/////////////////////////////////////////////////////////////////////////////#
         #                               SCULPT                                        #
         #/////////////////////////////////////////////////////////////////////////////#
-        if bpy.context.mode == 'SCULPT':
+        if context.mode == 'SCULPT':
             #TOP-ROW//////////////////////////////////////////////////////////////////#
             #TOP-LEFT/////////////////////////////////////////////////////////////////#
             col = top_left.column()
@@ -314,8 +314,8 @@ class XPanel(bpy.types.Panel):
 
             col = top_mid.column()
             col.ui_units_x = 17
-            SculptBrushSettings(self, context, parent=col)
-
+            SculptBrushSettings1(self, context, parent=col)
+            SculptBrushSettings2(self, context, parent=col)
             col = top_mid.column()
             col.ui_units_x = 2
             col.scale_y = 1.4
@@ -478,7 +478,7 @@ class XPanel(bpy.types.Panel):
         #                               PAINT_VERTEX                                  #
         #/////////////////////////////////////////////////////////////////////////////#
 
-        if bpy.context.mode == 'PAINT_VERTEX':
+        if context.mode == 'PAINT_VERTEX':
 
             brush = context.tool_settings.vertex_paint.brush
             #TOP-ROW///////////////////////////////////////////////////////////////////#
@@ -514,7 +514,7 @@ class XPanel(bpy.types.Panel):
         #/////////////////////////////////////////////////////////////////////////////#
         #                               PAINT_TEXTURE                                 #
         #/////////////////////////////////////////////////////////////////////////////#
-        if bpy.context.mode == 'PAINT_TEXTURE':
+        if context.mode == 'PAINT_TEXTURE':
 
             brush = context.tool_settings.image_paint.brush
 
@@ -552,7 +552,7 @@ class XPanel(bpy.types.Panel):
         #/////////////////////////////////////////////////////////////////////////////#
         #                               PAINT_WEIGHT                                  #
         #/////////////////////////////////////////////////////////////////////////////#
-        if bpy.context.mode == 'PAINT_WEIGHT':
+        if context.mode == 'PAINT_WEIGHT':
 
             brush = context.tool_settings.vertex_paint.brush
 
@@ -589,20 +589,21 @@ class XPanel(bpy.types.Panel):
         #/////////////////////////////////////////////////////////////////////////////#
         #                               PAINT_GPENCIL                                  #
         #/////////////////////////////////////////////////////////////////////////////#
-        if bpy.context.mode == 'PAINT_GPENCIL':
+        if context.mode == 'PAINT_GPENCIL':
 
-            brush = context.tool_settings.vertex_paint.brush
+            brush = context.tool_settings.gpencil_paint.brush
+            gp_settings = brush.gpencil_settings
 
             #TOP-ROW////////////////////////////////////////////////////////////////////////////////#
             #TOP-LEFT////////////////////////////////////////////
             row = top_left.row()
             sub = row.column()
             sub.ui_units_x = 4
-            sub.label(text='')
+            sub.menu("GPENCIL_MT_cleanup")
+
             sub = row.column()
             sub.ui_units_x = 4
             sub.operator("gpencil.blank_frame_add", text="INIT")
-
 
             #TOP-MID//////////////////////////////////////////////
             row = top_mid.row(align=True)
@@ -626,28 +627,75 @@ class XPanel(bpy.types.Panel):
             tool_bt(parent=row, cmd=10, w=1.2, h=1, text=False, icon='MESH_PLANE')
             tool_bt(parent=row, cmd=11, w=1.2, h=1, text=False, icon='MESH_CIRCLE')
 
-            #TOP-RIGHT////////////////////////////////////////////
-            col = top_right.column()
-            sub = row.column()
+            row.separator()
+            sub = row.column(align=True)
+            sub.ui_units_x = 2
+            sub.scale_y = 1.4
+            sub.prop(gp_settings, "use_settings_stabilizer", text="SMTH", toggle=True)
+            sub = row.column(align=True)
             sub.ui_units_x = 4
+            sub.scale_y = 0.7
+            sub.active = gp_settings.use_settings_stabilizer
+            sub.prop(brush, "smooth_stroke_radius", text="Radius", slider=True)
+            sub.prop(brush, "smooth_stroke_factor", text="Factor", slider=True)
+
+            #TOP-RIGHT////////////////////////////////////////////
+            row = top_right.row(align=True)
+
+            sub = row.column(align=True)
+            sub.ui_units_x = 4
+            sub.scale_y = 1
+            sub.popover("VIEW3D_PT_tools_grease_pencil_brush_post_processing")
+            sub = row.column(align=True)
+            sub.ui_units_x = 4
+            sub.scale_y = 1
+            sub.popover("VIEW3D_PT_tools_grease_pencil_brush_random")
+            sub = row.column(align=True)
+            sub.ui_units_x = 4
+            sub.scale_y = 1
             sub.popover("VIEW3D_PT_tools_grease_pencil_brush_advanced")
 
-            if brush.gpencil_tool not in {'FILL', 'TINT'}:
-                sub = row.column()
-                sub.ui_units_x = 4
-                sub.popover("VIEW3D_PT_tools_grease_pencil_brush_stroke")
 
         #/////////////////////////////////////////////////////////////////////////////#
         #                               EDIT_GPENCIL                                  #
         #/////////////////////////////////////////////////////////////////////////////#
-        if bpy.context.mode == 'EDIT_GPENCIL':
+        if context.mode == 'EDIT_GPENCIL':
 
-            brush = context.tool_settings.vertex_paint.brush
+            brush = context.tool_settings.gpencil_paint.brush
 
             #TOP-ROW////////////////////////////////////////////////////////////////////////////////#
             #TOP-LEFT////////////////////////////////////////////
-            col = top_left.column(align=True)
-            col.label(text="")
+            row = top_left.row(align=True)
+
+            sub = row.column(align=True)
+            sub.ui_units_x = 3.2
+            sub.scale_y = 0.7
+            sub.operator("gpencil.stroke_simplify", text="SIMPLIFY")
+            sub.operator("gpencil.stroke_sample", text="RESAMPL")
+
+            sub = row.column(align=True)
+            sub.ui_units_x = 3.2
+            sub.scale_y = 0.7
+            sub.operator("gpencil.stroke_subdivide", text="SUBDIV").only_selected=True
+            sub.operator("gpencil.stroke_smooth", text="SMOTH").only_selected=True
+
+            row.separator(factor=2)
+
+            sub = row.column(align=True)
+            sub.ui_units_x = 2.4
+            sub.scale_y = 0.7
+            op = sub.operator("gpencil.stroke_cyclical_set", text="CLOSE")
+            op.type='CLOSE'
+            op.geometry=True
+            sub.operator("gpencil.stroke_trim", text="TRIM")
+
+            sub = row.column(align=True)
+            sub.ui_units_x = 2.4
+            sub.scale_y = 0.7
+            sub.operator("gpencil.stroke_merge", text="MERGE")
+            sub.operator("gpencil.stroke_join", text="JOIN")
+
+
             #TOP-MID//////////////////////////////////////////////
             col = top_mid.column(align=False)
             col.alignment = 'CENTER'
@@ -691,15 +739,17 @@ class XPanel(bpy.types.Panel):
         #/////////////////////////////////////////////////////////////////////////////#
         #                               SCULPT_GPENCIL                                #
         #/////////////////////////////////////////////////////////////////////////////#
-        if bpy.context.mode == 'SCULPT_GPENCIL':
+        if context.mode == 'SCULPT_GPENCIL':
 
-            brush = context.tool_settings.vertex_paint.brush
+            brush = context.tool_settings.gpencil_paint.brush
+
 
             #TOP-ROW////////////////////////////////////////////////////////////////////////////////#
             #TOP-LEFT////////////////////////////////////////////
-            row = top_left.row()
-            row.ui_units_x = 6
-            row.label(text="")
+
+            col = top_left.column()
+            col.ui_units_x = 4
+            BrushCopy(self, context, parent=col)
 
             #TOP-MID//////////////////////////////////////////////
             col = top_mid.column()
@@ -711,36 +761,42 @@ class XPanel(bpy.types.Panel):
             tool_bt(parent=row, cmd=7, w=2.2, h=1.4, text=False, icon='LARGE')
             tool_bt(parent=row, cmd=8, w=2.2, h=1.4, text=False, icon='LARGE')
             row.separator(factor=1)
-            tool_bt(parent=row, cmd=0, w=2.8, h=1, text=True, icon='OFF')
-            tool_bt(parent=row, cmd=1, w=2.8, h=1, text=True, icon='OFF')
-            tool_bt(parent=row, cmd=2, w=2.8, h=1, text=True, icon='OFF')
-            tool_bt(parent=row, cmd=3, w=2.8, h=1, text=True, icon='OFF')
+            tool_bt(parent=row, cmd=1, w=2.8, h=1, text=False, icon='OFF')
+            tool_bt(parent=row, cmd=2, w=2.8, h=1, text=False, icon='OFF')
+            tool_bt(parent=row, cmd=0, w=2.8, h=1, text=False, icon='OFF')
+            tool_bt(parent=row, cmd=3, w=2.8, h=1, text=False, icon='OFF')
+
+            row.separator(factor=1)
+            col = top_mid.column()
+            col.ui_units_x = 2
+            col.scale_y = 1.4
+            col.menu_contents("VIEW3D_MT_Falloff")
+
+            row.separator(factor=1)
+            col = top_mid.column()
+            col.ui_units_x = 6
+            GPSculptToolSettings(self, context, parent=col)
             #TOP-RIGHT////////////////////////////////////////////
             col = top_right.column()
             col.label(text="")
 
             '''
 
-            elif tool_mode == 'SCULPT_GPENCIL':
-                if is_valid_context:
-                    brush = context.tool_settings.gpencil_sculpt_paint.brush
-                    tool = brush.gpencil_sculpt_tool
-                    if tool in {'SMOOTH', 'RANDOMIZE'}:
-                        layout.popover("VIEW3D_PT_tools_grease_pencil_sculpt_options")
-                    layout.popover("VIEW3D_PT_tools_grease_pencil_sculpt_appearance")
             elif tool_mode == 'WEIGHT_GPENCIL':
-                if is_valid_context:
-                    layout.popover("VIEW3D_PT_tools_grease_pencil_weight_appearance")
+                col.popover("VIEW3D_PT_tools_grease_pencil_weight_appearance")
             elif tool_mode == 'VERTEX_GPENCIL':
-                if is_valid_context:
-                    layout.popover("VIEW3D_PT_tools_grease_pencil_vertex_appearance")
+                col.popover("VIEW3D_PT_tools_grease_pencil_vertex_appearance")
+
+
+            bpy.data.scenes["Scene"].tool_settings.use_gpencil_select_mask_stroke
+            bpy.data.scenes["Scene"].tool_settings.use_gpencil_select_mask_point
             '''
 
 
         #/////////////////////////////////////////////////////////////////////////////#
         #                               WEIGHT_GPENCIL                                #
         #/////////////////////////////////////////////////////////////////////////////#
-        if bpy.context.mode == 'WEIGHT_GPENCIL':
+        if context.mode == 'WEIGHT_GPENCIL':
 
             brush = context.tool_settings.vertex_paint.brush
 
@@ -752,7 +808,7 @@ class XPanel(bpy.types.Panel):
             #TOP-MID//////////////////////////////////////////////
             col = top_mid.column()
             col.alignment = 'CENTER'
-            tool_bt(parent=col, cmd=0, w=2.2, h=1.4, text=True, icon='LARGE')
+            tool_bt(parent=col, cmd=0, w=2.2, h=1.4, text=False, icon='LARGE')
 
             #TOP-RIGHT////////////////////////////////////////////
             col = top_right.column()

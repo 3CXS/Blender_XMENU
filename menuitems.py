@@ -246,6 +246,19 @@ def VertexGroups(self, context, parent):
 
         col.prop(context.tool_settings, "vertex_group_weight", text="WEIGHT")
 
+    if (ob.vertex_groups and (ob.mode == 'EDIT_GPENCIL' )):
+        col = row.column(align=True)
+        col.ui_units_x = 5
+        sub = col.row(align=True)
+        sub.operator("xmenu.override", text="ASSIGN").cmd ='gpencil.vertex_group_assign'
+        sub.operator("xmenu.override", text="REMOVE").cmd ='gpencil.vertex_group_remove_from'
+
+        sub = col.row(align=True)
+        sub.operator("xmenu.override", text="SELECT").cmd ='gpencil.vertex_group_select'
+        sub.operator("xmenu.override", text="DESELCT").cmd ='gpencil.vertex_group_deselect'
+
+        col.prop(context.tool_settings, "vertex_group_weight", text="WEIGHT")
+
     else:
         col = row.column(align=True)
         col.ui_units_x = 2
@@ -315,9 +328,13 @@ class VIEW3D_MT_Material(bpy.types.Menu):
                 col.operator("xmenu.override", text="Assign").cmd='object.material_slot_assign'
                 col.operator("object.material_slot_select", text="Select")
                 col.operator("object.material_slot_deselect", text="Deselect")
+            if context.mode == 'EDIT_GPENCIL':
+                col = row.column(align=True)
+                col.ui_units_x = 3
+                col.operator("xmenu.override", text="Assign").cmd='object.material_slot_assign'
+                col.operator("object.material_slot_select", text="Select")
+                col.operator("object.material_slot_deselect", text="Deselect")
 
-        elif mat:
-            row.template_ID(space, "pin_id")
 
 def newmaterial(self, context):
         area = [area for area in bpy.context.screen.areas if area.type == "VIEW_3D"][0]
@@ -678,7 +695,7 @@ def GPToolSettings(self, context, parent):
     tool = context.workspace.tools.from_space_view3d_mode(context.mode)
     toolname = context.workspace.tools.from_space_view3d_mode(bpy.context.mode).idname
 
-    col = layout.column()
+    col = layout.column(align=True)
     col.ui_units_x = 6
 
     if toolname == 'builtin.cursor':
@@ -694,11 +711,18 @@ def GPToolSettings(self, context, parent):
         props = tool.gizmo_group_properties("VIEW3D_GGT_xform_extrude")
         sub = col.row(align=True)
         sub.prop(props, "axis_type", expand=True)
+        sub = col.row(align=True)
+        sub.scale_y = 0.4
+        sub.label(text='')
 
     elif toolname == 'builtin.transform_fill':
         props = tool.operator_properties("gpencil.transform_fill")
         sub = col.row(align=True)
         sub.prop(props, "mode", expand=True)
+        sub = col.row(align=True)
+        sub.scale_y = 0.4
+        sub.label(text='')
+
 
     elif toolname == 'builtin.interpolate':
         props = tool.operator_properties("gpencil.interpolate")
@@ -713,8 +737,11 @@ def GPToolSettings(self, context, parent):
         sub.prop(props, "smooth_steps")
 
     else:
-        sub = col.row(align=True)
-        sub.label(text='------')
+        sub = col.column(align=True)
+        sub.scale_y = 0.7
+        sub.label(text='>')
+        sub.label(text='')
+
 
 def SculptFilterSettings(self, context, parent):
     layout = parent
@@ -775,6 +802,35 @@ def SculptFilterSettings(self, context, parent):
         sub = col.row(align=True)
         sub.ui_units_x = 5
         sub.label(text='>')
+
+
+def GPSculptToolSettings(self, context, parent):
+    layout = parent
+
+    tool = context.workspace.tools.from_space_view3d_mode(bpy.context.mode).idname
+    brush = context.tool_settings.gpencil_paint.brush
+    gp_settings = brush.gpencil_settings
+    sculpt_tool = brush.gpencil_sculpt_tool
+
+    sub = layout.row(align=True)
+
+    if tool == 'builtin_brush.Smooth':
+        sub.popover("VIEW3D_PT_tools_grease_pencil_sculpt_options")
+    elif tool == 'builtin_brush.Randomize':
+        sub.popover("VIEW3D_PT_tools_grease_pencil_sculpt_options")
+    elif tool == 'builtin_brush.Thickness':
+        sub.prop(gp_settings, "direction", expand=True)
+    elif tool == 'builtin_brush.Strength':
+        sub.prop(gp_settings, "direction", expand=True)
+    elif tool == 'builtin_brush.Twist':
+        sub.prop_enum(gp_settings, "direction", value='ADD', text="CCW")
+        sub.prop_enum(gp_settings, "direction", value='SUBTRACT', text="CW")
+    elif tool == 'builtin_brush.Pinch':
+        sub.prop_enum(gp_settings, "direction", value='ADD', text="Pinch")
+        sub.prop_enum(gp_settings, "direction", value='SUBTRACT', text="Inflate")
+    else:
+        sub.label(text='')
+
 
 def SculptToolSettings(self, context, parent):
     layout = parent
@@ -875,7 +931,7 @@ def SculptToolSettings(self, context, parent):
 
 
 
-def SculptBrushSettings(self, context, parent):
+def SculptBrushSettings1(self, context, parent):
     layout = parent
     brush = context.tool_settings.sculpt.brush
     direction = not brush.sculpt_capabilities.has_direction
@@ -884,13 +940,12 @@ def SculptBrushSettings(self, context, parent):
     sculpt_tool = brush.sculpt_tool
 
     col = layout.column(align=True)
-    #col.ui_units_x = 15
     col.scale_y = 0.7
-    #ROW1#################################################
-    row = col.row()
-    sub = row.row(align=True)
 
-    sub.ui_units_x = 6
+    split1 = col.split(factor=0.33)
+
+    sub = split1.row(align=True)
+
     if sculpt_tool == 'GRAB':
         sub.prop(brush, "use_grab_silhouette",  text='SILHOUETTE', toggle=True)
         sub.prop(brush, "use_grab_active_vertex",  text='VERTEX', toggle=True)
@@ -899,7 +954,7 @@ def SculptBrushSettings(self, context, parent):
         subsub = sub.row(align=True)
         subsub.scale_x = 1.5
         subsub.prop(brush, "direction", expand=True, text="")
-        subsub.label(text="")
+        #sub.label(text="")
     elif sculpt_tool == 'PAINT':
         sub.prop(brush, "flow", slider=True, text="FLOW")
         sub.prop(brush, "invert_flow_pressure", text="")
@@ -910,10 +965,11 @@ def SculptBrushSettings(self, context, parent):
 
     else:
         sub.label(text="")
-    #sub.separator(factor=1)
 
-    sub = row.row(align=True)
-    sub.ui_units_x = 6
+    sub = split1.row(align=True)
+    split2 = sub.split(factor = 0.5)
+    sub = split2.row(align=True)
+
     if sculpt_tool == 'CLAY_STRIPS':
         sub.prop(brush, "tip_roundness", slider=True, text='ROUND')
     elif sculpt_tool == 'LAYER':
@@ -938,10 +994,8 @@ def SculptBrushSettings(self, context, parent):
         sub.prop(brush, "use_wet_mix_pressure", text="")
     else:
         sub.label(text="")
-    sub.separator(factor=1)
 
-    sub = row.row(align=True)
-    sub.ui_units_x = 6
+    sub = split2.row(align=True)
     if (capabilities.has_topology_rake and context.sculpt_object.use_dynamic_topology_sculpting):
         sub.prop(brush, "topology_rake_factor", slider=True, text='RAKE')
 
@@ -949,8 +1003,9 @@ def SculptBrushSettings(self, context, parent):
             sub.prop(brush, "use_accumulate", text="ACCU", toggle=True)
         else:
             sub.label(text='')
+
     elif capabilities.has_accumulate:
-        sub.label(text='')
+       #sub.label(text='')
         sub.prop(brush, "use_accumulate", text="ACCU", toggle=True)
 
     elif sculpt_tool == 'PAINT':
@@ -960,20 +1015,30 @@ def SculptBrushSettings(self, context, parent):
     else:
         sub.label(text='')
 
+def SculptBrushSettings2(self, context, parent):
+    layout = parent
+    brush = context.tool_settings.sculpt.brush
+    direction = not brush.sculpt_capabilities.has_direction
+    settings = context.tool_settings.sculpt
+    capabilities = brush.sculpt_capabilities
+    sculpt_tool = brush.sculpt_tool
+
+    col = layout.column(align=True)
+    col.scale_y = 0.7
     #ROW2#################################################
-    row = col.row()
+    row = col.row(align=True)
     sub = row.row(align=True)
-    sub.ui_units_x = 6
+    #sub.ui_units_x = 6
     sub.prop(brush, "normal_radius_factor", slider=True, text='NORMAL')
     sub.separator(factor=1)
 
     sub = row.row(align=True)
-    sub.ui_units_x = 6
+    #sub.ui_units_x = 6
     sub.prop(brush, "hardness", slider=True, text='HARD')
     sub.separator(factor=1)
 
     sub = row.row(align=True)
-    sub.ui_units_x = 6
+    #sub.ui_units_x = 6
     if sculpt_tool == 'MASK':
         sub.prop(brush, "mask_tool", expand=True)
     elif sculpt_tool == 'PAINT':
