@@ -5,7 +5,11 @@ import bgl
 import blf
 from bpy.types import Operator, AddonPreferences
 
+from .functions import redraw_regions
 
+#-----------------------------------------------------------------------------------------------------------------------
+
+#SQUARE
 xpos = 20
 ypos = 200
 l = 80
@@ -19,7 +23,7 @@ vertices = (
 shader1 = gpu.shader.from_builtin('2D_UNIFORM_COLOR')
 batch1 = batch_for_shader(shader1, 'LINES', {"pos":vertices})
 
-
+#PIVOT
 vertices2 = [(0.0, 0.0, 0.0), (1.0, 0.0, 0.0),
     (0.0, 0.0, 0.0), (0.0, 1.0, 0.0),
     (0.0, 0.0, 0.0), (0.0, 0.0, 1.0)]
@@ -34,9 +38,9 @@ font_data = {
     "font_id": 0,
     "handler": None,
 }
-#////////////////////////////////////////////////////////////////////////////////////////////#
-#                                     MESH-FUNCTIONS                                         #
-#////////////////////////////////////////////////////////////////////////////////////////////#
+
+
+#MESH-FUNCTIONS----------------------------------------------------------------------------------------------
 
 def polycount():
     verts, edges, polys = 0, 0, 0
@@ -118,11 +122,7 @@ def activetool():
     return toolname
 
 
-#////////////////////////////////////////////////////////////////////////////////////////////#
-#                                           DRAW                                             #
-#////////////////////////////////////////////////////////////////////////////////////////////#
-
-
+#DRAW----------------------------------------------------------------------------------------------
 
 def draw_callback_2d(self, context):
 
@@ -238,26 +238,10 @@ def remove_draw2():
         del bpy.app.driver_namespace['draw2']
         redraw_regions()
 
-def redraw_regions():
-    for area in bpy.context.window.screen.areas:
-        #if area.type == 'VIEW_3D':
-        for region in area.regions:
-            if region.type == 'WINDOW':
-                region.tag_redraw()
-
-def redraw_panel():
-    for area in bpy.context.window.screen.areas:
-        if area.type == 'VIEW_3D':
-            for region in area.regions:
-                if region.type == 'WINDOW':
-                    region.tag_redraw()
-
-#////////////////////////////////////////////////////////////////////////////////////////////#
-#                                           CLASS                                            #
-#////////////////////////////////////////////////////////////////////////////////////////////#
+#CLASSES----------------------------------------------------------------------------------------------
 
 class HUD(bpy.types.Operator):
-    bl_idname = "xmenu.hud"
+    bl_idname = "xm.hud"
     bl_label = "HUD"
     bpy.types.WindowManager.hud_state = bpy.props.BoolProperty(default = False)
     def execute(self, context):
@@ -275,7 +259,7 @@ class HUD(bpy.types.Operator):
         return {'FINISHED'}
 
 class PIVOT(bpy.types.Operator):
-    bl_idname = "xmenu.pivot"
+    bl_idname = "xm.pivot"
     bl_label = "PIVOT" 
     bpy.types.WindowManager.pivot_state = bpy.props.BoolProperty(default = False)
     def execute(self, context):
@@ -292,7 +276,8 @@ class PIVOT(bpy.types.Operator):
             redraw_regions()
         return {'FINISHED'}
 
-#////////////////////////////////////////////////////////////////////////////////////////////#
+#-----------------------------------------------------------------------------------------------------------------------
+
 classes = (HUD, PIVOT)
 
 def register():

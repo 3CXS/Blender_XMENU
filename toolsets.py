@@ -1,5 +1,7 @@
 import bpy
 
+#------------------------------------------------------------------------------------------------------------------------------------
+
 def Toolset():
     if bpy.context.mode == 'OBJECT':
         Toolset = Tools_Object
@@ -22,6 +24,8 @@ def Toolset():
     if bpy.context.mode == 'WEIGHT_GPENCIL':
         Toolset = Tools_GP_Weight
     return Toolset
+
+#------------------------------------------------------------------------------------------------------------------------------------
 
 Tools_Object= [ 
                 ('TWEAK',               'builtin.select',                   '',             'ops.generic.select',               ''), 
@@ -172,10 +176,10 @@ Tools_GP_Edit= [
                 ('SCALE',               'builtin.scale',                    '',             'ops.transform.resize',             ''),
                 ('TRANSFORM',           'builtin.transform',                '',             'ops.transform.transform',          ''),
                 ('EXTR',                'builtin.extrude',                  '',             'ops.gpencil.extrude_move',         ''),
-                ('RAD',              'builtin.radius',                   '',             'ops.gpencil.radius',               ''),
+                ('RAD',                 'builtin.radius',                   '',             'ops.gpencil.radius',               ''),
                 ('BEND',                'builtin.bend',                     '',             'ops.gpencil.edit_bend',            ''),
                 ('SHEAR',               'builtin.shear',                    '',             'ops.gpencil.edit_shear',           ''),
-                ('SPH',             'builtin.to_sphere',          '',             'ops.gpencil.edit_to_sphere',       ''),
+                ('SPH',                 'builtin.to_sphere',                '',             'ops.gpencil.edit_to_sphere',       ''),
                 ('X FILL',              'builtin.transform_fill',           '',             'ops.gpencil.transform_fill',       ''),
                 ('INTER',               'builtin.interpolate',              '',             'ops.gpencil.primitive_line',       ''),
                 ]
@@ -194,7 +198,7 @@ Tools_GP_Weight= [
                 ('WEIGHT',              'builtin_brush.Weight',             '',             'ops.gpencil.sculpt_weight',        ''), 
                 ]
 
-
+#------------------------------------------------------------------------------------------------------------------------------------
 
 #bpy.context.workspace.tools.from_space_view3d_mode(bpy.context.mode).idname
 #bpy.context.tool_settings.sculpt.brush

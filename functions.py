@@ -1,28 +1,43 @@
 import bpy
 import os
-from bpy.props import (StringProperty,
-                       BoolProperty,
-                       FloatVectorProperty,
-                       FloatProperty,
-                       EnumProperty,
-                       IntProperty,
-                       PointerProperty)
+from mathutils import Vector, Matrix
+from bpy.types import Operator, AddonPreferences
+from bpy.props import StringProperty,BoolProperty,FloatProperty,IntProperty
+
 from bl_ui.space_toolsystem_common import ToolSelectPanelHelper
 from bpy_extras.object_utils import AddObjectHelper, object_data_add
-from bpy.types import Operator, AddonPreferences
-from .icons.icons import load_icons
-from.toolsets import Toolset
-from mathutils import Vector, Matrix
-from .brushtexture import get_brush_mode ,mute_ramp
 
-#////////////////////////////////////////////////////////////////////////////////////////////#
-# Construct context
-def context(window=None, screen=None, area=None, region=None):
-    if window is None: window = C.window
-    if screen is None: screen = window.screen
-    if area is None: area = screen.areas[0]
-    if region is None: region = area.regions[0]
-    return {'window': window, 'screen': screen, 'area': area, 'region': region}
+from.toolsets import Toolset
+from .icons.icons import load_icons
+
+
+#-----------------------------------------------------------------------------------------------------------------------
+
+def redraw_regions():
+    for area in bpy.context.window.screen.areas:
+        #if area.type == 'VIEW_3D':
+        for region in area.regions:
+            if region.type == 'WINDOW':
+                region.tag_redraw()
+
+
+def get_brush_mode(self, context):
+    if context.active_object != None:
+        mode = context.active_object.mode
+        if mode == 'TEXTURE_PAINT':
+            brush = context.tool_settings.image_paint.brush
+        if mode == 'SCULPT':
+            brush = context.tool_settings.sculpt.brush
+        if mode == 'VERTEX_PAINT':
+            brush = context.tool_settings.vertex_paint.brush
+        if mode == 'WEIGHT_PAINT':
+            brush = context.tool_settings.weight_paint.brush
+        if mode == 'PAINT_GPENCIL':
+            brush = context.tool_settings.gpencil_paint.brush
+        if mode == 'SCULPT_GPENCIL':
+            brush = context.tool_settings.gpencil_paint.brush
+        return brush
+
 
 def paint_settings(context):
         tool_settings = context.tool_settings
@@ -55,26 +70,54 @@ def paint_settings(context):
             return tool_settings.gpencil_vertex_paint
         return None
 
+def update_normaldisp(self, context):
+    ob = context.active_object
+    polygons = ob.data.polygons
+    state = ob.data.polygons[0].use_smooth
+    return state
 
-def tool_bt(parent, cmd ,w=1, h=1, text=False, icon="NONE"):
+
+def update_local_view(space_data, states):
+    if space_data.local_view:
+        for obj, local in states:
+            obj.local_view_set(space_data, local)
+
+
+def parent(obj, parentobj):
+    if not parentobj.parent and parentobj.matrix_parent_inverse != Matrix():
+        print("Resetting %s's parent inverse matrix, as no parent is defined." % (parentobj.name))
+        parentobj.matrix_parent_inverse = Matrix()
+
+    p = parentobj
+    while p.parent:
+        p = p.parent
+
+    obj.parent = parentobj
+    obj.matrix_world = p.matrix_parent_inverse @ obj.matrix_world
+
+
+#TOOL OPERATOR -----------------------------------------------------------------------------------------
+
+
+def tool_bt(layout, cmd ,w=1, h=1, text=False, icon="NONE"):
     update_toolset()
-    tool_op(parent=parent, cmd=cmd, w=w, h=h, text=text, icon=icon)
+    tool_op(layout=layout, cmd=cmd, w=w, h=h, text=text, icon=icon)
 
-def tool_grid(parent, col, align, slotmin, slotmax, h=1, w=1, text=False, icon="NONE"):   
-    grid = parent.grid_flow(columns=col, align=align)
+def tool_grid(layout, col, align, slotmin, slotmax, h=1, w=1, text=False, icon="NONE"):   
+    grid = layout.grid_flow(columns=col, align=align)
     update_toolset()
     for i in range(slotmin,slotmax):
         col = grid.column(align=True)
-        tool_op(parent=col, cmd=i, w=w, h=h, text=text, icon=icon)
+        tool_op(layout=col, cmd=i, w=w, h=h, text=text, icon=icon)
 
-def tool_op(parent, cmd ,w=1, h=1, small=False, text=False, icon="NONE"):    
+def tool_op(layout, cmd ,w=1, h=1, small=False, text=False, icon="NONE"):    
     tool_icon = bpy.context.preferences.addons[__package__].preferences.tool_icon
     tool_text = bpy.context.preferences.addons[__package__].preferences.tool_text  
 
     icons = load_icons()
     Tools = Toolset()
 
-    col = parent.column(align=True)
+    col = layout.column(align=True)
     col.ui_units_x = w
     col.scale_y = h
 
@@ -100,13 +143,13 @@ def tool_op(parent, cmd ,w=1, h=1, small=False, text=False, icon="NONE"):
             icon_id = 0
             toollabel = Tools[cmd][0]
 
-        col.operator('xmenu.settool', text=toollabel, depress=bpy.types.WindowManager.tool_state[cmd], icon_value=icon_id).tool_index = cmd
+        col.operator('xm.settool', text=toollabel, depress=bpy.types.WindowManager.tool_state[cmd], icon_value=icon_id).tool_index = cmd
 
     if icon != 'LARGE' and icon !='CUSTOM' and icon !='OFF':
         # using small icons
         icon_id = icon
         toollabel = ' '
-        col.operator('xmenu.settool', text=toollabel, depress=bpy.types.WindowManager.tool_state[cmd], icon=icon_id).tool_index = cmd
+        col.operator('xm.settool', text=toollabel, depress=bpy.types.WindowManager.tool_state[cmd], icon=icon_id).tool_index = cmd
 
     if text == True:
         if tool_text == True:
@@ -115,30 +158,36 @@ def tool_op(parent, cmd ,w=1, h=1, small=False, text=False, icon="NONE"):
             subcol.label(text=Tools[cmd][0])
 
 class SetTool(bpy.types.Operator):
-    bl_idname = "xmenu.settool"
+    bl_idname = "xm.settool"
     bl_label = "SETTOOL"
     bl_options = {'REGISTER'}
     tool_index: bpy.props.IntProperty()
 
     def execute(self, context):
-        area = [area for area in bpy.context.screen.areas if area.type == "VIEW_3D"][0]
-        
-        override_context = bpy.context.copy()
-        override_context['window'] = bpy.context.window
-        override_context['screen'] = bpy.context.screen
-        override_context['area'] = area
-        override_context['region'] = area.regions[-1]
-        override_context['scene'] = bpy.context.scene
-        override_context['space_data'] = area.spaces.active
 
         Tools = Toolset()
         Tool = Tools[self.tool_index][1]
         Brush = Tools[self.tool_index][2]
 
+        for screen in bpy.data.screens:
+            for area in (a for a in screen.areas if a.type == 'VIEW_3D'):
+                region = next((region for region in area.regions if region.type == 'WINDOW'), None)
+                if region is not None:
+                    area = area
+
+        window = bpy.context.window
+        screen =  bpy.context.screen
+        region = area.regions[-1]
+        scene = bpy.context.scene
+        space_data = area.spaces.active
+        ob = context.active_object
+
         if Brush == '':
-            bpy.ops.wm.tool_set_by_id(override_context, name=Tool)
+            with context.temp_override(area=area, region=region, object=ob):
+                bpy.ops.wm.tool_set_by_id(name=Tool)
         else:
-            bpy.ops.wm.tool_set_by_id(override_context, name=Tool)
+            with context.temp_override(area=area, region=region, object=ob):
+                bpy.ops.wm.tool_set_by_id(name=Tool)
 
             mode = context.active_object.mode
             if mode == 'TEXTURE_PAINT':
@@ -178,8 +227,6 @@ def update_toolset():
     for i in range(NTools):
         if Tools[i][2] == '' and toolid == Tools[i][1]:
             bpy.types.WindowManager.tool_state[i] = True
-            #brushname.xm_use_mask != brushname.xm_use_mask
-            #mute_ramp(self,context)
 
         elif Tools[i][2] != '' and brushname == bpy.data.brushes[Tools[i][2]]:
             bpy.types.WindowManager.tool_state[i] = True
@@ -187,10 +234,10 @@ def update_toolset():
         else:
             bpy.types.WindowManager.tool_state[i] = False
 
-def funct_bt(parent, cmd='cmd', tog=False, w=1, h=1, label='', icon="NONE"):    
+def funct_bt(layout, cmd='cmd', tog=False, w=1, h=1, label='', icon="NONE"):    
     tool_icon = bpy.context.preferences.addons[__package__].preferences.tool_icon
 
-    col = parent.column(align=True)
+    col = layout.column(align=True)
     col.ui_units_x = w
     col.scale_y = h
 
@@ -202,7 +249,7 @@ def funct_bt(parent, cmd='cmd', tog=False, w=1, h=1, label='', icon="NONE"):
         icon_id = 'NONE'
         label = label 
     
-    op = 'xmenu.'
+    op = 'xm.'
     op += cmd
 
     dstate = 'bpy.types.WindowManager.'
@@ -218,11 +265,29 @@ def funct_bt(parent, cmd='cmd', tog=False, w=1, h=1, label='', icon="NONE"):
     else:
         col.operator(op, text=label, icon=icon_id)
 
-class Detailsize(bpy.types.Operator):
-    bl_idname = "xmenu.detailsize"
-    bl_label = ""
 
-    #bpy.types.WindowManager.detailsize_state = bpy.props.BoolProperty(default = False)
+
+#OPERATORS -----------------------------------------------------------------------------------------
+
+
+class NormalShading(bpy.types.Operator):
+    bl_idname = "xm.normalshading"
+    bl_label = "NORMALS"
+      
+    def execute(self, context):
+        ob = context.active_object
+        polygons = ob.data.polygons
+        for window in bpy.context.window_manager.windows:
+            screen = window.screen
+            for area in screen.areas:
+                if area.type == 'VIEW_3D':
+                    for polygons in ob.data.polygons:
+                        polygons.use_smooth  = not polygons.use_smooth
+        return {'FINISHED'}
+
+class Detailsize(bpy.types.Operator):
+    bl_idname = "xm.detailsize"
+    bl_label = ""
 
     size: bpy.props.FloatProperty()
 
@@ -233,7 +298,7 @@ class Detailsize(bpy.types.Operator):
         return {'FINISHED'}
 
 class Voxelsize(bpy.types.Operator):
-    bl_idname = "xmenu.voxelsize"
+    bl_idname = "xm.voxelsize"
     bl_label = ""
 
     size: bpy.props.FloatProperty()
@@ -243,14 +308,8 @@ class Voxelsize(bpy.types.Operator):
         mesh.remesh_voxel_size = self.size
         return {'FINISHED'}
 
-def initvoxelsize(self, context):
-    mesh = context.active_object.data
-    mesh.remesh_voxel_size = 0.02
-    return {'FINISHED'}
-
-
 class Hide(bpy.types.Operator):
-    bl_idname = "xmenu.hide"
+    bl_idname = "xm.hide"
     bl_label = "TogHide"
 
     def execute(self, context):
@@ -268,7 +327,7 @@ class Hide(bpy.types.Operator):
         return {'FINISHED'}
 
 class Wire(bpy.types.Operator):
-    bl_idname = "xmenu.wire"
+    bl_idname = "xm.wire"
     bl_label = "Wireframe"
 
     bpy.types.WindowManager.wire_state = bpy.props.BoolProperty(default = False)   
@@ -281,9 +340,8 @@ class Wire(bpy.types.Operator):
                     bpy.types.WindowManager.wire_state = space.overlay.show_wireframes
         return {'FINISHED'}
 
-
 class XRay(bpy.types.Operator):
-    bl_idname = "xmenu.xray"
+    bl_idname = "xm.xray"
     bl_label = "X-RAY"
     bpy.types.WindowManager.xray_state = bpy.props.BoolProperty(default = False)        
     def execute(self, context):  
@@ -297,7 +355,7 @@ class XRay(bpy.types.Operator):
         return {'FINISHED'}
 
 class FaceOrient(bpy.types.Operator):
-    bl_idname = "xmenu.faceorient"
+    bl_idname = "xm.faceorient"
     bl_label = "FaceOrient"
 
     bpy.types.WindowManager.faceorient_state = bpy.props.BoolProperty(default = False)   
@@ -311,7 +369,7 @@ class FaceOrient(bpy.types.Operator):
         return {'FINISHED'}
 
 class Grid(bpy.types.Operator):
-    bl_idname = "xmenu.grid"
+    bl_idname = "xm.grid"
     bl_label = "GRID"
    
     bpy.types.WindowManager.grid_state = bpy.props.BoolProperty(default = False)        
@@ -333,7 +391,7 @@ class Grid(bpy.types.Operator):
         return {'FINISHED'}
 
 class Axis(bpy.types.Operator):
-    bl_idname = "xmenu.axis"
+    bl_idname = "xm.axis"
     bl_label = "AXIS"
    
     bpy.types.WindowManager.axis_state = bpy.props.BoolProperty(default = False)        
@@ -356,9 +414,8 @@ class Axis(bpy.types.Operator):
                     break
         return {'FINISHED'}
 
-
 class Persp(bpy.types.Operator):
-    bl_idname = "xmenu.persp"
+    bl_idname = "xm.persp"
     label = "PERSP"
     bl_label = label
     
@@ -382,7 +439,7 @@ class Persp(bpy.types.Operator):
         return {'FINISHED'} 
      
 class ViewCam(bpy.types.Operator):
-    bl_idname = "xmenu.viewcam"
+    bl_idname = "xm.viewcam"
     bl_label = "ACTIVE CAM" 
 
     bpy.types.WindowManager.viewcam_state = bpy.props.BoolProperty(default = False)        
@@ -405,7 +462,7 @@ class ViewCam(bpy.types.Operator):
         return {'FINISHED'}  
 
 class LockCam(bpy.types.Operator):
-    bl_idname = "xmenu.lockcam"
+    bl_idname = "xm.lockcam"
     bl_label = "LOCK"
     bpy.types.WindowManager.lockcam_state = bpy.props.BoolProperty(default = False)        
     def execute(self, context):
@@ -423,7 +480,7 @@ class LockCam(bpy.types.Operator):
         return {'FINISHED'}   
    
 class FrameS(bpy.types.Operator):
-    bl_idname = "xmenu.frames"
+    bl_idname = "xm.frames"
     bl_label = "FRAME"        
     def execute(self, context):
         for window in bpy.context.window_manager.windows:
@@ -438,7 +495,7 @@ class FrameS(bpy.types.Operator):
         return {'FINISHED'} 
     
 class FrameA(bpy.types.Operator):
-    bl_idname = "xmenu.framea"
+    bl_idname = "xm.framea"
     bl_label = "ALL"        
     def execute(self, context):
         for window in bpy.context.window_manager.windows:
@@ -453,7 +510,7 @@ class FrameA(bpy.types.Operator):
         return {'FINISHED'} 
 
 class LocalView(bpy.types.Operator):
-    bl_idname = "xmenu.localview"
+    bl_idname = "xm.localview"
     bl_label = "LocalView"
     bpy.types.WindowManager.localview_state = bpy.props.BoolProperty(default = False)      
     def execute(self, context):
@@ -470,7 +527,7 @@ class LocalView(bpy.types.Operator):
         return {'FINISHED'}
 
 class MaxArea(bpy.types.Operator):
-    bl_idname = "xmenu.maxarea"
+    bl_idname = "xm.maxarea"
     bl_label = "MaximizeArea"
     bpy.types.WindowManager.maxarea_state = bpy.props.BoolProperty(default = False)      
     def execute(self, context):
@@ -480,7 +537,7 @@ class MaxArea(bpy.types.Operator):
 
 
 class SetActive(bpy.types.Operator):
-    bl_idname = "xmenu.setactive"
+    bl_idname = "xm.setactive"
     bl_label = "SetActiveCam"
     def execute(self, context):
         for window in bpy.context.window_manager.windows:
@@ -496,7 +553,7 @@ class SetActive(bpy.types.Operator):
         return {'FINISHED'} 
 
 class Mask(bpy.types.Operator):
-    bl_idname = "xmenu.mask"
+    bl_idname = "xm.mask"
     bl_label = ""
     cmd: bpy.props.StringProperty()
 
@@ -526,8 +583,11 @@ class Mask(bpy.types.Operator):
         return {'FINISHED'}
 
 
+
+#OVERRIDES -----------------------------------------------------------------------------------------
+
 class Override(bpy.types.Operator):
-    bl_idname = "xmenu.override"
+    bl_idname = "xm.override"
     bl_label = "Operator Override"
     bl_options = {'REGISTER', 'UNDO'}
     cmd: bpy.props.StringProperty()
@@ -555,7 +615,7 @@ class Override(bpy.types.Operator):
             return {'FINISHED'}
 
 class Override1(bpy.types.Operator):
-    bl_idname = "xmenu.override1"
+    bl_idname = "xm.override1"
     bl_label = "Operator Override"
 
     cmd: bpy.props.StringProperty()
@@ -567,8 +627,7 @@ class Override1(bpy.types.Operator):
         keyword1 = prop1.split('=')
         op = 'bpy.ops.'
         op += self.cmd
-        op += '(override'
-        op += ', '
+        op += '('
         op += keyword1[0]
         op += '='
         op += keyword1[1]
@@ -578,12 +637,21 @@ class Override1(bpy.types.Operator):
             for area in (a for a in screen.areas if a.type == 'VIEW_3D'):
                 region = next((region for region in area.regions if region.type == 'WINDOW'), None)
                 if region is not None:
-                    override = {'area': area, 'region': region}
-                    eval(op)
-                    return {'FINISHED'}
+                    area = area
+
+        window = bpy.context.window
+        screen =  bpy.context.screen
+        region = area.regions[-1]
+        scene = bpy.context.scene
+        space_data = area.spaces.active
+        ob = context.active_object
+
+        with context.temp_override(area=area, region=region, object=ob):
+            eval(op)
+            return {'FINISHED'}
 
 class Override2(bpy.types.Operator):
-    bl_idname = "xmenu.override2"
+    bl_idname = "xm.override2"
     bl_label = "Operator Override"
 
     cmd: bpy.props.StringProperty()
@@ -595,55 +663,43 @@ class Override2(bpy.types.Operator):
         keyword1 = prop1.split('=')
         prop2 = self.prop2
         keyword2 = prop2.split('=')
+
         op = 'bpy.ops.'
         op += self.cmd
-        op += '(override'
-        op += ', '
+        op += '('
         op += keyword1[0]
         op += '='
         op += keyword1[1]
-        op += ', '
-        op += keyword2[0]
+        op += ','
+        op += keyword1[0]
         op += '='
-        op += keyword2[1]
+        op += keyword1[1]
         op += ')'
 
         for screen in bpy.data.screens:
             for area in (a for a in screen.areas if a.type == 'VIEW_3D'):
                 region = next((region for region in area.regions if region.type == 'WINDOW'), None)
                 if region is not None:
-                    override = {'area': area, 'region': region}
-                    eval(op)
-                    return {'FINISHED'}
-#////////////////////////////////////////////////////////////////////////////////////////////#
+                    area = area
+
+        window = bpy.context.window
+        screen =  bpy.context.screen
+        region = area.regions[-1]
+        scene = bpy.context.scene
+        space_data = area.spaces.active
+        ob = context.active_object
+
+        with context.temp_override(area=area, region=region, object=ob):
+            eval(op)
+            return {'FINISHED'}
 
 
-
-def parent(obj, parentobj):
-    if not parentobj.parent and parentobj.matrix_parent_inverse != Matrix():
-        print("Resetting %s's parent inverse matrix, as no parent is defined." % (parentobj.name))
-        parentobj.matrix_parent_inverse = Matrix()
-
-    p = parentobj
-    while p.parent:
-        p = p.parent
-
-    obj.parent = parentobj
-    obj.matrix_world = p.matrix_parent_inverse @ obj.matrix_world
-
-
-def update_local_view(space_data, states):
-    """
-    states: list of (obj, bool) tuples, True being in local view, False being out
-    """
-    if space_data.local_view:
-        for obj, local in states:
-            obj.local_view_set(space_data, local)
+#MODES -----------------------------------------------------------------------------------------
 
 class SurfaceDrawMode(bpy.types.Operator):
     bl_idname = "xm.surface_draw_mode"
-    bl_label = "MSurface Draw Mode"
-    bl_description = "Surface Draw, create parented, empty GreasePencil object and enter DRAW mode.\nSHIFT: Select the Line tool."
+    bl_label = "Surface Draw Mode"
+    bl_description = "Surface Draw"
     bl_options = {'REGISTER', 'UNDO'}
 
     def invoke(self, context, event):
@@ -656,8 +712,6 @@ class SurfaceDrawMode(bpy.types.Operator):
         view = context.space_data
         active = context.active_object
 
-
-        
         existing_gps = [obj for obj in active.children if obj.type == "GPENCIL"]
 
         if existing_gps:
@@ -682,8 +736,6 @@ class SurfaceDrawMode(bpy.types.Operator):
         
         gp.color = (0, 0, 0, 1)
 
-        #ts.use_keyframe_insert_auto = True
-
         bpy.ops.object.mode_set(mode='PAINT_GPENCIL')
 
         ts.gpencil_stroke_placement_view3d = 'SURFACE'
@@ -697,12 +749,11 @@ class SurfaceDrawMode(bpy.types.Operator):
         return {'FINISHED'}
 
 
-
-#////////////////////////////////////////////////////////////////////////////////////////////#
+#-----------------------------------------------------------------------------------------------------------------------
 
 classes = (XRay, ViewCam, Grid, Axis, FrameS, FrameA, LocalView, MaxArea, Persp, LockCam, SetTool, Wire, Hide, 
-            SetActive, Detailsize, Voxelsize, Mask, SurfaceDrawMode, FaceOrient, Override, Override1, Override2
-            )
+           SetActive, Detailsize, Voxelsize, Mask, SurfaceDrawMode, FaceOrient, Override, Override1, Override2, NormalShading
+          )
 
 def register():
     for cls in classes:

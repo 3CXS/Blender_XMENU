@@ -1,28 +1,28 @@
 bl_info = {
     "name": "XMENU",
-    "author": "cxs",
+    "author": "CXS",
     "version": (1, 0),
     "blender": (3, 0, 0),
     "location": "PROPERTIES > Scene > XMENU",
     "description": "Tool and Function Collection Panel",
     "doc_url": "",
     "category": "Interface",
-}
+    }
  
-modulesNames = ['x_panel', 'x_header', 'hud', 'menus', 'menuitems', 'functions', 'preferences', 'icons', 'toolsets', 'brushtexture', 'editorfloat'] 
+modulesNames = ['x_panel', 'x_header', 'x_menus', 'hud', 'menuitems', 'functions', 'preferences', 'icons', 'toolsets', 'brushtexture', 'editorfloat'] 
  
 import sys
 import os
 import bpy
 import importlib
-from .icons.icons import xmenu_clear_icons
-#from .import properties
-from .import brushtexture as brushtexture
-#from .functions import clear_brush_textures
-from .brushtexture import register_previews, unregister_previews, user_path, clear_brush_textures
-
 from bpy.types import AddonPreferences
 
+from .icons.icons import clear_icons
+
+from .import brushtexture as brushtexture
+from .brushtexture import register_previews, unregister_previews, user_path, clear_brush_textures
+
+#-----------------------------------------------------------------------------------------------------------------------
 
 modulesFullNames = {}
 for currentModuleName in modulesNames:
@@ -36,11 +36,13 @@ for currentModuleFullName in modulesFullNames.values():
         setattr(globals()[currentModuleFullName], 'modulesNames', modulesFullNames)
 
 
+#KEYMAP-----------------------------------------------------------------------------------------------------------------
+
 keys = {"MENU": [{"label": "1",
                   "region_type": "WINDOW",
                   "map_type": "KEYBOARD",
                   "keymap": "Window",
-                  "idname": "xmenu.floater_01",
+                  "idname": "xm.floater_01",
                   "type": "FOUR",
                   "ctrl": False,
                   "alt": False,
@@ -52,7 +54,7 @@ keys = {"MENU": [{"label": "1",
                   "region_type": "WINDOW",
                   "map_type": "KEYBOARD",
                   "keymap": "Window",
-                  "idname": "xmenu.floater_02",
+                  "idname": "xm.floater_02",
                   "type": "FIVE",
                   "ctrl": False,
                   "alt": False,
@@ -64,7 +66,7 @@ keys = {"MENU": [{"label": "1",
                   "region_type": "WINDOW",
                   "map_type": "KEYBOARD",
                   "keymap": "Window",
-                  "idname": "xmenu.floater_03",
+                  "idname": "xm.floater_03",
                   "type": "SIX",
                   "ctrl": False,
                   "alt": False,
@@ -76,7 +78,7 @@ keys = {"MENU": [{"label": "1",
                   "region_type": "WINDOW",
                   "map_type": "KEYBOARD",
                   "keymap": "Window",
-                  "idname": "xmenu.floater_04",
+                  "idname": "xm.floater_04",
                   "type": "SEVEN",
                   "ctrl": False,
                   "alt": False,
@@ -88,7 +90,7 @@ keys = {"MENU": [{"label": "1",
                   "region_type": "WINDOW",
                   "map_type": "KEYBOARD",
                   "keymap": "Window",
-                  "idname": "xmenu.floater_05",
+                  "idname": "xm.floater_05",
                   "type": "EIGHT",
                   "ctrl": False,
                   "alt": False,
@@ -100,7 +102,7 @@ keys = {"MENU": [{"label": "1",
                   "region_type": "WINDOW",
                   "map_type": "KEYBOARD",
                   "keymap": "Window",
-                  "idname": "xmenu.floater_06",
+                  "idname": "xm.floater_06",
                   "type": "NINE",
                   "ctrl": False,
                   "alt": False,
@@ -112,7 +114,7 @@ keys = {"MENU": [{"label": "1",
                   "region_type": "WINDOW",
                   "map_type": "KEYBOARD",
                   "keymap": "Window",
-                  "idname": "xmenu.floater_07",
+                  "idname": "xm.floater_07",
                   "type": "ZERO",
                   "ctrl": False,
                   "alt": False,
@@ -124,7 +126,7 @@ keys = {"MENU": [{"label": "1",
                   "region_type": "WINDOW",
                   "map_type": "KEYBOARD",
                   "keymap": "Window",
-                  "idname": "xmenu.floater_07",
+                  "idname": "xm.floater_07",
                   "type": "ZERO",
                   "ctrl": False,
                   "alt": True,
@@ -177,6 +179,9 @@ def register_keymaps(keylists):
                         keymaps.append((km, kmi))
     return keymaps
 
+
+#-----------------------------------------------------------------------------------------------------------------------
+
 def register():
     for currentModuleName in modulesFullNames.values():
         if currentModuleName in sys.modules:
@@ -196,7 +201,7 @@ def unregister():
                 sys.modules[currentModuleName].unregister()
   
     unregister_previews()
-    xmenu_clear_icons()
+    clear_icons()
 
     global keymaps
     for km, kmi in keymaps:

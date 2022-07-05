@@ -1,21 +1,23 @@
 import bpy
-from bpy import context
 import os, platform
+
 
 from mathutils import Vector
 from time import sleep
 
-from .functions import context 
 from bpy.types import AddonPreferences
 
-############################################ Ctypes/Win32 globals
+#Ctypes/Win32 globals
 active_process_id = os.getpid()
 
 import ctypes 
 from ctypes import wintypes
 from ctypes import byref
 from ctypes import c_int, c_double, c_byte, c_char_p, c_long, Structure
+
 #https://docs.microsoft.com/en-us/windows/win32/api/winuser/
+
+#-----------------------------------------------------------------------------------------------------------------------
 
 #RGB window class also known as COLORREF DWORD
 
@@ -28,25 +30,23 @@ def RGB(r, g, b):
 class POINT(Structure):
     _fields_ = [("x", c_long), ("y", c_long)]
 
-
-#proper way to define user32 it seems 
+#User32
 
 user32 = ctypes.WinDLL('user32', use_last_error=True)
 screensize = user32.GetSystemMetrics(0), user32.GetSystemMetrics(1)
 
-#not sure why this is needed 
+#Function
 
 if not hasattr(wintypes, 'LPDWORD'): # PY2
     wintypes.LPDWORD = ctypes.POINTER(wintypes.DWORD)
  
-#Useful for function
 
 WNDENUMPROC = ctypes.WINFUNCTYPE(
     wintypes.BOOL,
     wintypes.HWND,
     wintypes.LPARAM,)
 
-#all flags we'll use 
+#Flags
 
 NULL            = 0x05
 SWP_NOSIZE      = 0x0001
@@ -60,34 +60,18 @@ LWA_COLORKEY    = 0x00000001
 SIZESW_MINIMIZE = 6
 SW_RESTORE      = 9
 
+#-----------------------------------------------------------------------------------------------------------------------
 
-############################################ Cursor Position
-
-def get_mouse_position(): #get mouse position
-    
+def get_mouse_position():
     pos = POINT()
     user32.GetCursorPos(byref(pos))
 
     return pos.x , pos.y
 
-############################################ Show/Hide
-
-
 def show_win(hWnd, show=True,):
-    """minimize or show given window"""
-    
     user32.ShowWindow(hWnd, SW_RESTORE if show else SIZESW_MINIMIZE)
     
     return None
- 
- 
-def is_win_minimized(hWnd,):
-    """check if window is minimized"""
-    
-    #TODO
-    
-    return True
-
 
 def is_win_visible(hWnd):
     """check if window is visible"""
@@ -95,17 +79,13 @@ def is_win_visible(hWnd):
     return user32.IsWindowVisible(hWnd)
 
 
-############################################ Windows Managers
-
+#Windows Managers
 
 def get_active_win():
-    """get currently active window handle value""" 
-    
+
     return user32.GetActiveWindow()
 
-
 def get_all_computer_win(filter_process_id=None):
-    """return all windows handles (== all process, some have non visible windows)"""
 
     handles = []
     
@@ -122,19 +102,14 @@ def get_all_computer_win(filter_process_id=None):
     
     return handles
 
-
 def get_blender_win():
-    """return all windows handles used by this instance of blender"""
-    
+   
     blender_wins = [ hWnd for hWnd in get_all_computer_win(filter_process_id=active_process_id) if is_win_visible(hWnd) and not get_win_text(hWnd,).startswith("blender.exe")] 
-    
-    #TODO, might be good to know if win is main window, or children, or console? 
-    
-    return blender_wins #take this 3dsmax
+      
+    return blender_wins
 
 
 def get_blender_console():
-    """return blender console window handle"""
 
     return [ hWnd for hWnd in get_all_computer_win(filter_process_id=active_process_id) if get_win_text(hWnd,).startswith("blender.exe")][0]
 
@@ -157,7 +132,7 @@ def get_win_process_id(hWnd,):
     return pid.value
 
 
-############################################ Window Text
+#Window Text
 
 
 def set_win_text(hWnd, text,): #Well, it's useless, on each save status the title will update with asterix char
@@ -178,29 +153,25 @@ def get_win_text(hWnd,):
 
     return buffer.value
 
-############################################ Close
+#Close
 def shut_window(hWnd):
     bpy.ops.wm.window_close()
     return None
 
-def close_win(hWnd,):
-    """close given window"""
-    
+def close_win(hWnd,):   
     #user32.CloseWindow(hWnd,)
     user32.DestroyWindow(hWnd,)
     return None 
 
 
-############################################ Transforms 
-
+#Transforms 
 
 def set_win_transforms(hWnd, location=(0,0), size=(500,500), ):
-    """set location and size of given window handle (use vector values)"""
 
     if (size is None) and (location is None):
         return None
     
-    flags  = SWP_SHOWWINDOW #needed to send update signal somehow? witouth it it won't work 
+    flags  = SWP_SHOWWINDOW
     flags |= SWP_NOZORDER
 
     if (location is None): 
@@ -220,21 +191,15 @@ def set_win_transforms(hWnd, location=(0,0), size=(500,500), ):
 
 
 def get_win_transforms(hWnd,):
-    """get given window handle location and scale (return tuple of two vectors)"""
-    
-    #TODO
-    
+  
     return tuple 
 
 
-############################################ Transparency 
+#Transparency 
 
 
 def set_win_transparency(hWnd, percentage=50, ):
-    """set given window handle transparency (note that minimal value is 10 or you're gonna have a bad time)"""
-    
-    #https://www.experts-exchange.com/articles/1783/Win32-Semi-Transparent-Window.html
-    
+
     if percentage<10:
         percentage=10
     perc_val = int(255/100*percentage)
@@ -247,20 +212,14 @@ def set_win_transparency(hWnd, percentage=50, ):
 
 
 def get_win_transparency(hWnd,):
-    """get transparency value from given window handle"""
-    
-    #https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getlayeredwindowattributes
-    #need to create ctypes obj, pass obj ptr within fct to get modifier ptr value back (it's a cpp thing, they can't return complex values)
-    
+  
     a = c_int(0)
     user32.GetLayeredWindowAttributes( hWnd, 0, byref(a), 0) 
     
     return round(a.value/255*100)
 
+#-----------------------------------------------------------------------------------------------------------------------
 
-####################################################################################
-
-####################################################################################
 #invoke_mouse = None 
 #invoke_area = None
 invoke_window = None 
@@ -293,9 +252,10 @@ def gen_C_dict(context, window, area_type='VIEW_3D'):
 
     return C_dict
 
+#FLOATERS------------------------------------------------------------------------------------------------------------------
 
 class Floater_01(bpy.types.Operator):
-    bl_idname = "xmenu.floater_01"
+    bl_idname = "xm.floater_01"
     bl_label = "OUTLINER"
 
     bpy.types.WindowManager.floater_01_init = bpy.props.BoolProperty(default = False) 
@@ -348,7 +308,7 @@ class Floater_01(bpy.types.Operator):
         return {'FINISHED'}
 
 class Floater_02(bpy.types.Operator):
-    bl_idname = "xmenu.floater_02"
+    bl_idname = "xm.floater_02"
     bl_label = "PROPERTIES"
 
     bpy.types.WindowManager.floater_02_init = bpy.props.BoolProperty(default = False) 
@@ -405,7 +365,7 @@ class Floater_02(bpy.types.Operator):
         return {'FINISHED'}
 
 class Floater_03(bpy.types.Operator):
-    bl_idname = "xmenu.floater_03"
+    bl_idname = "xm.floater_03"
     bl_label = "PROP_MODIFIER"
 
     bpy.types.WindowManager.floater_03_init = bpy.props.BoolProperty(default = False) 
@@ -444,18 +404,9 @@ class Floater_03(bpy.types.Operator):
 
             sv3d.show_region_header = False
 
-            area = [area for area in bpy.context.screen.areas if area.type == "PROPERTIES"][0]
-            
-            override_context = bpy.context.copy()
-            override_context['window'] = bpy.context.window
-            override_context['screen'] = bpy.context.screen
-            override_context['area'] = area
-            override_context['region'] = area.regions[-1]
-            override_context['scene'] = bpy.context.scene
-            override_context['space_data'] = area.spaces.active
-            
-            bpy.ops.screen.region_toggle(override_context, region_type='NAVIGATION_BAR')
-            bpy.context.space_data.context = 'MODIFIER' 
+            with context.temp_override(window=new_window, area=area, region = area.regions[0]):
+                bpy.ops.screen.region_toggle(region_type='NAVIGATION_BAR')
+                bpy.context.space_data.context = 'MODIFIER' 
 
             bpy.types.WindowManager.floater_03_init = True
             bpy.types.WindowManager.floater_03_state = True
@@ -474,7 +425,7 @@ class Floater_03(bpy.types.Operator):
 
 
 class Floater_04(bpy.types.Operator):
-    bl_idname = "xmenu.floater_04"
+    bl_idname = "xm.floater_04"
     bl_label = "SHADER"
 
     bpy.types.WindowManager.floater_04_init = bpy.props.BoolProperty(default = False) 
@@ -530,7 +481,7 @@ class Floater_04(bpy.types.Operator):
         return {'FINISHED'}
 
 class Floater_05(bpy.types.Operator):
-    bl_idname = "xmenu.floater_05"
+    bl_idname = "xm.floater_05"
     bl_label = "UV"
 
     bpy.types.WindowManager.floater_05_init = bpy.props.BoolProperty(default = False) 
@@ -583,7 +534,7 @@ class Floater_05(bpy.types.Operator):
         return {'FINISHED'}
 
 class Floater_06(bpy.types.Operator):
-    bl_idname = "xmenu.floater_06"
+    bl_idname = "xm.floater_06"
     bl_label = "IMAGE"
 
     bpy.types.WindowManager.floater_06_init = bpy.props.BoolProperty(default = False) 
@@ -636,7 +587,7 @@ class Floater_06(bpy.types.Operator):
         return {'FINISHED'}
 
 class Floater_07(bpy.types.Operator):
-    bl_idname = "xmenu.floater_07"
+    bl_idname = "xm.floater_07"
     bl_label = "GEO_NODES"
 
     bpy.types.WindowManager.floater_07_init = bpy.props.BoolProperty(default = False) 
@@ -693,7 +644,7 @@ class Floater_07(bpy.types.Operator):
 
 
 class Floater_08(bpy.types.Operator):
-    bl_idname = "xmenu.floater_08"
+    bl_idname = "xm.floater_08"
     bl_label = "CAM"
 
     bpy.types.WindowManager.floater_08_init = bpy.props.BoolProperty(default = False) 
@@ -762,7 +713,7 @@ class Floater_08(bpy.types.Operator):
         return {'FINISHED'}
 
 class Floater_09(bpy.types.Operator):
-    bl_idname = "xmenu.floater_09"
+    bl_idname = "xm.floater_09"
     bl_label = "BAKE_NODES"
 
     bpy.types.WindowManager.floater_09_init = bpy.props.BoolProperty(default = False) 
@@ -819,7 +770,7 @@ class Floater_09(bpy.types.Operator):
 
 
 class Floater_10(bpy.types.Operator):
-    bl_idname = "xmenu.floater_10"
+    bl_idname = "xm.floater_10"
     bl_label = "BAKE_NODES"
 
     bpy.types.WindowManager.floater_10_init = bpy.props.BoolProperty(default = False) 
@@ -873,9 +824,8 @@ class Floater_10(bpy.types.Operator):
                 bpy.types.WindowManager.floater_10_state = True
 
         return {'FINISHED'}
-#////////////////////////////////////////////////////////////////////////////////////////////#
 
-addon_keymaps = []
+#-----------------------------------------------------------------------------------------------------------------------
 
 classes = (Floater_01, Floater_02, Floater_03, Floater_04, Floater_05, Floater_06, Floater_07, Floater_08, Floater_09, Floater_10)
 
@@ -908,12 +858,7 @@ def register():
     for cls in classes:
         bpy.utils.register_class(cls)
 
-
-    
+ 
 def unregister():
     for cls in classes:
         bpy.utils.unregister_class(cls)
-
-    for km, kmi in addon_keymaps:
-        km.keymap_items.remove(kmi)
-    addon_keymaps.clear()

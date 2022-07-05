@@ -5,8 +5,7 @@ from bpy.props import StringProperty, IntProperty, FloatProperty, BoolProperty, 
 import rna_keymap_ui
 
 
-#////////////////////////////////////////////////////////////////////////////////////////////#
-#////////////////////////////////////////////////////////////////////////////////////////////#
+#-----------------------------------------------------------------------------------------------------------------------
 def centerscreen():
     center_x = bpy.props.FloatProperty(name="center_x", default=1)
     center_y = bpy.props.FloatProperty(name="center_y", default=1)
@@ -21,7 +20,7 @@ def centerscreen():
 class XPrefs(bpy.types.AddonPreferences):
     bl_idname = __package__
 
-    #///////////////////////////ITEMS////////////////////////////////#
+    #PROPS---------------------------------------------------------------------------------
  
     hud_01_size: IntProperty(name="Size", default=24)
     hud_01_pos_x: IntProperty(name="Pos X", default=25)
@@ -110,7 +109,8 @@ class XPrefs(bpy.types.AddonPreferences):
     hud_items : bpy.props.EnumProperty(default="01",items=[("01","MODE",""),("02","TOOL",""),("03","DATA","")])
     prefs_tabs : EnumProperty(default='info', items=[('info', "Info", "INFO"),('options', "Options", "OPTIONS"),('floaters', "Floaters", "FLOATERS")])
 
-    #///////////////////////////MENU/////////////////////////////////#
+
+    #MENU---------------------------------------------------------------------------------
 
     def draw(self, context):
         layout = self.layout
@@ -191,14 +191,10 @@ class XPrefs(bpy.types.AddonPreferences):
             propcol.separator()
 
 
-#////////////////////////////////////////////////////////////////////////////////////////////#
-
-#////////////////////////////////////////////////////////////////////////////////////////////#
-
+#-----------------------------------------------------------------------------------------------------------------------
 
 def register() :
     bpy.utils.register_class(XPrefs)
-
 
 def unregister() :
     bpy.utils.unregister_class(XPrefs)

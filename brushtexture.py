@@ -1,44 +1,22 @@
 import os
 import bpy
 from bpy.types import AddonPreferences
-from bpy.props import   (
-                        CollectionProperty, 
-                        StringProperty, 
-                        PointerProperty, 
-                        IntProperty, 
-                        FloatProperty, 
-                        BoolProperty, 
-                        EnumProperty, 
-                        FloatVectorProperty, 
-                        IntVectorProperty
-                        )
+from bpy.props import   (StringProperty, FloatProperty, BoolProperty, EnumProperty)
+
+from .functions import get_brush_mode
 
 user_path = os.path.join(os.path.dirname(__file__))
 brush_icons_path = os.path.join(user_path,"icons")
 
 preview_collections = {}
 
-#/////////////////////////////////////////////////////////////////////#
+#-----------------------------------------------------------------------------------------------------------------------
+
 def get_tex_path(self, context):
     user_texture_path = bpy.context.preferences.addons[__package__].preferences.tex_path
     return user_texture_path
 
-def get_brush_mode(self, context):
-    if context.active_object != None:
-        mode = context.active_object.mode
-        if mode == 'TEXTURE_PAINT':
-            brush = context.tool_settings.image_paint.brush
-        if mode == 'SCULPT':
-            brush = context.tool_settings.sculpt.brush
-        if mode == 'VERTEX_PAINT':
-            brush = context.tool_settings.vertex_paint.brush
-        if mode == 'WEIGHT_PAINT':
-            brush = context.tool_settings.weight_paint.brush
-        if mode == 'PAINT_GPENCIL':
-            brush = context.tool_settings.gpencil_paint.brush
-        if mode == 'SCULPT_GPENCIL':
-            brush = context.tool_settings.gpencil_paint.brush
-        return brush
+# PREVIEW -----------------------------------------------------------------------------------------
 
 def get_tex_previews(self, context,tex_type="BRUSH"):  
     misc_icons = preview_collections["xm_misc_icons"]
@@ -157,7 +135,11 @@ def register_previews():
     preview_collections["xm_stencil_previews"] = pcoll2
     preview_collections["xm_misc_icons"] = pcoll3
 
-#////////////////////////////////////////////////////////////////////////////////////////////#
+
+
+# SETUP BRUSH TEX -------------------------------------------------------------------------------------
+
+
 def clear_brush_textures():
     for brush in bpy.data.brushes:
         if "xm" in brush:
@@ -225,7 +207,7 @@ def setup_brush_tex(img_path,tex_type="BRUSH"):
     
     return brush_tex
 
-#////////////////////////////////////////////////////////////////////////////////////////////#
+# COLOR RAMP -----------------------------------------------------------------------------------------
 
 def _invert_ramp(self,context,tex_type="BRUSH"):
     mode = context.active_object.mode
@@ -288,9 +270,8 @@ def _mute_ramp(self,context):
         brush.xm_brush_texture = brush.xm_brush_texture
 
 
-#/////////////////////////////////////////////////////////////////////////////#
-#                               PROPERTIES                                    #
-#/////////////////////////////////////////////////////////////////////////////#
+# PROPERTIES -------------------------------------------------------------------------------------
+
 def invert_ramp(self,context):
     context.window_manager.xm_brush_textures_loaded = False
     context.window_manager.xm_stencil_textures_loaded = False
@@ -443,7 +424,8 @@ def refresh_stencil_category(self,context):
     bpy.ops.xm.refresh_previews()
 
  
-#/////////////////////////////////////////////////////////////////////#
+#-----------------------------------------------------------------------------------------
+
 class XM_OT_RefreshPreviews(bpy.types.Operator):
     bl_idname = "xm.refresh_previews"
     bl_label = "Refresh Previews"
@@ -460,7 +442,7 @@ class XM_OT_RefreshPreviews(bpy.types.Operator):
         context.window_manager.xm_stencil_textures_loaded = False
         return {"FINISHED"}
  
-#/////////////////////////////////////////////////////////////////////#
+#-----------------------------------------------------------------------------------------------------------------------
 
 def register():
     bpy.types.WindowManager.xm_brush_textures_loaded = BoolProperty(default=False)
