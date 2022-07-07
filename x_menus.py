@@ -3,6 +3,8 @@ from bpy.types import Menu
 from .menuitems import *
 from .functions import tool_bt, funct_bt
 
+from .icons import get_icon_id
+
 #-----------------------------------------------------------------------------------------------------------------------
 # PIE-MODES:
 
@@ -82,21 +84,20 @@ class ToolMenu(bpy.types.Panel):
     #OBJECT-----------------------------------------------------------------------------------------------
 
         if context.mode == 'OBJECT':
-            '''
-            sub = col.row(align=True)
-            tool_bt(layout=sub, cmd=0, w=2, h=1.4, text=False, icon='LARGE')
-            tool_bt(layout=sub, cmd=1, w=2, h=1.4, text=False, icon='LARGE')
-            tool_bt(layout=sub, cmd=2, w=2, h=1.4, text=False, icon='LARGE')
-            tool_bt(layout=sub, cmd=3, w=2, h=1.4, text=False, icon='LARGE')
-
-            sub = col.row(align=True)
-            tool_bt(layout=sub, cmd=5, w=2, h=1.4, text=False, icon='LARGE')
-            tool_bt(layout=sub, cmd=6, w=2, h=1.4, text=False, icon='LARGE')
-            tool_bt(layout=sub, cmd=7, w=2, h=1.4, text=False, icon='LARGE')
-            tool_bt(layout=sub, cmd=8, w=2, h=1.4, text=False, icon='LARGE')
+            row = col.row(align=True)
+            tool_bt(layout=row, cmd=5, w=1.4, h=1, text=False, icon='CUSTOM')
+            tool_bt(layout=row, cmd=6, w=1.4, h=1, text=False, icon='CUSTOM')
+            tool_bt(layout=row, cmd=7, w=1.4, h=1, text=False, icon='CUSTOM')
+            tool_bt(layout=row, cmd=8, w=1.4, h=1, text=False, icon='CUSTOM')
+            row.separator(factor = 2)
+            tool_bt(layout=row, cmd=0, w=1.4, h=1, text=False, icon='CUSTOM')
+            tool_bt(layout=row, cmd=1, w=1.4, h=1, text=False, icon='CUSTOM')
+            tool_bt(layout=row, cmd=2, w=1.4, h=1, text=False, icon='CUSTOM')
+            tool_bt(layout=row, cmd=3, w=1.4, h=1, text=False, icon='CUSTOM')
+            tool_bt(layout=row, cmd=4, w=1.4, h=1, text=False, icon='CUSTOM')
 
             col.separator(factor=2)
-            '''
+
 #           transform-matrix:
             sub = col.row(align=True)
             Transforms(self, context, layout=sub)
@@ -114,8 +115,9 @@ class ToolMenu(bpy.types.Panel):
             sub.operator("object.modifier_add", text="", icon="MOD_SUBSURF").type='SUBSURF'
             sub.operator("object.modifier_add", text="", icon="MOD_MIRROR").type='MIRROR'
             sub.operator("object.modifier_add", text="", icon="MOD_REMESH").type='REMESH'
+            sub.operator("object.modifier_add", text="", icon="MOD_DECIM").type='DECIMATE'
             sub.separator(factor=1.2)
-            sub.operator_menu_enum("object.modifier_add", "type")
+            sub.operator_menu_enum("object.modifier_add", "type", text='ADD MOD')
 
             col.separator(factor=1)
 
@@ -126,9 +128,9 @@ class ToolMenu(bpy.types.Panel):
             sub.operator('mesh.primitive_uv_sphere_add', text="", icon='MESH_UVSPHERE')
             sub.operator('mesh.primitive_cylinder_add', text="", icon='MESH_CYLINDER')
             sub.operator('object.empty_add', text="", icon='EMPTY_DATA')
-            #sub.operator('object.gpencil_add', text="", icon='GREASEPENCIL')  
+            sub.operator('object.gpencil_add', text="", icon='GREASEPENCIL')
             sub.separator(factor=1.2)
-            sub.menu("VIEW3D_MT_add", text="Add Object", text_ctxt=i18n_contexts.operator_default)
+            sub.menu("VIEW3D_MT_add", text="ADD OBJ", text_ctxt=i18n_contexts.operator_default)
 
             col.separator(factor=0.2)
 
@@ -168,11 +170,17 @@ class ToolMenu(bpy.types.Panel):
 
             sub = col.column()
             #sub.ui_units_x = 6
-            grid = sub.grid_flow(row_major=True, columns=4, align=True)
-            tool_bt(layout=grid, cmd=0, w=2, h=1.2, text=False, icon='LARGE')
-            tool_bt(layout=grid, cmd=1, w=2, h=1.2, text=False, icon='LARGE')
-            tool_bt(layout=grid, cmd=2, w=2, h=1.2, text=False, icon='LARGE')
-            tool_bt(layout=grid, cmd=3, w=2, h=1.2, text=False, icon='LARGE')
+            row = col.row(align=True)
+            tool_bt(layout=row, cmd=5, w=1.4, h=1, text=False, icon='CUSTOM')
+            tool_bt(layout=row, cmd=6, w=1.4, h=1, text=False, icon='CUSTOM')
+            tool_bt(layout=row, cmd=7, w=1.4, h=1, text=False, icon='CUSTOM')
+            tool_bt(layout=row, cmd=8, w=1.4, h=1, text=False, icon='CUSTOM')
+            row.separator(factor = 2)
+            tool_bt(layout=row, cmd=0, w=1.4, h=1, text=False, icon='CUSTOM')
+            tool_bt(layout=row, cmd=1, w=1.4, h=1, text=False, icon='CUSTOM')
+            tool_bt(layout=row, cmd=2, w=1.4, h=1, text=False, icon='CUSTOM')
+            tool_bt(layout=row, cmd=3, w=1.4, h=1, text=False, icon='CUSTOM')
+            tool_bt(layout=row, cmd=4, w=1.4, h=1, text=False, icon='CUSTOM')
 
             sub = col.row(align=True)
             sub.alignment = 'CENTER'
@@ -218,7 +226,7 @@ class ToolMenu(bpy.types.Panel):
 
 #           add mesh:
             sub = col.row(align=True)
-            sub.menu("VIEW3D_MT_add", text="Add Mesh", text_ctxt=i18n_contexts.operator_default)
+            sub.menu("VIEW3D_MT_mesh_add",text='ADD MSH')
             sub.separator(factor = 1)
             sub.operator('mesh.intersect_boolean', text='', icon='MOD_BOOLEAN')
             sub.operator('mesh.intersect', text='', icon='FCURVE')
@@ -246,7 +254,6 @@ class ToolMenu(bpy.types.Panel):
             tool_bt(layout=sub, cmd=18, w=1.2, h=1, text=False, icon='MOD_MESHDEFORM')
             tool_bt(layout=sub, cmd=19, w=1.2, h=1, text=False, icon='MOD_BEVEL')
 
-
             sub = col.row(align=True)
             tool_bt(layout=sub, cmd=22, w=1.2, h=1, text=False, icon='SNAP_MIDPOINT')
             tool_bt(layout=sub, cmd=24, w=1.2, h=1, text=False, icon='MOD_DATA_TRANSFER')
@@ -259,8 +266,6 @@ class ToolMenu(bpy.types.Panel):
             sub.separator()
             tool_bt(layout=sub, cmd=34, w=1.2, h=1, text=False, icon='CURVE_NCIRCLE')
             tool_bt(layout=sub, cmd=35, w=1.2, h=1, text=False, icon='TRANSFORM_ORIGINS')
-
-
 
             col.separator(factor=1)
 
@@ -294,16 +299,12 @@ class ToolMenu(bpy.types.Panel):
             op.orient_type='GLOBAL'
             op.constraint_axis=(True, False, False)
 
-
             item = sub.column(align=True)
             item.scale_y=0.8
             item.operator('uv.smart_project', text="A-UV")
             item.operator('uv.unwrap', text="UNWRP")
 
             sub.separator(factor=2)
-
-
-
 
             item = sub.column(align=True)
             item.scale_y=0.8
@@ -331,7 +332,6 @@ class ToolMenu(bpy.types.Panel):
             subsub.operator('xm.mask', text='PVT M').cmd='PMASKED'
             subsub.operator('xm.mask', text='RESET').cmd='ORIGIN'
             tool_bt(layout=sub, cmd=18, w=2, h=1.4, text=False, icon='LARGE')
-            #sub.separator(factor = 1)
             tool_bt(layout=sub, cmd=0, w=2, h=1.4, text=False, icon='LARGE')
             sub.separator(factor = 1)
             subsub = sub.row(align=True)
@@ -353,7 +353,7 @@ class ToolMenu(bpy.types.Panel):
             tool_grid(layout=sub, col=3, align=True, slotmin=4, slotmax=7, w=2, h=1.4, text=True, icon='LARGE')
             sub.separator(factor = 1)
             tool_bt(layout=sub, cmd=8, w=2, h=1.4, text=True, icon='LARGE')
-            col.separator(factor=1)
+
             sub = col.row(align=True)
             tool_grid(layout=sub, col=3, align=True, slotmin=9, slotmax=12, w=2, h=1.4, text=True, icon='LARGE')
             sub.separator(factor = 1)
@@ -754,8 +754,11 @@ class PropMenu(bpy.types.Panel):
         if context.mode == 'SCULPT':
             col = layout.column()
             col.menu_contents("VIEW3D_MT_dynamesh")
+
+            col.separator(factor = 1)
             col.menu_contents("VIEW3D_MT_remesh")
 
+            col.separator(factor = 1)
             subrow = col.row(align=False)
             subcol = subrow.column(align=False)
             subcol.ui_units_x = 3
@@ -769,8 +772,10 @@ class PropMenu(bpy.types.Panel):
             item = subcol.row()
             tool_bt(layout=item, cmd=35, w=3, h=1, text=False, icon='OFF')
 
+            col.separator(factor = 1)
             SculptFilterSettings(self, context, layout=subrow)
 
+            col.separator(factor = 1)
             VertexColor(self, context, layout=col)
 
 ##---------------------------------------------------------------------------------------------------------------------

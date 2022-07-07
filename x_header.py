@@ -5,7 +5,7 @@ from bl_ui.space_toolsystem_common import (ToolSelectPanelHelper, ToolDef)
 
 from .hud import redraw_regions
 from .functions import tool_grid, tool_bt, funct_bt, paint_settings
-from .menuitems import BrushCopy, ModeSelector, Overlay, History, PaintHud, ColorHud, GPColorHud, SelectHud, GPSelectHud
+from .menuitems import BrushCopy, ModeSelector, Overlay, History, PaintHud, ColorHud, GPColorHud, SelectHud, GPSelectHud, GPPaintHud
 
 #-----------------------------------------------------------------------------------------------------------------------
 
@@ -48,7 +48,7 @@ def draw(self, context):
     #LEFT -------------------------------------------------------------------------------------------------
 
     ModeSelector(self, context, left)
-    left.separator(factor = 1)
+    left.separator(factor = 4.7)
 
     sub = left.row(align=True)
     sub.popover("OBJECT_PT_viewcam", text='', icon="CAMERA_DATA")
@@ -149,24 +149,11 @@ def draw(self, context):
 
     if context.mode == 'PAINT_GPENCIL':
         brush = context.tool_settings.gpencil_paint.brush
-        gp_settings = brush.gpencil_settings
-        sub = mid.row()
-        GPColorHud(self, context, layout=sub)
-        subsub = sub.row(align=True)
-        subsub.scale_x = 1.2
-        subsub.operator("brush.scale_size", icon='BACK', text="").scalar=0.8
-        subsub.operator("brush.scale_size", icon='FORWARD', text="").scalar=1.2
-        sub = mid.row(align=True)
-        sub.ui_units_x = 5
-        sub.prop(brush, "size", text="Radius")
-        sub.prop(gp_settings, "use_pressure", text="", icon='STYLUS_PRESSURE')
-        sub.separator(factor = 1)
-        sub = mid.row(align=True)
-        sub.ui_units_x = 5
-        sub.prop(gp_settings, "pen_strength", slider=True)
-        sub.prop(gp_settings, "use_strength_pressure", text="", icon='STYLUS_PRESSURE')
-        sub = mid.row()
-        sub.prop(ts, "use_gpencil_draw_onback", text="BACK", toggle=True)
+
+        GPColorHud(self, context, layout=mid)
+        mid.separator(factor = 4)
+        GPPaintHud(mid, context, brush)
+
 
     if context.mode == 'EDIT_GPENCIL':
         sub = mid.row(align=True)

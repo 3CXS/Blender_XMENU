@@ -9,7 +9,7 @@ bl_info = {
     "category": "Interface",
     }
  
-modulesNames = ['x_panel', 'x_header', 'x_menus', 'hud', 'menuitems', 'functions', 'preferences', 'icons', 'toolsets', 'brushtexture', 'editorfloat'] 
+modulesNames = ['x_panel', 'x_header', 'x_menus', 'hud', 'menuitems', 'functions', 'preferences', 'toolsets', 'brushtexture', 'editorfloat'] 
  
 import sys
 import os
@@ -17,10 +17,11 @@ import bpy
 import importlib
 from bpy.types import AddonPreferences
 
-from .icons.icons import clear_icons
-
 from .import brushtexture as brushtexture
-from .brushtexture import register_previews, unregister_previews, user_path, clear_brush_textures
+from .brushtexture import register_previews, unregister_previews, clear_brush_textures
+
+from .icons.__init__ import *
+from .icons import initialize_icons_collection, unload_icons
 
 #-----------------------------------------------------------------------------------------------------------------------
 
@@ -182,7 +183,10 @@ def register_keymaps(keylists):
 
 #-----------------------------------------------------------------------------------------------------------------------
 
+
+
 def register():
+
     for currentModuleName in modulesFullNames.values():
         if currentModuleName in sys.modules:
             if hasattr(sys.modules[currentModuleName], 'register'):
@@ -190,19 +194,25 @@ def register():
 
     register_previews()
 
+    initialize_icons_collection()
+
     global keymaps
     keys = get_keys()
     keymaps = register_keymaps(keys)
 
+
 def unregister():
+
     for currentModuleName in modulesFullNames.values():
         if currentModuleName in sys.modules:
             if hasattr(sys.modules[currentModuleName], 'unregister'):
                 sys.modules[currentModuleName].unregister()
-  
+
+    unload_icons()
+
     unregister_previews()
-    clear_icons()
 
     global keymaps
     for km, kmi in keymaps:
         km.keymap_items.remove(kmi)
+

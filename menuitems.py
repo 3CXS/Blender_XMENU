@@ -9,7 +9,7 @@ from bpy.app.translations import contexts as i18n_contexts
 from rna_prop_ui import PropertyPanel
 from collections import defaultdict
 
-from .icons.icons import load_icons
+
 from .functions import tool_grid, tool_bt, funct_bt, paint_settings, update_normaldisp, get_brush_mode
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -140,6 +140,131 @@ def PaintHud(layout, brush, self, context):
     sub.prop(brush, "use_pressure_strength", slider=True, text="")
 
 
+def GPPaintHud(layout, context, brush, *, compact=True):
+    tool_settings = context.tool_settings
+    settings = tool_settings.gpencil_paint
+    gp_settings = brush.gpencil_settings
+    tool = context.workspace.tools.from_space_view3d_mode(context.mode, create=False)
+    if gp_settings is None:
+        return
+
+    # Brush details
+    if brush.gpencil_tool == 'ERASE':
+        row = layout.row(align=True)
+        #row.ui_units_x = 4
+        row.prop(brush, "size", text="Radius")
+        row.prop(gp_settings, "use_pressure", text="", icon='STYLUS_PRESSURE')
+        row.prop(gp_settings, "use_occlude_eraser", text="", icon='XRAY')
+        row.prop(gp_settings, "use_default_eraser", text="")
+
+        row = layout.row(align=True)
+        row.ui_units_x = 6
+        row.prop(gp_settings, "eraser_mode", expand=True)
+        if gp_settings.eraser_mode == 'SOFT':
+            row = layout.row(align=True)
+            row.ui_units_x = 5
+            row.prop(gp_settings, "pen_strength", slider=True, text='STR')
+            row.prop(gp_settings, "use_strength_pressure", text="", icon='STYLUS_PRESSURE')
+            row = layout.row(align=True)
+            row.ui_units_x = 4
+            row.prop(gp_settings, "eraser_strength_factor", text='S')
+            row = layout.row(align=True)
+            row.ui_units_x = 4
+            row.prop(gp_settings, "eraser_thickness_factor", text='T')
+        else:
+            row = layout.row(align=True)
+            row.ui_units_x = 13
+            row.label(text=">")
+
+    # FIXME: tools must use their own UI drawing!
+    elif brush.gpencil_tool == 'FILL':
+        use_property_split_prev = layout.use_property_split
+        if compact:
+            row = layout.row(align=True)
+            row.prop(gp_settings, "fill_direction", text="", expand=True)
+        else:
+            layout.use_property_split = False
+            row = layout.row(align=True)
+            row.prop(gp_settings, "fill_direction", expand=True)
+
+        row = layout.row(align=True)
+        row.ui_units_x = 6
+        row.prop(gp_settings, "fill_factor")
+        row = layout.row(align=True)
+        row.ui_units_x = 6
+        row.prop(gp_settings, "dilate")
+        row = layout.row(align=True)
+        row.ui_units_x = 6
+        row.prop(brush, "size", text="Thickness")
+        layout.use_property_split = use_property_split_prev
+
+    else:  # brush.gpencil_tool == 'DRAW/TINT':
+        row = layout.row(align=True)
+
+        sub = row.row(align=True)
+        sub.scale_x = 1.2
+        sub.operator("brush.scale_size", icon='TRIA_LEFT', text="").scalar=0.8
+
+        row.prop(brush, "size", text="Radius")
+        row.prop(gp_settings, "use_pressure", text="", icon='STYLUS_PRESSURE')
+
+        sub = row.row(align=True)
+        sub.scale_x = 1.2
+        sub.operator("brush.scale_size", icon='TRIA_RIGHT', text="").scalar=1.2
+
+        row.separator()
+
+        if gp_settings.use_pressure and not compact:
+            col = layout.column()
+            col.template_curve_mapping(gp_settings, "curve_sensitivity", brush=True,
+                                       use_negative_slope=True)
+
+        row = layout.row(align=True)
+        row.prop(gp_settings, "pen_strength", slider=True)
+        row.prop(gp_settings, "use_strength_pressure", text="", icon='STYLUS_PRESSURE')
+
+        if gp_settings.use_strength_pressure and not compact:
+            col = layout.column()
+            col.template_curve_mapping(gp_settings, "curve_strength", brush=True,
+                                       use_negative_slope=True)
+
+        if brush.gpencil_tool == 'TINT':
+            row = layout.row(align=True)
+            row.prop(gp_settings, "vertex_mode", text="Mode")
+        else:
+            row = layout.row(align=True)
+            if context.region.type == 'TOOL_HEADER':
+                row.prop(gp_settings, "caps_type", text="", expand=True)
+            else:
+                row.prop(gp_settings, "caps_type", text="Caps Type")
+
+    # FIXME: tools must use their own UI drawing!
+    if tool.idname in {
+            "builtin.arc",
+            "builtin.curve",
+            "builtin.line",
+            "builtin.box",
+            "builtin.circle",
+            "builtin.polyline"
+    }:
+        settings = context.tool_settings.gpencil_sculpt
+        if compact:
+            row = layout.row(align=True)
+            row.prop(settings, "use_thickness_curve", text="", icon='SPHERECURVE')
+            sub = row.row(align=True)
+            sub.active = settings.use_thickness_curve
+            sub.popover(
+                panel="TOPBAR_PT_gpencil_primitive",
+                text="Thickness Profile",
+            )
+        else:
+            row = layout.row(align=True)
+            row.prop(settings, "use_thickness_curve", text="Use Thickness Profile")
+            sub = row.row(align=True)
+            if settings.use_thickness_curve:
+                # Curve
+                layout.template_curve_mapping(settings, "thickness_primitive_curve", brush=True)
+
 
 def ColorHud(self, context, layout):
     ts = context.tool_settings
@@ -167,7 +292,7 @@ def ColorHud(self, context, layout):
 def GPColorHud(self, context, layout):
     tool_settings = context.scene.tool_settings
     settings = tool_settings.gpencil_paint
-    brush = context.tool_settings.gpencil_sculpt_paint.brush
+    brush = context.tool_settings.gpencil_paint.brush
     gp_settings = brush.gpencil_settings
     ma = gp_settings.material
 
@@ -176,6 +301,7 @@ def GPColorHud(self, context, layout):
     if brush.gpencil_tool in {'DRAW', 'FILL'}:
         row.separator(factor=1.0)
         sub = row.row(align=True)
+        sub.ui_units_x = 2
         if gp_settings.pin_draw_mode:
             sub.prop_enum(gp_settings, "brush_draw_mode", 'MATERIAL', text="", icon='MATERIAL')
             sub.prop_enum(gp_settings, "brush_draw_mode", 'VERTEXCOLOR', text="", icon='VPAINT_HLT')
@@ -187,7 +313,6 @@ def GPColorHud(self, context, layout):
         sub.ui_units_x = 2
         sub.enabled = settings.color_mode == 'VERTEXCOLOR' or gp_settings.brush_draw_mode == 'VERTEXCOLOR'
         sub.prop_with_popover(brush, "color", text="", panel="TOPBAR_PT_gpencil_vertexcolor")
-
 
 def SelectHud(layout, self, context):
     tool = context.workspace.tools.from_space_view3d_mode(context.mode)
@@ -788,8 +913,7 @@ class VIEW3D_MT_Material(bpy.types.Menu):
             sub = row.column(align=True)
             sub.ui_units_x = 7
             sub.template_list("MATERIAL_UL_matslots", "", ob, "material_slots", ob, "active_material_index", rows=4)
-            sub.template_ID(ob, "active_material")
-            sub.operator("xm.override", icon='ADD', text="NEW").cmd='material.new'
+            sub.template_ID(ob, "active_material", new="material.new")
 
             sub = row.column(align=True)
             sub.ui_units_x = 1
@@ -907,7 +1031,7 @@ def ObjectToolSettings(self, context, layout):
         sub = col.row(align=True)
         sub.prop(props, "orientation")
 
-    if toolname == 'builtin.extrude':
+    elif toolname == 'builtin.extrude':
         props = tool.gizmo_group_properties("VIEW3D_GGT_xform_extrude")
         layout.prop(props, "axis_type", expand=True)
 

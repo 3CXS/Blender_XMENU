@@ -57,9 +57,9 @@ GWL_EXSTYLE     = -20
 WS_EX_LAYERED   = 0x00080000
 LWA_ALPHA       = 0x00000002
 LWA_COLORKEY    = 0x00000001
-SIZESW_MINIMIZE = 6
+SW_MINIMIZE     = 6
 SW_RESTORE      = 9
-
+SW_HIDE         = 0
 #-----------------------------------------------------------------------------------------------------------------------
 
 def get_mouse_position():
@@ -69,7 +69,7 @@ def get_mouse_position():
     return pos.x , pos.y
 
 def show_win(hWnd, show=True,):
-    user32.ShowWindow(hWnd, SW_RESTORE if show else SIZESW_MINIMIZE)
+    user32.ShowWindow(hWnd, SW_RESTORE if show else SW_HIDE)
     
     return None
 
@@ -193,9 +193,6 @@ def set_win_transforms(hWnd, location=(0,0), size=(500,500), ):
 def get_win_transforms(hWnd,):
   
     return tuple 
-
-
-#Transparency 
 
 
 def set_win_transparency(hWnd, percentage=50, ):

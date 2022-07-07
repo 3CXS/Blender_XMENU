@@ -8,9 +8,8 @@ from bl_ui.space_toolsystem_common import ToolSelectPanelHelper
 from bpy_extras.object_utils import AddObjectHelper, object_data_add
 
 from.toolsets import Toolset
-from .icons.icons import load_icons
 
-
+from .icons import get_icon_id
 #-----------------------------------------------------------------------------------------------------------------------
 
 def redraw_regions():
@@ -114,7 +113,7 @@ def tool_op(layout, cmd ,w=1, h=1, small=False, text=False, icon="NONE"):
     tool_icon = bpy.context.preferences.addons[__package__].preferences.tool_icon
     tool_text = bpy.context.preferences.addons[__package__].preferences.tool_text  
 
-    icons = load_icons()
+
     Tools = Toolset()
 
     col = layout.column(align=True)
@@ -127,18 +126,22 @@ def tool_op(layout, cmd ,w=1, h=1, small=False, text=False, icon="NONE"):
         icon = 'OFF'
     
     if icon == 'LARGE' or icon =='CUSTOM' or icon =='OFF':
+
         if icon == 'LARGE':
             # using icons from toolpanel
             icon_id = ToolSelectPanelHelper._icon_value_from_icon_handle(Tools[cmd][3])
             toollabel = ' '
+
         if icon == 'CUSTOM':
-            # using custom icons            
-            ds = icons.get(Tools[cmd][4])
-            if ds != None:
-                icon_id = ds.icon_id
+            # using custom icons
+            c_icon = Tools[cmd][4]
+
+            if c_icon != None:
+                icon_id = get_icon_id(c_icon)
             else:
                 icon_id = 0
             toollabel = ' '
+
         if icon == 'OFF':
             icon_id = 0
             toollabel = Tools[cmd][0]
