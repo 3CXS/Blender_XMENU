@@ -190,6 +190,7 @@ def setup_brush_tex(img_path,tex_type="BRUSH"):
     brush_tex.use_nodes = True
     node_tree = brush_tex.node_tree
     
+
     if "Image" not in node_tree.nodes:    
         image_node = node_tree.nodes.new('TextureNodeImage')    
     else:
@@ -197,14 +198,22 @@ def setup_brush_tex(img_path,tex_type="BRUSH"):
     image_node.location = [0,0]
     image_node.image = brush_img
 
+
+    if "ColorRamp" not in node_tree.nodes:    
+        ramp_node = node_tree.nodes.new('TextureNodeValToRGB')
+    else:
+        ramp_node = node_tree.nodes['ColorRamp']
+
+
     if "Output" not in node_tree.nodes:
         output_node = node_tree.nodes.new('TextureNodeOutput')
     else:
         output_node = node_tree.nodes['Output']
     output_node.location = [500,0]
 
-    node_tree.links.new(output_node.inputs['Color'],image_node.outputs['Image']) 
-    
+    node_tree.links.new(ramp_node.inputs['Fac'],image_node.outputs['Image'])
+    node_tree.links.new(output_node.inputs['Color'],ramp_node.outputs['Color'])  
+
     return brush_tex
 
 # COLOR RAMP -----------------------------------------------------------------------------------------

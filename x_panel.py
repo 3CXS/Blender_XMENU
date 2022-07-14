@@ -40,6 +40,8 @@ class XPanel(bpy.types.Panel):
         top_row = layout.row()
         top_row.alignment = 'CENTER'
 
+#------------------------------------------------
+
         top_left_outer = top_row.row()
         top_left_outer.ui_units_x = 8
         top_left_outer.alignment = 'LEFT'
@@ -49,17 +51,18 @@ class XPanel(bpy.types.Panel):
         top_left.alignment = 'RIGHT'
 
         top_mid = top_row.row()
-        top_mid.alignment = 'CENTER'
+        top_mid.alignment = 'LEFT'
         top_mid.ui_units_x = 36
 
-        top_right = top_row.row()
-        top_right.ui_units_x = 12
+        top_right = top_row.row(align=True)
+        top_right.ui_units_x = 16
         top_right.alignment = 'LEFT'
 
         top_right_outer = top_row.row()
-        top_right_outer.ui_units_x = 12
+        top_right_outer.ui_units_x = 8
         top_right_outer.alignment = 'RIGHT'
 
+#------------------------------------------------
 
         main_row = layout.row()
         main_row.alignment = 'CENTER' 
@@ -73,6 +76,8 @@ class XPanel(bpy.types.Panel):
         main_right = main_row.column()
         main_right.ui_units_x = 24
 
+#------------------------------------------------
+
         main_leftbox = main_left.box()
         main_leftbox.ui_units_y = 0.6
         main_leftrow = main_left.row()
@@ -82,18 +87,21 @@ class XPanel(bpy.types.Panel):
         main_midbox.ui_units_y = 0.8
         main_midrow = main_mid.row()
 
-
         main_rightbox = main_right.box()
         main_rightbox.ui_units_y = 0.6
         main_rightrow = main_right.row()
         main_rightrow.alignment = 'LEFT'
+
+#------------------------------------------------
 
         end = layout.row()
         end.ui_units_x = 0.2
         end.ui_units_y = 10
         end.label(text="")
 
-        #TOP-LEFT OUTER-----------------------------------------------------------------------------
+
+
+#TOP-LEFT OUTER-----------------------------------------------------------------------------
 
         col = top_left_outer.column()
         col.ui_units_x = 0.2
@@ -111,39 +119,40 @@ class XPanel(bpy.types.Panel):
         row.scale_x = 1.2
         row.operator("script.reload", icon='FILE_REFRESH', text="")
 
-        #TOP-RIGHT OUTER------------------------------------------------------------------------------
+#TOP-RIGHT OUTER------------------------------------------------------------------------------
 
         row = top_right_outer.row(align=True)
-        Overlay(self, context, layout=row)
-        funct_bt(layout=row, cmd='hud', tog=True, w=2, h=1.4, label='INFO', icon="NONE") 
-        funct_bt(layout=row, cmd='pivot', tog=True, w=1.2, h=1.4, label='ORIG', icon="OUTLINER_DATA_EMPTY")
 
-        col = top_right_outer.column()
-        col.ui_units_x = 0.2
-        col.scale_y = 0.7
-        col.label(text='')
-        col.label(text='')
+#       object visibility:
+        HideObject(self, context, layout=row)
+        row.separator(factor=1)
+
+#       overlay & hud:
+        Overlay(self, context, layout=row)
+        funct_bt(layout=row, cmd='pivot', tog=True, w=1.2, h=1, label='', icon='ORIENTATION_VIEW')
+        funct_bt(layout=row, cmd='hud', tog=True, w=1.2, h=1, label='', icon="INFO") 
+
+        sub = top_right_outer.column()
+        sub.ui_units_x = 0.2
+        sub.scale_y = 0.7
+        sub.label(text='')
+        sub.label(text='')
 
 
 #OBJECT-----------------------------------------------------------------------------------------------  
 
         if context.mode == 'OBJECT':
 
+            ob = context.active_object
+
             main_midrow.alignment = 'LEFT'
 
             #TOP-LEFT---------------------------------------------------------------------------------
 
-            row = top_left.row()
-            HideObject(self, context, layout=row)
-            row.separator()
-            Normals(self, context, layout=row)
+            row = top_left.row(align=True)
 
-            #TOP-MID----------------------------------------------------------------------------------
-
-            col = top_mid.column()
-            row = col.row(align=True)
-            #row.scale_y = 0.7
-
+            row.separator(factor = 2)
+#           toolset:
             tool_bt(layout=row, cmd=5, w=1.4, h=1, text=False, icon='CUSTOM')
             tool_bt(layout=row, cmd=6, w=1.4, h=1, text=False, icon='CUSTOM')
             tool_bt(layout=row, cmd=7, w=1.4, h=1, text=False, icon='CUSTOM')
@@ -155,26 +164,87 @@ class XPanel(bpy.types.Panel):
             tool_bt(layout=row, cmd=3, w=1.4, h=1, text=False, icon='CUSTOM')
             tool_bt(layout=row, cmd=4, w=1.4, h=1, text=False, icon='CUSTOM')
 
-            row.separator(factor = 2)
-            col = row.column()
+
+
+            #TOP-MID----------------------------------------------------------------------------------
+
+            col = top_mid.column()
+            row = col.row(align=True)
+            #row.scale_y = 0.7
+
+
+#           object injection:
+            row.operator('mesh.primitive_plane_add', text="", icon='MESH_PLANE')
+            row.operator('mesh.primitive_cube_add', text="", icon='MESH_CUBE')
+            row.operator('mesh.primitive_uv_sphere_add', text="", icon='MESH_UVSPHERE')
+            row.operator('mesh.primitive_cylinder_add', text="", icon='MESH_CYLINDER')
+            row.operator('object.empty_add', text="", icon='EMPTY_DATA')
+            row.operator('object.gpencil_add', text="", icon='GREASEPENCIL')
+            row.separator(factor=2) 
+
+#           list objects:
+            sub = row.column()
+            sub.ui_units_x = 5
+            sub.menu("VIEW3D_MT_add", text="Add Object", text_ctxt=i18n_contexts.operator_default)
+
+            row.separator(factor=2) 
+
+#           list modifiers:
+            sub = row.column()
+            sub.ui_units_x = 5
+            sub.operator_menu_enum("object.modifier_add", "type")
+
+            row.separator(factor=2)
+
+#           list HOPS: use only one choice of menus
+            #row.menu('HOPS_MT_ObjectsOperatorsSubmenu', text='Hard.OPs')  
+            #row.menu('HOPS_MT_BoolSumbenu', text='Hard.OPs')
+
+#           bool operators:
+            row.operator('btool.boolean_union', text="", icon='SELECT_EXTEND')
+            row.operator('btool.boolean_diff', text="", icon='SELECT_SUBTRACT')
+            row.operator('btool.boolean_inters', text="", icon='SELECT_INTERSECT')
+            row.operator('btool.boolean_slice', text="", icon='SELECT_DIFFERENCE')
+            row.operator('object.convert', text="", icon='SHADERFX')
+
+            row.separator(factor=2)
+
+#           merge/clone/array:
+            row.operator('object.join', text='', icon='MOD_OPACITY') #merge
+            row.operator('object.duplicate_move', text='', icon='DUPLICATE') #clone
+            row.separator(factor =1)
+            if ob.type == 'MESH':
+                row.operator('object.modifier_add', text='', icon='MOD_ARRAY').type='ARRAY'
+            else:
+                sub = row.column()
+                sub.ui_units_x = 1
+                sub.label(text="")
+            #row.operator('mesh.radial_symmetry', text='', icon='PHYSICS')
+
+            top_mid.separator(factor = 2)
+
+            col = top_mid.column()
             col.ui_units_x = 5
             ObjectToolSettings(self, context, layout=col)
 
-            row.separator(factor = 2)
-            tool_bt(layout=row, cmd=9, w=2, h=1.4, text=False, icon='LARGE')
-            tool_bt(layout=row, cmd=12, w=2, h=1.4, text=False, icon='LARGE')
-            tool_bt(layout=row, cmd=13, w=2, h=1.4, text=False, icon='LARGE')
-            row.separator(factor = 1)
-            #tool_bt(layout=row, cmd=14, w=2, h=1.4, text=False, icon='LARGE')
-
-            sub = row.column()
-            sub.ui_units_x = 3
-            sub.menu("VIEW3D_MT_add", text="ADD", text_ctxt=i18n_contexts.operator_default)
 
             #TOP-RIGHT-------------------------------------------------------------------------------
+            sub = top_right.column()
+            sub.ui_units_x = 8
+            ToolOptions(self, context, layout=sub)
 
-            ToolOptions(self, context, layout=top_right)
-            top_right.separator(factor = 2)
+            top_right.separator(factor = 1)
+
+#           annotate & measure:
+            sub = top_right.row(align=True)
+            empty = sub.column()
+            empty.ui_units_x = 4
+            empty.separator()
+
+            tool_bt(layout=sub, cmd=9, w=1.2, h=1, text=False, icon='OUTLINER_DATA_GP_LAYER')
+            tool_bt(layout=sub, cmd=12, w=1.2, h=1, text=False, icon='OUTLINER_DATA_LIGHTPROBE')
+            tool_bt(layout=sub, cmd=13, w=1.2, h=1, text=False, icon='DRIVER_ROTATIONAL_DIFFERENCE')
+            top_right.separator(factor=1)
 
             #MAIN-LEFT-------------------------------------------------------------------------------
 
@@ -186,75 +256,69 @@ class XPanel(bpy.types.Panel):
             box.ui_units_x = 4
             box.menu_contents("OBJECT_MT_import_menu")
 
-            box = main_leftrow.box()
-            box.ui_units_x = 4
-            col = box.column(align=True)
-            col.scale_y = 0.8
+            col = main_leftrow.column()
+            col.ui_units_x = 16
+            col.separator()
 
-            col.operator('object.join', text='JOIN')
-            col.operator('object.duplicate_move', text='DUPLICATE')
-            col.operator('object.duplicate_move_linked', text='LINKED')
-            col.separator(factor = 2)
-            col.operator('object.make_links_data', text='COPY MODS').type='MODIFIERS'
-
-            box = main_leftrow.box()
-            col = box.column(align=True)
-            col.scale_y = 0.8
-            col.label(text="CONVERT")
-            col.ui_units_x = 3
-            col.operator('object.convert', text='MESH').target='MESH'
-            col.operator('object.convert', text='CURVE').target='CURVE'
-            col.operator('object.convert', text='GPENCIL').target='GPENCIL'
-            col.operator('gpencil.trace_image', text='IMG TRACE')
-
-            box = main_leftrow.box()
-            col = box.column(align=True)
-            col.scale_y = 0.8
-            col.label(text="Linked")
-            col.ui_units_x = 4
-            sub = col.row(align=True)
-            sub.operator('object.select_linked', text='DATA').type='OBDATA'
-            sub.operator('object.select_linked', text='MAT').type='MATERIAL'
-            sub = col.row(align=True)
-            sub.operator('object.select_linked', text='INST').type='DUPGROUP'
-            sub.operator('object.select_linked', text='LIB').type='LIBRARY_OBDATA'
-            col.separator(factor = 2)
-            sub = col.row(align=True)
-
-            op = sub.operator("xm.override2", text="HIERARCHY")
-            op.cmd ='object.select_hierarchy'
-            op.prop1 ='direction="CHILD"'
-            op.prop2 ='extend=True'
 
             #MAIN-MID-------------------------------------------------------------------------------
 
-            col = main_midrow.column(align=False)
-            col.ui_units_x= 12
-            col.separator(factor = 1)
+#           material-menu + UV:
+            col = main_midrow.column()
+            col.ui_units_x = 10
 
-            row = col.row(align=False)
-            row.ui_units_x = 4
-            row.operator('mesh.primitive_plane_add', text="", icon='MESH_PLANE')
-            row.operator('mesh.primitive_cube_add', text="", icon='MESH_CUBE')
-            row.operator('mesh.primitive_uv_sphere_add', text="", icon='MESH_UVSPHERE')
-            row.operator('mesh.primitive_cylinder_add', text="", icon='MESH_CYLINDER')
-            row.operator('object.empty_add', text="", icon='EMPTY_DATA')
-            row.operator('object.gpencil_add', text="", icon='GREASEPENCIL')
-            row.operator('curve.primitive_bezier_curve_add', text="", icon='CURVE_DATA')
-            row.operator('object.delete', text='DELETE').use_global=False            
+            sub = col.row(align=True)
+            sub.scale_y = 1.2
+            sub.menu("MATERIAL_MT_context_menu", text=" Material Menu ")
+            item = sub.column(align=True)
+            item.ui_units_x = 1.2  
+            item.operator("xm.override", icon='ADD', text="").cmd='material.new'
+            sub.separator(factor = 0.5)
+            sub.operator("xm.override", icon='ADD', text="").cmd='mesh.uv_texture_add'
+            sub.operator("xm.override", icon='REMOVE', text="").cmd='mesh.uv_texture_remove'
+
+#           uv-window
+            UVTexture(self, context, layout=col)
+
+            col.separator(factor = 3)
+
+#           material-window:
+            col = main_midrow.column()
+            col.ui_units_x = 13.5
+            col.menu_contents("VIEW3D_MT_Material")
+
+#           vertex group:
+            col = main_midrow.column()
+            col.ui_units_x = 9.5
+
+            sub = col.row(align=True)
+            sub.scale_y = 1.2
+            sub.operator('xm.override', text='Vertex Group').cmd='object.vertex_group_add'
+            sub.operator('xm.override',text='',icon='ADD').cmd='object.vertex_group_add'
+            sub.operator('xm.override',text='',icon='REMOVE').cmd='object.vertex_group_remove'
+
+#           vertex-window:
+            sub = col.row(align=True)
+            ob = context.active_object
+            group = ob.vertex_groups.active
+            sub.template_list("MESH_UL_vgroups", "", ob, "vertex_groups", ob.vertex_groups, "active_index", rows=2)
 
             #MAIN-RIGHT------------------------------------------------------------------------------
-            box = main_rightrow.box()
-            box.ui_units_x = 8
-            Transforms(self, context, layout=box)
 
-            box = main_rightrow.box()
-            box.ui_units_x = 8
-            box.menu_contents("VIEW3D_MT_Material")
+#           XYZ Matrix:
+            col = main_rightrow.column()
+            col.ui_units_x = 8
+            Transforms(self, context, layout=col)
 
-            box = main_rightrow.box()
-            box.ui_units_x = 8
-            UVTexture(self, context, layout=box)
+#           MOD Window:
+            col = main_rightrow.column(align=False)
+
+            col.ui_units_x = 13
+            col.scale_y = 1.22
+            ob = context.active_object
+            ml_props = bpy.context.window_manager.modifier_list
+            active_mod_index = ob.ml_modifier_active_index
+            col.template_list("OBJECT_UL_ml_modifier_list", "", ob, "modifiers", ml_props, "active_object_modifier_active_index", rows=3)
 
 
 #EDIT------------------------------------------------------------------------------------------------
@@ -263,15 +327,7 @@ class XPanel(bpy.types.Panel):
 
             #TOP-LEFT--------------------------------------------------------------------------------
 
-            row = top_left.row()
-            Normals(self, context, layout=row)
-
-            #TOP-MID---------------------------------------------------------------------------------
-
-            col = top_mid.column(align=False)
-            col.alignment = 'CENTER'
-
-            row = col.row(align=True)
+            row = top_left.row(align=True)
             tool_bt(layout=row, cmd=5, w=1.4, h=1, text=False, icon='CUSTOM')
             tool_bt(layout=row, cmd=6, w=1.4, h=1, text=False, icon='CUSTOM')
             tool_bt(layout=row, cmd=7, w=1.4, h=1, text=False, icon='CUSTOM')
@@ -283,39 +339,154 @@ class XPanel(bpy.types.Panel):
             tool_bt(layout=row, cmd=3, w=1.4, h=1, text=False, icon='CUSTOM')
             tool_bt(layout=row, cmd=4, w=1.4, h=1, text=False, icon='CUSTOM')
 
-            row.separator(factor = 2)
-            col = row.column()
-            col.ui_units_x = 5
-            ObjectToolSettings(self, context, layout=col)
 
-            row.separator(factor = 2)
-            tool_bt(layout=row, cmd=9, w=2, h=1.4, text=False, icon='LARGE')
-            tool_bt(layout=row, cmd=10, w=2, h=1.4, text=False, icon='LARGE')
-            tool_bt(layout=row, cmd=11, w=2, h=1.4, text=False, icon='LARGE')
-            row.separator(factor = 1)
-            #tool_bt(layout=row, cmd=12, w=2, h=1.4, text=False, icon='LARGE')
-            sub = row.column()
-            sub.ui_units_x = 3
-            sub.menu("VIEW3D_MT_mesh_add",text='ADD')
 
-            #col.menu_contents("OBJECT_MT_edgedata")
+
+            #TOP-MID---------------------------------------------------------------------------------
+
+            row = top_mid.row(align=True)
+
+#           add meshes:
+            row.operator('mesh.primitive_plane_add', text="", icon='MESH_PLANE')
+            row.operator('mesh.primitive_cube_add', text="", icon='MESH_CUBE')
+            row.operator('mesh.primitive_uv_sphere_add', text="", icon='MESH_UVSPHERE')
+            row.operator('mesh.primitive_cylinder_add', text="", icon='MESH_CYLINDER')
+
+            row.separator(factor=1)
+
+#           list meshes:
+            row.menu("VIEW3D_MT_mesh_add", icon='NONE', text='Add Mesh') 
+
+            row.separator(factor=1) 
+
+#           list MACHIN3:
+            #row.menu('MACHIN3_MT_mesh_machine', text=' Machine')
+
+            #row.separator(factor=1) 
+
+#           list HOPS: use only one choice of menus
+            #row.menu('HOPS_MT_ObjectsOperatorsSubmenu', text='Hard.OPs')  
+            #row.menu('HOPS_MT_BoolSumbenu', text='Hard.OPs')
+            #row.menu('HOPS_MT_ST3MeshToolsSubmenu', text='Hard.OPs')
+            #row.menu('HOPS_MT_ObjectToolsSubmenu', text='Hard.OPs')
+
+            row.separator(factor=1) 
+
+#           list Quick:
+            #row.menu('SCREEN_MT_user_menu', text=' Quick')
+            row.menu('VIEW3D_MT_edit_mesh_edges', text='Edge Tool')
+
+#           contour select:
+            row.operator('mesh.region_to_loop', text='', icon='CHECKBOX_DEHLT')
+
+            row.separator(factor=1)
+
+#           quick pivot:
+            row.operator('mesh.quick_pivot', text='', icon='SNAP_FACE_CENTER')
+
+#           add MOD Bevel :
+            row.operator("object.modifier_add", text="", icon="MOD_BEVEL").type='BEVEL'
+
+            row.separator(factor=1)
+
+#           mark seams:
+            op = row.operator('mesh.mark_seam', text='',icon='RADIOBUT_ON')
+            op = row.operator('mesh.mark_seam', text='',icon='RADIOBUT_OFF')
+            op.clear = True
+
+            row.separator(factor=1)
+
+#           mark sharp:
+            op = row.operator('mesh.mark_sharp', text='',icon='RADIOBUT_ON')
+            op = row.operator('mesh.mark_sharp', text='',icon='RADIOBUT_OFF')
+            op.clear = True
+
 
             #TOP-RIGHT-------------------------------------------------------------------------------
 
-            col = top_right.column(align=True)
-            ToolOptions(self, context, layout=col)
+            row = top_right.row(align=True)
+            Normals(self, context, layout=row)
+            row.separator(factor=1)
 
-            '''
-            col.ui_units_x = 5
-            col.operator('uv.smart_project', text="AUTO UV")
-            col.operator('uv.unwrap', text="UNWRAP")
-            col.operator('uv.follow_active_quads', text="FOLLOW Q")
-            op = col.operator('uv.project_from_view', text="FROM VIEW")
-            op.scale_to_bounds = True
-            col.operator('uv.reset', text="RESET")
-            col = main_leftrow.column(align=True)
+#           list modifiers:
+            sub = row.column()
+            sub.ui_units_x = 4
+            sub.scale_y = 1.4
+            sub.operator_menu_enum("object.modifier_add", "type", text='   Modifiers')
+            row.separator(factor=1)
+#           annotate & measure:
+            tool_bt(layout=row, cmd=9, w=1.2, h=1, text=False, icon='OUTLINER_DATA_GP_LAYER')
+            tool_bt(layout=row, cmd=10, w=1.2, h=1, text=False, icon='OUTLINER_DATA_LIGHTPROBE')
+            tool_bt(layout=row, cmd=11, w=1.2, h=1, text=False, icon='DRIVER_ROTATIONAL_DIFFERENCE')
+            row.separator(factor=1)
+
+            #MAIN-LEFT-----------------------------------------------------------------------------
+
+            col = main_leftrow.column(align=False)
+            col.label(text='')
+
+            #MAIN-MID-----------------------------------------------------------------------------
+
+            main_midrow.separator(factor = 1)
+
+            col = main_midrow.column(align=False)
+
+#           Menu+UV:
+            sub = col.row(align=True)
+            sub.ui_units_x = 7
+            sub.scale_y = 1.2
+            ob = context.active_object
+            sub.menu("MATERIAL_MT_context_menu", text="Material Menu")
+            item = sub.column(align=True)
+            item.ui_units_x = 1.2  
+            item.operator("xm.override", icon='ADD', text="").cmd='material.new'
+
+
+#           UV-window:
             UVTexture(self, context, layout=col)
-            '''
+            col.separator(factor = 3)
+
+#           MAT-slots + window:
+            col = main_midrow.column(align=False)
+
+            sub = col.row(align=True)
+            sub.ui_units_x = 10
+            sub.menu_contents("VIEW3D_MT_Material")
+
+#           vertex group:
+            col = main_midrow.column(align=False)
+            sub = col.row(align=True)
+            sub.ui_units_x = 8
+            sub.scale_y = 1.2
+
+            sub.operator('xm.override', text=' Vertex Group ').cmd='object.vertex_group_assign_new'
+            sub.operator('xm.override',text='',icon='X').cmd='object.vertex_group_remove'
+            sub.operator('xm.override',text='',icon='CHECKMARK').cmd='object.vertex_group_assign'
+            sub.operator('xm.override',text='',icon='REMOVE').cmd='object.vertex_group_remove_from'
+            sub.separator(factor = 1)
+            sub.operator('xm.override',text='',icon='RADIOBUT_ON').cmd='object.vertex_group_select'
+            sub.operator('xm.override',text='',icon='RADIOBUT_OFF').cmd='object.vertex_group_deselect'
+
+#           vertex-window:
+            sub = col.row(align=True)
+            ob = context.active_object
+            group = ob.vertex_groups.active
+            sub.template_list("MESH_UL_vgroups", "", ob, "vertex_groups", ob.vertex_groups, "active_index", rows=2)
+
+            main_midrow.separator(factor = 1)
+
+            #MAIN-RIGHT-----------------------------------------------------------------------------
+
+            col = main_rightrow.column(align=False)
+
+#           MOD Window:
+            ob = context.active_object
+            ml_props = bpy.context.window_manager.modifier_list
+            active_mod_index = ob.ml_modifier_active_index
+            sub = col.row(align=False)
+            sub.ui_units_x = 12
+            sub.scale_y = 1.25
+            sub.template_list("OBJECT_UL_ml_modifier_list", "", ob, "modifiers", ml_props, "active_object_modifier_active_index", rows=3)
 
 #SCULPT----------------------------------------------------------------------------------------------
 
@@ -354,11 +525,7 @@ class XPanel(bpy.types.Panel):
             BrushCopy(self, context, layout=col)
 
             #TOP-MID-------------------------------------------------------------------------------
-
-            col = top_mid.column()
-            col.ui_units_x = 6
-            SculptToolSettings(self, context, layout=col)
-
+            top_mid.separator(factor=2)
             col = top_mid.column()
             col.ui_units_x = 17
             SculptBrushSettings1(self, context, layout=col)
@@ -368,6 +535,9 @@ class XPanel(bpy.types.Panel):
             col.scale_y = 1.4
             col.menu_contents("VIEW3D_MT_Falloff")
 
+            col = top_mid.column()
+            col.ui_units_x = 6
+            SculptToolSettings(self, context, layout=col)
 
             col = top_mid.column()
             col.ui_units_x = 4
@@ -377,6 +547,8 @@ class XPanel(bpy.types.Panel):
 
             col = top_right.column(align=True)
             ToolOptions(self, context, layout=col)
+
+
 
             #MAIN-LEFT--------------------------------------------------------------------------------
 

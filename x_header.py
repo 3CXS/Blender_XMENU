@@ -5,7 +5,7 @@ from bl_ui.space_toolsystem_common import (ToolSelectPanelHelper, ToolDef)
 
 from .hud import redraw_regions
 from .functions import tool_grid, tool_bt, funct_bt, paint_settings
-from .menuitems import BrushCopy, ModeSelector, Overlay, History, PaintHud, ColorHud, GPColorHud, SelectHud, GPSelectHud, GPPaintHud
+from .menuitems import Normals, BrushCopy, ModeSelector, Overlay, History, PaintHud, ColorHud, GPColorHud, SelectHud, GPSelectHud, GPPaintHud
 
 #-----------------------------------------------------------------------------------------------------------------------
 
@@ -53,7 +53,7 @@ def draw(self, context):
     sub = left.row(align=True)
     sub.popover("OBJECT_PT_viewcam", text='', icon="CAMERA_DATA")
     funct_bt(layout=sub, cmd='framea', w=2, h=1, label='ALL', icon="NONE")
-    funct_bt(layout=sub, cmd='frames', w=2, h=1, label='FRME', icon="NONE")
+    funct_bt(layout=sub, cmd='frames', w=2, h=1, label='SEL', icon="NONE")
     funct_bt(layout=sub, cmd='localview',tog=True, w=2, h=1, label='ISO', icon="NONE")
 
     sub.separator(factor = 1)
@@ -79,27 +79,55 @@ def draw(self, context):
     #MID --------------------------------------------------------------------------------------------------
 
     if context.mode == 'OBJECT':
+#       selection:
         SelectHud(mid, self, context)
+        mid.separator(factor=2)
+
+#       pivot to COG:
+        op = mid.operator('object.origin_set', text='', icon='PIVOT_BOUNDBOX') # COG
+        op.type = 'ORIGIN_GEOMETRY'
+        op.center ='MEDIAN'
+        mid.separator(factor=2)
+
+#       smooth/angle:
+        Normals(self, context, layout=mid)
 
     if context.mode == 'EDIT_MESH':
         sub = mid.row(align=True)
         sub.ui_units_x = 1.2
         sub.operator('mesh.reveal', icon='HIDE_OFF', text="")
         sub = mid.row(align=True)
-        sub.ui_units_x = 2.4
-        sub.operator('mesh.hide', text="HIDE").unselected=False
+        sub.ui_units_x = 1.2
+        sub.operator('mesh.hide', icon='HIDE_ON', text="").unselected=False
 
-        mid.separator(factor=4)
+        mid.separator(factor=1)
 
         sub = mid.row(align=True)
         sub.scale_x = 1.5
         sub.template_edit_mode_selection()
 
-        mid.separator(factor=2)
-
+        mid.separator(factor=1)
         SelectHud(mid, self, context)
 
-        mid.separator(factor=4)
+        mid.separator(factor=1)
+        sub = mid.row(align=True)
+#       stitch-tools:
+        sub.operator('mesh.target_weld_toggle', text='', icon='CON_TRACKTO') #target_weld
+
+#       tweak mode:
+        tool_bt(layout=sub, cmd=0, w=1.1, h=1, text='', icon='OBJECT_ORIGIN') #tweak_mode
+
+#       automerge:
+        ts = context.tool_settings
+        sub.prop(ts, "use_mesh_automerge", text="", toggle=True) #automerge
+
+        sub.separator(factor=1)
+
+#       quick pivot:
+        sub.operator('mesh.quick_pivot', text='', icon='PIVOT_BOUNDBOX') #pivot_selection
+
+
+
 
         sub = mid.row()
         sub.ui_units_x = 5

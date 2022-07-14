@@ -426,31 +426,33 @@ def Overlay(self, context, layout):
                 overlay = view.overlay
                 shading = view.shading
 
-    col = layout.column(align=True)
-    col.scale_y = 0.7
-    col.ui_units_x = 4
-    subcol = col.column(align=True)
+    row = layout.row(align=True)
+
+    sub = row.column(align=True)
+    sub.ui_units_x = 2.4
+
+    if ob != None and ob.type == 'MESH':
+        sub.active = ob.show_wire
+        sub.prop(overlay, "wireframe_opacity", text="Wire")
+    else:
+        sub.label(text="")
+
+    sub = row.column(align=True)
+    funct_bt(layout=sub, cmd='grid', tog=True, w=1.2, h=1, label='', icon='VIEW_ORTHO')
+    #funct_bt(layout=sub, cmd='axis', tog=True, w=1.2, h=1, label='', icon='ORIENTATION_VIEW')
+
+    '''
+    sub = row.column(align=True)
+    sub.ui_units_x = 4
     if context.mode == 'SCULPT':
         sub = subcol.row(align=True)
         sub.prop(ts, "show_face_sets", text="F-SETS", toggle=True)
         sub.prop(ts, "show_mask", text="MASK", toggle=True)
         sub = subcol.row(align=True)
-        if ob != None and ob.type == 'MESH':
-            sub.active = ob.show_wire
-            sub.prop(overlay, "wireframe_opacity", text="Wire")
-        else:
-            sub.label(text="")
 
     else:
-        sub = subcol.row(align=True)
-        funct_bt(layout=sub, cmd='grid', tog=True, w=2, h=1, label='GRID', icon="NONE")
-        funct_bt(layout=sub, cmd='axis', tog=True, w=2, h=1, label='AXIS', icon="NONE")
-        sub = subcol.row(align=True)
-        if ob != None and ob.type == 'MESH':
-            sub.active = ob.show_wire
-            sub.prop(overlay, "wireframe_opacity", text="Wire")
-        else:
-            sub.label(text="")
+        sub.label(text="")
+    '''
 
 #SCENE-----------------------------------------------------------------------------------------------
 
@@ -558,17 +560,19 @@ def HideObject(self, context, layout):
     ob = context.active_object
 
     row = layout.row(align=True)
-    row.ui_units_x = 3
+    row.scale_x = 1.2
+    #row.scale_y = 1.3
 
     if ob != None:
         if ob.hide_viewport == True:
             state = True
-            label = 'UNHIDE'
+            label = 'Hidden  '
+            icon = 'HIDE_ON'
         else:
             state = False
-            label = 'HIDE'
-
-        row.operator("xm.hide", text=label)
+            label = 'Visible  '
+            icon = 'HIDE_OFF'
+        row.operator("xm.hide", text='', icon=icon)
 
 
 def HideObjectMenuBt(self, context):
@@ -580,11 +584,13 @@ def HideObjectMenuBt(self, context):
     if ob != None:
         if ob.hide_viewport == True:
             state = True
-            label = 'UNHIDE'
+            label = 'Hidden  '
+            icon = 'HIDE_ON'
         else:
             state = False
-            label = 'HIDE'
-        row.operator("xm.hide", text=label)
+            label = 'Visible  '
+            icon = 'HIDE_OFF'
+        row.operator("xm.hide", text='', icon=icon)
     else: 
         row.label(text='')
 
@@ -641,72 +647,64 @@ def ViewCam(self, context, layout):
 #OBJECT-----------------------------------------------------------------------------------------------
 
 def Transforms(self, context, layout):
-    layout = layout
-    layout.use_property_split = True
-    layout.use_property_decorate = False
 
     ob = context.active_object
-    col = layout.row()
-    row = col.row()
-    
-    if ob != None:
-        col = row.column(align=True)
-        col.ui_units_x = 8
-        subrow = col.row(align=True)
-        sub = subrow.column(align=True)
-        sub.scale_y = 1
+
+    col = layout.column(align=True)
+    col.ui_units_x = 8
+
+    if ob:
+        row = col.row(align=True)
+        sub = row.column(align=True)
         sub.prop(ob, "location", text="")
-        sub = subrow.column(align=True)
-        sub.scale_y = 1
-        sub.prop(ob, "rotation_euler", text="", expand=False)
-        sub = subrow.column(align=True)
-        sub.scale_y = 1
+        sub = row.column(align=True)
+        sub.prop(ob, "rotation_euler", text="")
+        sub = row.column(align=True)
         sub.prop(ob, "scale", text="")
 
-        sub = col.row(align=True)
-        sub.scale_y = 0.8
-        op = sub.operator('object.transform_apply', text=' + ')
+        row = col.row(align=True)
+        row.scale_y = 0.8
+        op = row.operator('object.transform_apply', text=' + ')
         op.location = True
         op.rotation = False
         op.scale = False
-        sub.operator('object.location_clear', text=' - ').clear_delta=False
+        row.operator('object.location_clear', text=' - ').clear_delta=False
 
-        op = sub.operator('object.transform_apply', text='+')
+        op = row.operator('object.transform_apply', text='+')
         op.location = False
         op.rotation = True
         op.scale = False
-        sub.operator('object.rotation_clear', text='-').clear_delta=False
+        row.operator('object.rotation_clear', text='-').clear_delta=False
 
-        op = sub.operator('object.transform_apply', text=' + ')
+        op = row.operator('object.transform_apply', text=' + ')
         op.location = False
         op.rotation = False
         op.scale = True
-        sub.operator('object.scale_clear', text=' - ').clear_delta=False
+        row.operator('object.scale_clear', text=' - ').clear_delta=False
 
         col.separator(factor=0.8)
 
-        sub = col.row(align=True)
-        sub.operator('object.transform_apply', text='APPLY ALL')
+        row = col.row(align=True)
+        row.operator('object.transform_apply', text='APPLY ALL')
 
         col.separator(factor=0.8)
 
-        sub = col.row(align=True) 
-        op = sub.operator('object.origin_set', text='COG')
+        row = col.row(align=True)
+        op = row.operator('object.origin_set', text='COG')
         op.type = 'ORIGIN_GEOMETRY'
         op.center ='MEDIAN'
 
-        sub.operator('object.pivotobottom', text='FLOOR')        #needs 3d viewport pie menu addon#
+        row.operator('object.pivotobottom', text='FLOOR')        #needs 3d viewport pie menu addon#
 
-        op = sub.operator('object.origin_set', text='CURSOR')
+        op = row.operator('object.origin_set', text='CURSOR')
         op.type = 'ORIGIN_CURSOR'
         op.center ='MEDIAN'
 
     else:
-        col = row.column(align=True)
-        col.ui_units_x = 8
-        sub = col.row(align=True)
-        sub.scale_y = 0.8
-        sub.label(text="")
+        row = col.row(align=True)
+
+        row.scale_y = 1
+        row.label(text=">")
 
 
 #PROPERTIES-----------------------------------------------------------------------------------------------
@@ -788,9 +786,9 @@ def UVTexture(self, context, layout):
         row = col.row()
         col = row.column()
         col.template_list("MESH_UL_uvmaps", "uvmaps", mesh, "uv_layers", mesh.uv_layers, "active_index", rows=2)
-        col = row.column(align=True)
-        col.operator("xm.override", icon='ADD', text="").cmd='mesh.uv_texture_add'
-        col.operator("xm.override", icon='REMOVE', text="").cmd='mesh.uv_texture_remove'
+        #col = row.column(align=True)
+        #col.operator("xm.override", icon='ADD', text="").cmd='mesh.uv_texture_add'
+        #col.operator("xm.override", icon='REMOVE', text="").cmd='mesh.uv_texture_remove'
     else:
         sub = col.row(align=True)
         sub.label(text=">")
@@ -900,29 +898,45 @@ class VIEW3D_MT_Material(bpy.types.Menu):
         layout = self.layout
 
         ob = context.active_object
-        mat = ob.active_material
-        slot = ob.material_slots
+        if ob != None:
+            mat = ob.active_material
+            slot = ob.material_slots
         space = context.space_data
 
-        col = layout.column()
+        col = layout.column(align=True)
+        row = col.row(align=True)
+        row.scale_y = 1.2
 
+        row.template_ID(ob, "active_material")
+        row.operator('xm.override',text='',icon='RADIOBUT_ON').cmd='object.material_slot_add'
+        row.operator('xm.override',text='',icon='RADIOBUT_OFF').cmd='object.material_slot_remove'
+
+        if context.mode == 'EDIT_MESH':
+            row.separator(factor = 1)
+            row.operator('xm.override',text='',icon='CHECKMARK').cmd='object.material_slot_assign'
+            row.operator("object.material_slot_select", text="", icon='RADIOBUT_ON')
+            row.operator("object.material_slot_deselect", text="", icon='RADIOBUT_OFF')
+        if context.mode == 'EDIT_GPENCIL':
+            row.separator(factor = 1)
+            row.operator('xm.override',text='',icon='CHECKMARK').cmd='object.material_slot_assign'
+            row.operator("object.material_slot_select", text="", icon='RADIOBUT_ON')
+            row.operator("object.material_slot_deselect", text="", icon='RADIOBUT_OFF')
+
+        col.separator(factor=0.5)
         if ob:
             is_sortable = len(ob.material_slots) > 1
 
-            row = col.row()
+            row = col.row(align=True)
             sub = row.column(align=True)
             sub.ui_units_x = 7
-            sub.template_list("MATERIAL_UL_matslots", "", ob, "material_slots", ob, "active_material_index", rows=4)
-            sub.template_ID(ob, "active_material", new="material.new")
+            sub.template_list("MATERIAL_UL_matslots", "", ob, "material_slots", ob, "active_material_index", rows=2)
 
+
+            '''
             sub = row.column(align=True)
             sub.ui_units_x = 1
-            sub.operator("xm.override", icon='ADD', text="").cmd='object.material_slot_add'
-            sub.operator("xm.override", icon='REMOVE', text="").cmd='object.material_slot_remove'
-            sub.separator()
-            sub.menu("MATERIAL_MT_context_menu", icon='DOWNARROW_HLT', text="")
+
             if is_sortable:
-                sub.separator()
                 op = sub.operator("xm.override1", icon='TRIA_UP', text="")
                 op.cmd='object.material_slot_move'
                 op.prop1 ='direction="UP"'
@@ -930,24 +944,11 @@ class VIEW3D_MT_Material(bpy.types.Menu):
                 op.cmd='object.material_slot_move'
                 op.prop1 ='direction="DOWN"'
 
-            '''
             if slot:
                 icon_link = 'MESH_DATA' if slot.link == 'DATA' else 'OBJECT_DATA'
                 row.prop(slot, "link", icon=icon_link, icon_only=True)
             '''
 
-            if context.mode == 'EDIT_MESH':
-                sub = row.column(align=True)
-                sub.ui_units_x = 3
-                sub.operator("xm.override", text="Assign").cmd='object.material_slot_assign'
-                sub.operator("object.material_slot_select", text="Select")
-                sub.operator("object.material_slot_deselect", text="Deselect")
-            if context.mode == 'EDIT_GPENCIL':
-                sub = row.column(align=True)
-                sub.ui_units_x = 3
-                sub.operator("xm.override", text="Assign").cmd='object.material_slot_assign'
-                sub.operator("object.material_slot_select", text="Select")
-                sub.operator("object.material_slot_deselect", text="Deselect")
 
 
 
@@ -967,12 +968,12 @@ def ToolOptions(self, context, layout):
 
     elif bpy.context.mode == 'EDIT_MESH':
         subrow = row.row(align=True)
-        subrow.ui_units_x = 4.2
+        subrow.ui_units_x = 8
         subrow.prop(ts, "use_mesh_automerge", text="Auto Merge", toggle=True)
 
     elif bpy.context.mode == 'EDIT_GPENCIL':
         subrow = row.row(align=True)
-        subrow.ui_units_x = 4.2
+        subrow.ui_units_x = 8   
         subrow.prop(ts, "use_mesh_automerge", text="Auto Merge", toggle=True)
 
     elif bpy.context.mode == 'SCULPT':

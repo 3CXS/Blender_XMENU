@@ -7,7 +7,7 @@ from bpy.props import StringProperty,BoolProperty,FloatProperty,IntProperty
 from bl_ui.space_toolsystem_common import ToolSelectPanelHelper
 from bpy_extras.object_utils import AddObjectHelper, object_data_add
 
-from.toolsets import Toolset
+from .toolsets import Toolset
 
 from .icons import get_icon_id
 #-----------------------------------------------------------------------------------------------------------------------
@@ -109,7 +109,7 @@ def tool_grid(layout, col, align, slotmin, slotmax, h=1, w=1, text=False, icon="
         col = grid.column(align=True)
         tool_op(layout=col, cmd=i, w=w, h=h, text=text, icon=icon)
 
-def tool_op(layout, cmd ,w=1, h=1, small=False, text=False, icon="NONE"):    
+def tool_op(layout, cmd ,w=1, h=1, text=False, icon="NONE"):    
     tool_icon = bpy.context.preferences.addons[__package__].preferences.tool_icon
     tool_text = bpy.context.preferences.addons[__package__].preferences.tool_text  
 
@@ -164,6 +164,7 @@ class SetTool(bpy.types.Operator):
     bl_idname = "xm.settool"
     bl_label = "SETTOOL"
     bl_options = {'REGISTER'}
+
     tool_index: bpy.props.IntProperty()
 
     def execute(self, context):
@@ -188,6 +189,7 @@ class SetTool(bpy.types.Operator):
         if Brush == '':
             with context.temp_override(area=area, region=region, object=ob):
                 bpy.ops.wm.tool_set_by_id(name=Tool)
+
         else:
             with context.temp_override(area=area, region=region, object=ob):
                 bpy.ops.wm.tool_set_by_id(name=Tool)
@@ -236,6 +238,8 @@ def update_toolset():
 
         else:
             bpy.types.WindowManager.tool_state[i] = False
+
+
 
 def funct_bt(layout, cmd='cmd', tog=False, w=1, h=1, label='', icon="NONE"):    
     tool_icon = bpy.context.preferences.addons[__package__].preferences.tool_icon

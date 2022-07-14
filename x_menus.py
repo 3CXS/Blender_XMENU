@@ -49,7 +49,7 @@ class FileMenu(bpy.types.Menu):
 
         col = pie.column()
         col.label(text='')
-        col.operator("wm.link", text="SCREEN")
+        col.operator("screen.screenshot_area", text="SCREEN")
 
         col = pie.column()
         col.popover("OBJECT_PT_import_panel")
@@ -110,14 +110,27 @@ class ToolMenu(bpy.types.Panel):
 
 #           add modifiers:
             sub=col.row(align=True)
-            sub.operator("object.modifier_add", text="", icon="MOD_BEVEL").type='BEVEL'
-            sub.operator("object.modifier_add", text="", icon="MOD_SOLIDIFY").type='SOLIDIFY'
-            sub.operator("object.modifier_add", text="", icon="MOD_SUBSURF").type='SUBSURF'
-            sub.operator("object.modifier_add", text="", icon="MOD_MIRROR").type='MIRROR'
-            sub.operator("object.modifier_add", text="", icon="MOD_REMESH").type='REMESH'
-            sub.operator("object.modifier_add", text="", icon="MOD_DECIM").type='DECIMATE'
-            sub.separator(factor=1.2)
-            sub.operator_menu_enum("object.modifier_add", "type", text='ADD MOD')
+            ob = context.active_object
+            if  ob:
+                if ob.type == "MESH" and "CURVE" and "SURFACE" and "TEXT":
+                    sub.operator("object.modifier_add", text="", icon="MOD_BEVEL").type='BEVEL'
+                    sub.operator("object.modifier_add", text="", icon="MOD_SOLIDIFY").type='SOLIDIFY'
+                    sub.operator("object.modifier_add", text="", icon="MOD_SUBSURF").type='SUBSURF'
+                    sub.operator("object.modifier_add", text="", icon="MOD_MIRROR").type='MIRROR'
+                    sub.operator("object.modifier_add", text="", icon="MOD_REMESH").type='REMESH'
+                    sub.operator("object.modifier_add", text="", icon="MOD_DECIM").type='DECIMATE'
+                    #sub.separator(factor=1.2)
+                    sub.operator_menu_enum("object.modifier_add", "type", text='ADD MOD')
+                elif ob.type == "GPENCIL":
+                    split = sub.split(factor=0.62)
+                    split.label(text="")
+                    #sub.separator(factor=1.2)
+                    split.operator_menu_enum("object.gpencil_modifier_add", "type", text='ADD MOD')
+                elif ob.type == "ARMATURE":
+                    sub.label(text=">") 
+                else:
+                    sub.label(text=">")
+
 
             col.separator(factor=1)
 
@@ -128,8 +141,8 @@ class ToolMenu(bpy.types.Panel):
             sub.operator('mesh.primitive_uv_sphere_add', text="", icon='MESH_UVSPHERE')
             sub.operator('mesh.primitive_cylinder_add', text="", icon='MESH_CYLINDER')
             sub.operator('object.empty_add', text="", icon='EMPTY_DATA')
-            sub.operator('object.gpencil_add', text="", icon='GREASEPENCIL')
-            sub.separator(factor=1.2)
+            sub.operator('object.gpencil_add', text="", icon='GREASEPENCIL').type='EMPTY'
+            #sub.separator(factor=1.2)
             sub.menu("VIEW3D_MT_add", text="ADD OBJ", text_ctxt=i18n_contexts.operator_default)
 
             col.separator(factor=0.2)
@@ -140,31 +153,50 @@ class ToolMenu(bpy.types.Panel):
             sub.operator('btool.boolean_diff', text="", icon='SELECT_SUBTRACT')
             sub.operator('btool.boolean_inters', text="", icon='SELECT_INTERSECT')
             sub.operator('btool.boolean_slice', text="", icon='SELECT_DIFFERENCE')
-            sub.operator('object.convert', text="", icon='CANCEL')
+            sub.operator('object.convert', text="CONV",)
+
 
 #           merge/clone:
-            sub.separator(factor=1.2)
-            sub.operator('object.join', text='MERGE')
+            #sub.separator(factor=1)
+            sub.operator('object.join', text='MRG')
             sub.operator('object.duplicate_move', text='DUB')
             #sub.operator('object.make_links_data', text='COPY MODS').type='MODIFIERS'
 
             col.separator(factor=1)
 
-            col.separator(factor=1)
             sub = col.row(align=True)
-            #sub.operator('object.delete', text='DELETE').use_global=False
-            sub.operator("screen.redo_last", text="CMD >")
+            sub.scale_y = 0.7 
+            sub.label(text="")
+            sub.label(text="")
+            sub.label(text="")
+            sub.label(text="")
+            sub.operator("screen.redo_last", text=">")
 
     #EDIT-----------------------------------------------------------------------------------------------
 
         if context.mode == 'EDIT_MESH':
 
-            sub = col.row()
-            subsub = sub.column()
-            subsub.scale_x=2.5
-            subsub.template_edit_mode_selection()
-            sub.separator(factor=3)
+            sub = col.row(align=True)
+
+            item = sub.column( )
+            item.scale_x = 2.5
+            item.template_edit_mode_selection()
+
+            sub.separator(factor=2)
             funct_bt(layout=sub, cmd='xray', tog=True, w=2.4, h=1, label='', icon="XRAY")
+            sub.separator(factor=2)
+
+#           automerge:
+            ts = context.tool_settings
+            item = sub.row(align=True)
+            item.scale_x = 2.5
+            item.prop(ts, "use_mesh_automerge", text="", toggle=True)
+#           stitch-tools:
+            item = sub.row(align=True)
+            item.scale_x = 2.5    
+            item.operator('mesh.target_weld_toggle', text='', icon='CON_TRACKTO') #target_weld
+
+
 
             col.separator(factor=1)
 
@@ -188,48 +220,57 @@ class ToolMenu(bpy.types.Panel):
 
             #---------------------------------------------------------------------
 
-#           selections:
-            sub = col.row(align=True)
-            sub.operator_menu_enum("mesh.select_similar", "type")
-            sub.operator('mesh.select_more', icon='ADD',text='')
-            sub.operator('mesh.select_less', icon='REMOVE', text='')
-            sub.separator(factor = 1)
-            sub.operator('mesh.select_all',text='',icon='SHADING_SOLID').action='SELECT'
-            sub.operator('mesh.select_all',text='', icon='IMAGE_ALPHA').action='INVERT'
-
-            col.separator(factor = 1)
-
-#           linked:
-            sub = col.row(align=True)
-            sub.operator_menu_enum("mesh.select_linked", "delimit")
-
 #           mark seams:
+            sub = col.row(align=True)
             op = sub.operator('mesh.mark_seam', text='',icon='ADD')
             op = sub.operator('mesh.mark_seam', text='',icon='REMOVE')
             op.clear = True
             sub.separator(factor = 1)
+
+            empty = sub.column()
+            empty.ui_units_x = 4
+            empty.label(text='')
 
 #           mark sharp:
             op = sub.operator('mesh.mark_sharp', text='',icon='ADD')
             op = sub.operator('mesh.mark_sharp', text='',icon='REMOVE')
             op.clear = True
 
+
+            col.separator(factor = 1)
+
+#           Edge Tools:
+            sub = col.row(align=True)
+            sub.ui_units_x = 8
+            sub.operator('transform.edge_bevelweight', text='Bevel')
+            sub.operator('transform.edge_crease', text='Crease')
+
+
+
+#           modifiers ON/OFF:
+#           sub.operator("view3d.ml_toggle_all_modifiers", icon="CANCEL", text="")
+
+#           select contour:
+            sub.operator('mesh.region_to_loop', text='', icon='CHECKBOX_DEHLT')
+
+#           quick pivot:
+            sub.operator('mesh.quick_pivot', text='', icon='SNAP_FACE_CENTER')
+
             col.separator(factor = 2.5)
 
-#           selections trait:
-            sub = col.row(align=True)
-            sub.operator('mesh.select_non_manifold',text='OPEN')
-            sub.operator('mesh.select_loose',text='LOOSE')
-            sub.operator('mesh.select_interior_faces',text='INTERIOR')
-            sub.operator('mesh.select_face_by_sides',text='COUNT')
-            col.separator(factor = 2.5)
+
+
 
 #           add mesh:
             sub = col.row(align=True)
             sub.menu("VIEW3D_MT_mesh_add",text='ADD MSH')
             sub.separator(factor = 1)
-            sub.operator('mesh.intersect_boolean', text='', icon='MOD_BOOLEAN')
-            sub.operator('mesh.intersect', text='', icon='FCURVE')
+            item = sub.row(align=True)
+            item.scale_x = 2.5
+            item.operator('mesh.intersect_boolean', text='', icon='MOD_BOOLEAN')
+            item = sub.row(align=True)
+            item.scale_x = 2.5
+            item.operator('mesh.intersect', text='', icon='FCURVE')
 
             col.separator(factor = 1)
 
@@ -237,19 +278,26 @@ class ToolMenu(bpy.types.Panel):
             sub = col.row(align=True)
             sub.operator_menu_enum("mesh.separate", "type")
             sub.separator(factor = 1)
-            sub.operator('mesh.split', text='', icon='MOD_BOOLEAN')
-            sub.operator('mesh.duplicate_move', text='', icon='XRAY')
+            item = sub.row(align=True)
+            item.scale_x = 2.5
+            item .operator('mesh.split', text='', icon='MOD_BOOLEAN')
+            item = sub.row(align=True)
+            item.scale_x = 2.5
+            item .operator('mesh.duplicate_move', text='', icon='XRAY')
 
-            #---------------------------------------------------------------------
             col.separator(factor=1)
 
+#           tools:
             sub = col.row(align=True)
             tool_bt(layout=sub, cmd=20, w=1.2, h=1, text=False, icon='MOD_LINEART')
             empty = sub.column()
+            empty.ui_units_x = 1.2
             empty.label(text='')
             sub.separator()
-            tool_bt(layout=sub, cmd=16, w=1.2, h=1, text=False, icon='MOD_EXPLODE')
-            tool_bt(layout=sub, cmd=15, w=1.2, h=1, text=False, icon='MOD_SOLIDIFY')
+            tool_bt(layout=sub, cmd=29, w=1.2, h=1, text=False, icon='UV_EDGESEL')
+            tool_bt(layout=sub, cmd=32, w=1.2, h=1, text=False, icon='EXPORT')
+            sub.separator()
+            tool_bt(layout=sub, cmd=34, w=1.2, h=1, text=False, icon='CURVE_NCIRCLE')
             sub.separator()
             tool_bt(layout=sub, cmd=18, w=1.2, h=1, text=False, icon='MOD_MESHDEFORM')
             tool_bt(layout=sub, cmd=19, w=1.2, h=1, text=False, icon='MOD_BEVEL')
@@ -258,17 +306,17 @@ class ToolMenu(bpy.types.Panel):
             tool_bt(layout=sub, cmd=22, w=1.2, h=1, text=False, icon='SNAP_MIDPOINT')
             tool_bt(layout=sub, cmd=24, w=1.2, h=1, text=False, icon='MOD_DATA_TRANSFER')
             sub.separator()
-
-            tool_bt(layout=sub, cmd=32, w=1.2, h=1, text=False, icon='EXPORT')
-            tool_bt(layout=sub, cmd=31, w=1.2, h=1, text=False, icon='IMPORT')
-            tool_bt(layout=sub, cmd=29, w=1.2, h=1, text=False, icon='UV_EDGESEL')
             tool_bt(layout=sub, cmd=30, w=1.2, h=1, text=False, icon='UV_VERTEXSEL')
+            tool_bt(layout=sub, cmd=31, w=1.2, h=1, text=False, icon='IMPORT')
             sub.separator()
-            tool_bt(layout=sub, cmd=34, w=1.2, h=1, text=False, icon='CURVE_NCIRCLE')
             tool_bt(layout=sub, cmd=35, w=1.2, h=1, text=False, icon='TRANSFORM_ORIGINS')
+            sub.separator()
+            tool_bt(layout=sub, cmd=16, w=1.2, h=1, text=False, icon='MOD_EXPLODE')
+            tool_bt(layout=sub, cmd=15, w=1.2, h=1, text=False, icon='MOD_SOLIDIFY')
 
             col.separator(factor=1)
 
+#           functions:
             sub = col.row(align=True)
 
             item = sub.column(align=True)
@@ -306,6 +354,7 @@ class ToolMenu(bpy.types.Panel):
 
             sub.separator(factor=2)
 
+#           redo last:
             item = sub.column(align=True)
             item.scale_y=0.8
             item.label(text='')
@@ -722,7 +771,7 @@ class PropMenu(bpy.types.Panel):
 
 #           materials:
             sub = col.row(align=True)
-            sub.menu("MATERIAL_MT_context_menu", text="Material      ") 
+            sub.menu("MATERIAL_MT_context_menu", text="Material")
             sub.operator('object.material_slot_assign',text='',icon='BLANK1')
             sub.operator('object.material_slot_add',text='',icon='ADD')
             sub.operator('object.material_slot_remove',text='',icon='REMOVE')
@@ -832,8 +881,6 @@ class SelectMenu(bpy.types.Panel):
         if context.mode == 'OBJECT':
 
             sub = col.column(align=True)
-            sub.scale_y = 0.8
-            sub.label(text="Linked")
             sub.ui_units_x = 4
             subsub = sub.row(align=True)
             subsub.operator('object.select_linked', text='DATA').type='OBDATA'
@@ -849,6 +896,8 @@ class SelectMenu(bpy.types.Panel):
             op.prop1 ='direction="CHILD"'
             op.prop2 ='extend=True'
 
+            col.separator(factor = 2)
+
             sub = col.row()
             subsub = sub.column()
             subsub.label(text='')
@@ -860,48 +909,48 @@ class SelectMenu(bpy.types.Panel):
 
         if context.mode == 'EDIT_MESH':
             sub = col.row(align=True)
-            sub.scale_y = 1
-            #sub.label(text="SELECT")
-            sub.ui_units_x = 4
-            sub.operator('mesh.select_all',text='ALL').action='SELECT'
-            sub.operator('mesh.select_all',text='CLR').action='DESELECT'
-            sub.operator('mesh.select_all',text='INV').action='INVERT'
-
-            col.separator(factor = 2)
-            sub = col.column(align=True)
             sub.scale_x = 2
-            #sub.label(text="SELECT")
-            subsub = sub.row(align=True)
-            subsub.alignment = 'CENTER'
-            subsub.operator('mesh.select_less', icon='REMOVE', text='')
-            subsub.operator('mesh.select_more', icon='ADD',text='')
+            sub.operator('mesh.select_all',text='',icon='SHADING_SOLID').action='SELECT'
+            sub.operator('mesh.select_all',text='', icon='IMAGE_ALPHA').action='INVERT'
+
+            sub.separator(factor = 4)
+
+            sub.operator('mesh.select_less', icon='REMOVE', text='')
+            sub.operator('mesh.select_more', icon='ADD',text='')
 
             col.separator(factor = 2)
             sub = col.row(align=True)
-            sub.operator('object.vertex_group_assign_new',text='NEW GRP')
-            sub.operator('object.vertex_group_assign',text='ADD')
+            sub.operator('object.vertex_group_assign_new',text='VERTEX GRP')
+            item = sub.row(align=True)
+            item.scale_x = 1.2
+            item.operator('object.vertex_group_assign',text='',icon='CHECKMARK')
 
-            col.separator(factor = 1)
-            sub = col.row(align=True)
-            sub.operator_menu_enum("mesh.select_similar", "type")
+
 
             col.separator(factor = 2)
             sub = col.row(align=True)
             sub.operator('mesh.select_linked',text='LINKED')
             sub.operator('mesh.shortest_path_select',text='PATH')
             sub.operator('mesh.faces_select_linked_flat',text='FLAT')
+            sub.separator(factor = 2)
+            sub.operator('mesh.select_mirror',text='MIRROR')
 
             col.separator(factor = 2)
+
+
             sub = col.row(align=True)
-            sub.scale_y = 1
-            sub.label(text="BY TRAIT")
+            sub.operator_menu_enum("mesh.select_similar", "type")
+            sub.operator_menu_enum("mesh.select_linked", "delimit")
+
+            col.separator(factor = 2)
+
             sub = col.row(align=True)
-            subsub = sub.column(align=True)
-            subsub.operator('mesh.select_non_manifold',text='OPEN')
-            subsub.operator('mesh.select_loose',text='LOOSE')
-            subsub = sub.column(align=True)
-            subsub.operator('mesh.select_interior_faces',text='INTERIOR')
-            subsub.operator('mesh.select_face_by_sides',text='COUNT')
+            sub.operator('mesh.select_non_manifold',text='OPEN')
+            sub.operator('mesh.select_loose',text='LOOSE')
+            sub.operator('mesh.select_interior_faces',text='INTERIOR')
+            sub.operator('mesh.select_face_by_sides',text='COUNT')
+
+            col.separator(factor = 2)
 
             sub = col.row()
             subsub = sub.column()
