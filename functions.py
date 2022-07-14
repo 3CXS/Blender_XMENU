@@ -206,6 +206,12 @@ class SetTool(bpy.types.Operator):
             if mode == 'PAINT_GPENCIL':
                 context.tool_settings.gpencil_paint.brush = bpy.data.brushes[Brush]
 
+
+        brush = get_brush_mode(self, context)
+
+        if brush != None:
+            brush.xm_brush_texture = brush.xm_brush_texture
+
         return {'FINISHED'}
 
 def update_toolset(): 
@@ -233,12 +239,12 @@ def update_toolset():
         if Tools[i][2] == '' and toolid == Tools[i][1]:
             bpy.types.WindowManager.tool_state[i] = True
 
+
         elif Tools[i][2] != '' and brushname == bpy.data.brushes[Tools[i][2]]:
             bpy.types.WindowManager.tool_state[i] = True
 
         else:
             bpy.types.WindowManager.tool_state[i] = False
-
 
 
 def funct_bt(layout, cmd='cmd', tog=False, w=1, h=1, label='', icon="NONE"):    
