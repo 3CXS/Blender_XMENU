@@ -2,27 +2,30 @@ import bpy
 
 #------------------------------------------------------------------------------------------------------------------------------------
 
-def Toolset():
+def toolset():
     if bpy.context.mode == 'OBJECT':
         Toolset = Tools_Object
-    if bpy.context.mode == 'EDIT_MESH':
+    elif bpy.context.mode == 'EDIT_MESH':
         Toolset = Tools_Edit
-    if bpy.context.mode == 'SCULPT':
+    elif bpy.context.mode == 'SCULPT':
         Toolset = Tools_Sculpt
-    if bpy.context.mode == 'PAINT_TEXTURE':
+    elif bpy.context.mode == 'PAINT_TEXTURE':
         Toolset = Tools_Texture
-    if bpy.context.mode == 'PAINT_VERTEX':
+    elif bpy.context.mode == 'PAINT_VERTEX':
         Toolset = Tools_Vertex
-    if bpy.context.mode == 'PAINT_WEIGHT':
+    elif bpy.context.mode == 'PAINT_WEIGHT':
         Toolset = Tools_Weight
-    if bpy.context.mode == 'PAINT_GPENCIL':
+    elif bpy.context.mode == 'PAINT_GPENCIL':
         Toolset = Tools_GP_Draw
-    if bpy.context.mode == 'EDIT_GPENCIL':
+    elif bpy.context.mode == 'EDIT_GPENCIL':
         Toolset = Tools_GP_Edit
-    if bpy.context.mode == 'SCULPT_GPENCIL':
+    elif bpy.context.mode == 'SCULPT_GPENCIL':
         Toolset = Tools_GP_Sculpt
-    if bpy.context.mode == 'WEIGHT_GPENCIL':
+    elif bpy.context.mode == 'WEIGHT_GPENCIL':
         Toolset = Tools_GP_Weight
+    else:
+        Toolset = None
+
     return Toolset
 
 #------------------------------------------------------------------------------------------------------------------------------------

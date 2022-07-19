@@ -4,7 +4,7 @@ from bpy.types import Operator, Header, Panel, Menu, AddonPreferences, Preferenc
 from bl_ui.space_toolsystem_common import (ToolSelectPanelHelper, ToolDef)
 
 from .hud import redraw_regions
-from .functions import tool_grid, tool_bt, funct_bt, paint_settings
+from .functions import tool_bt, funct_bt, paint_settings
 from .menuitems import Normals, BrushCopy, ModeSelector, Overlay, History, PaintHud, ColorHud, GPColorHud, SelectHud, GPSelectHud, GPPaintHud
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -70,12 +70,16 @@ def draw(self, context):
 
     funct_bt(layout=sub, cmd='persp', tog=False, w=1.2, h=1, label='', icon=icon_view)
 
-    if bpy.types.WindowManager.maxarea_state == False:
-        icon_area = 'TRIA_DOWN'
-    else:
+    if bpy.types.WindowManager.max_area_state == False:
         icon_area = 'TRIA_UP'
-    funct_bt(layout=sub, cmd='maxarea', tog=False, w=1.2, h=1, label='', icon=icon_area)
+    else:
+        icon_area = 'TRIA_DOWN'
+    funct_bt(layout=sub, cmd='max_area', tog=False, w=1.2, h=1, label='', icon=icon_area)
+
+    #funct_bt(layout=sub, cmd='move_area', tog=False, w=1.2, h=1, label='XX')
+
     left.separator(factor = 1)
+
     #MID --------------------------------------------------------------------------------------------------
 
     if context.mode == 'OBJECT':
@@ -87,20 +91,19 @@ def draw(self, context):
         op = mid.operator('object.origin_set', text='', icon='PIVOT_BOUNDBOX') # COG
         op.type = 'ORIGIN_GEOMETRY'
         op.center ='MEDIAN'
+
+        mid.operator('object.pivotobottom', text='', icon='IMPORT')        #needs 3d viewport pie menu addon#
+
+        op = mid.operator('object.origin_set', text='', icon='PIVOT_CURSOR')
+        op.type = 'ORIGIN_CURSOR'
+        op.center ='MEDIAN'
+
         mid.separator(factor=2)
 
 #       smooth/angle:
         Normals(self, context, layout=mid)
 
     if context.mode == 'EDIT_MESH':
-        sub = mid.row(align=True)
-        sub.ui_units_x = 1.2
-        sub.operator('mesh.reveal', icon='HIDE_OFF', text="")
-        sub = mid.row(align=True)
-        sub.ui_units_x = 1.2
-        sub.operator('mesh.hide', icon='HIDE_ON', text="").unselected=False
-
-        mid.separator(factor=1)
 
         sub = mid.row(align=True)
         sub.scale_x = 1.5
@@ -109,33 +112,37 @@ def draw(self, context):
         mid.separator(factor=1)
         SelectHud(mid, self, context)
 
-        mid.separator(factor=1)
+        mid.separator()
         sub = mid.row(align=True)
-#       stitch-tools:
-        sub.operator('mesh.target_weld_toggle', text='', icon='CON_TRACKTO') #target_weld
 
-#       tweak mode:
-        tool_bt(layout=sub, cmd=0, w=1.1, h=1, text='', icon='OBJECT_ORIGIN') #tweak_mode
 
-#       automerge:
+#       extra:
+        tool_bt(layout=sub, cmd=0, w=1.2, h=1, text='', icon='CUSTOM')
+ 
+        sub.operator('mesh.target_weld_toggle', text='', icon='CON_TRACKTO')
+
         ts = context.tool_settings
-        sub.prop(ts, "use_mesh_automerge", text="", toggle=True) #automerge
+        sub.prop(ts, "use_mesh_automerge", text="", toggle=True)
 
         sub.separator(factor=1)
+        sub.operator('mesh.quick_pivot', text='', icon='PIVOT_BOUNDBOX')
 
-#       quick pivot:
-        sub.operator('mesh.quick_pivot', text='', icon='PIVOT_BOUNDBOX') #pivot_selection
-
-
-
+        mid.separator(factor=1)
 
         sub = mid.row()
         sub.ui_units_x = 5
         sub.menu_contents("VIEW3D_MT_sym")
 
-        sub = sub.row()
-        sub.ui_units_x = 1
-        sub.label(text="")
+        mid.separator(factor=1)
+
+        sub = mid.row(align=True)
+        sub.ui_units_x = 1.2
+        sub.operator('mesh.reveal', icon='HIDE_OFF', text="")
+        sub = mid.row(align=True)
+        sub.ui_units_x = 1.2
+        sub.operator('mesh.hide', icon='HIDE_ON', text="").unselected=False
+
+
 
     if context.mode == 'SCULPT':
         brush = context.tool_settings.sculpt.brush
@@ -156,10 +163,13 @@ def draw(self, context):
         sub.menu_contents("VIEW3D_MT_sym")
 
     if context.mode == 'PAINT_WEIGHT':
+        ts = context.tool_settings
+        ups = ts.unified_paint_settings
         brush = context.tool_settings.weight_paint.brush
-        sub = mid.row(align=True)
-        sub.ui_units_x = 5
-        sub.label(text="")
+
+
+        mid.prop(ups, 'weight', slider=True)
+        mid.separator(factor = 1)
         PaintHud(mid, brush, self, context)
         mid.separator(factor = 4)
         sub = mid.row(align=True)

@@ -768,7 +768,7 @@ class Floater_09(bpy.types.Operator):
 
 class Floater_10(bpy.types.Operator):
     bl_idname = "xm.floater_10"
-    bl_label = "BAKE_NODES"
+    bl_label = "COMP_NODES"
 
     bpy.types.WindowManager.floater_10_init = bpy.props.BoolProperty(default = False) 
     bpy.types.WindowManager.floater_10_state = bpy.props.BoolProperty(default = False)  
