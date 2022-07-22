@@ -9,7 +9,7 @@ bl_info = {
     "category": "Interface",
     }
  
-modulesNames = ['x_panel', 'x_header', 'x_menus', 'hud', 'menuitems', 'functions', 'preferences', 'toolsets', 'brushtexture', 'editorfloat'] 
+modulesNames = ['x_panel', 'x_header', 'x_menus', 'x_toolhud', 'hud', 'menuitems', 'functions', 'preferences', 'toolsets', 'brushtexture', 'floaters'] 
  
 import sys
 import os
@@ -122,18 +122,6 @@ keys = {"MENU": [{"label": "1",
                   "shift": False,
                   "oskey": False,
                   "value": "PRESS"
-                  },
-              {"label": "8",
-                  "region_type": "WINDOW",
-                  "map_type": "KEYBOARD",
-                  "keymap": "Window",
-                  "idname": "xm.floater_07",
-                  "type": "ZERO",
-                  "ctrl": False,
-                  "alt": True,
-                  "shift": False,
-                  "oskey": False,
-                  "value": "PRESS"
                   }
                   ]}
 
@@ -156,7 +144,6 @@ def register_keymaps(keylists):
 
             if keymap:
                 km = kc.keymaps.new(name=keymap, space_type=space_type, region_type=region_type)
-                # km = kc.keymaps.new(name=keymap, space_type=space_type)
 
                 if km:
                     idname = item.get("idname")

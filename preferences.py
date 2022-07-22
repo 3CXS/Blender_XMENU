@@ -102,9 +102,15 @@ class XPrefs(bpy.types.AddonPreferences):
     floater_10_pos  : bpy.props.FloatVectorProperty(name="Pos", size=2, default=(100,300),precision=0)
     floater_10_alpha: IntProperty(name="FLOAT ALPHA", default=70)
 
+    floater_11_name : bpy.props.StringProperty(default="11", name="Name",)
+    floater_11_type : bpy.props.StringProperty(default='PROPERTIES')
+    floater_11_size : bpy.props.FloatVectorProperty(name="Size", size=2, default=(300,500),precision=0)
+    #floater_11_pos  : bpy.props.FloatVectorProperty(name="Pos", size=2, default=(100,300),precision=0)
+    floater_11_alpha: IntProperty(name="FLOAT ALPHA", default=100)
+
     floaters : bpy.props.EnumProperty(default="01",items=[("01","Outliner",""),("02","Properties",""),("03","Modifiers",""),("04","Shader",""),
                                                             ("05","UV",""),("06","Image",""),("07","GeoNode",""),("08","Cam",""),("09","BakeTree",""),
-                                                            ("10","Compositor","")])
+                                                            ("10","Compositor",""), ("11","Tools","")])
 
     hud_items : bpy.props.EnumProperty(default="01",items=[("01","MODE",""),("02","TOOL",""),("03","DATA","")])
     prefs_tabs : EnumProperty(default='info', items=[('info', "Info", "INFO"),('options', "Options", "OPTIONS"),('floaters', "Floaters", "FLOATERS")])

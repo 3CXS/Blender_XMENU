@@ -1159,11 +1159,14 @@ def register():
 
         kmi = km.keymap_items.new('wm.call_panel', 'SPACE', 'PRESS', ctrl=False, shift=False, alt=False)
         kmi.properties.name = ToolMenu.bl_idname
-        #kmi.properties.keep_open = True
+        kmi.properties.keep_open = True
         addon_keymaps.append((km, kmi))
 
-        kmi = km.keymap_items.new('wm.call_panel', 'A', 'PRESS', ctrl=False, shift=False, alt=False)
+        kmi = km.keymap_items.new('wm.call_panel', 'A', 'PRESS', ctrl=True, shift=False, alt=False)
         kmi.properties.name = SelectMenu.bl_idname
+        addon_keymaps.append((km, kmi))
+
+        kmi = km.keymap_items.new('xm.toolhud', 'A', 'PRESS', ctrl=False, shift=False, alt=False)
         addon_keymaps.append((km, kmi))
     
         km = wm.keyconfigs.addon.keymaps.new(name='Window', space_type='EMPTY')

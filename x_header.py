@@ -51,7 +51,9 @@ def draw(self, context):
     left.separator(factor = 4.7)
 
     sub = left.row(align=True)
-    sub.popover("OBJECT_PT_viewcam", text='', icon="CAMERA_DATA")
+    subsub = sub.row(align=True)
+    subsub.scale_x = 0.8
+    subsub.popover("OBJECT_PT_viewcam", text='', icon="CAMERA_DATA")
     funct_bt(layout=sub, cmd='framea', w=2, h=1, label='ALL', icon="NONE")
     funct_bt(layout=sub, cmd='frames', w=2, h=1, label='SEL', icon="NONE")
     funct_bt(layout=sub, cmd='localview',tog=True, w=2, h=1, label='ISO', icon="NONE")
@@ -99,9 +101,6 @@ def draw(self, context):
         op.center ='MEDIAN'
 
         mid.separator(factor=2)
-
-#       smooth/angle:
-        Normals(self, context, layout=mid)
 
     if context.mode == 'EDIT_MESH':
 

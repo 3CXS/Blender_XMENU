@@ -176,7 +176,6 @@ def GPPaintHud(layout, context, brush, *, compact=True):
             row.ui_units_x = 13
             row.label(text=">")
 
-    # FIXME: tools must use their own UI drawing!
     elif brush.gpencil_tool == 'FILL':
         use_property_split_prev = layout.use_property_split
         if compact:
@@ -238,7 +237,6 @@ def GPPaintHud(layout, context, brush, *, compact=True):
             else:
                 row.prop(gp_settings, "caps_type", text="Caps Type")
 
-    # FIXME: tools must use their own UI drawing!
     if tool.idname in {
             "builtin.arc",
             "builtin.curve",
@@ -286,7 +284,6 @@ def ColorHud(self, context, layout):
     sub = row.row(align=True)
     sub.ui_units_x = 2.4
     sub.operator("paint.brush_colors_flip", icon='FILE_REFRESH', text="")
-    #sub.operator("xm.override", icon='EYEDROPPER', text="").cmd ='ui.eyedropper_color'
 
 
 def GPColorHud(self, context, layout):
@@ -326,25 +323,30 @@ def SelectHud(layout, self, context):
         icon_id = ToolSelectPanelHelper._icon_value_from_icon_handle("ops.generic.select")
         row.separator(factor = 2)
         row.label(text="TWEAK")
-    if toolname == 'builtin.select_box':
+    elif toolname == 'builtin.select_box':
         icon_id = ToolSelectPanelHelper._icon_value_from_icon_handle("ops.generic.select_box")
         row.template_icon(icon_value=icon_id)
         row.separator(factor = 2)
         props = tool.operator_properties("view3d.select_box")
         row.prop(props, "mode", text="", expand=True, icon_only=True)
-    if toolname == 'builtin.select_circle':
+    elif toolname == 'builtin.select_circle':
         icon_id = ToolSelectPanelHelper._icon_value_from_icon_handle("ops.generic.select_circle")
         row.template_icon(icon_value=icon_id)
         row.separator(factor = 2)
         props = tool.operator_properties("view3d.select_circle")
         row.prop(props, "mode", text="", expand=True, icon_only=True)
         row.prop(props, "radius")
-    if toolname == 'builtin.select_lasso':
+    elif toolname == 'builtin.select_lasso':
         icon_id = ToolSelectPanelHelper._icon_value_from_icon_handle("ops.generic.select_lasso")
         row.template_icon(icon_value=icon_id)
         row.separator(factor = 2)
         props = tool.operator_properties("view3d.select_lasso")
         row.prop(props, "mode", text="", expand=True, icon_only=True)
+    else:
+        sub = row.column(align=True)
+        sub.label(text="")
+
+
 
 
 def GPSelectHud(layout, self, context):
@@ -399,15 +401,15 @@ def Normals(self, context, layout):
     ob = context.active_object
 
     row = layout.row(align=True)
-    row.ui_units_x = 8
+    row.ui_units_x = 6
 
     if ob != None and ob.type == 'MESH':
         mesh = context.active_object.data
         sub = row.row(align=True)
-        sub.scale_x = 0.8
+        sub.scale_x = 0.6
         sub.operator("xm.normalshading", text="SMTH", depress=update_normaldisp(self, context))
         sub = row.row(align=True)
-        sub.scale_x = 1.2
+        sub.scale_x = 1
         sub.active = update_normaldisp(self, context)
         sub.prop(mesh, "use_auto_smooth", text="", icon="TRIA_RIGHT", toggle=True)
         sub = row.row(align=True)
@@ -914,18 +916,21 @@ class VIEW3D_MT_Material(bpy.types.Menu):
         layout = self.layout
 
         ob = context.active_object
+
         if ob != None:
+
             mat = ob.active_material
             slot = ob.material_slots
             space = context.space_data
 
             col = layout.column(align=True)
+
             row = col.row(align=True)
             row.scale_y = 1.2
 
             row.template_ID(ob, "active_material")
-            row.operator('xm.override',text='',icon='RADIOBUT_ON').cmd='object.material_slot_add'
-            row.operator('xm.override',text='',icon='RADIOBUT_OFF').cmd='object.material_slot_remove'
+            row.operator('xm.override',text='',icon='ADD').cmd='object.material_slot_add'
+            row.operator('xm.override',text='',icon='REMOVE').cmd='object.material_slot_remove'
 
             if context.mode == 'EDIT_MESH':
                 row.separator(factor = 1)
@@ -966,8 +971,6 @@ class VIEW3D_MT_Material(bpy.types.Menu):
         else:
             col = layout.column(align=True)
             col.label(text='>')
-
-
 
 
 #TOOLSETTINGS-----------------------------------------------------------------------------------------------
@@ -1038,17 +1041,17 @@ def ObjectToolSettings(self, context, layout):
     tool = context.workspace.tools.from_space_view3d_mode(context.mode)
     toolname = context.workspace.tools.from_space_view3d_mode(bpy.context.mode).idname
 
-    col = layout.column()
+    col = layout.column(align=True)
     col.alignment = 'LEFT'
-    col.ui_units_x = 6
+    col.ui_units_x = 4
     col.scale_y = 0.7
 
     if toolname == 'builtin.cursor':
         props = tool.operator_properties("view3d.cursor3d")
         sub = col.row(align=True)
-        sub.prop(props, "use_depth")
+        sub.prop(props, "use_depth", text="PROJECT", toggle=True)
         sub = col.row(align=True)
-        sub.prop(props, "orientation")
+        sub.prop(props, "orientation", text="")
 
     elif toolname == 'builtin.extrude':
         props = tool.gizmo_group_properties("VIEW3D_GGT_xform_extrude")
@@ -1056,7 +1059,7 @@ def ObjectToolSettings(self, context, layout):
 
     else:
         sub = col.row(align=True)
-        sub.label(text='------')
+        sub.label(text='>>')
 
 
 def SculptToolSettings(self, context, layout):
@@ -1255,29 +1258,35 @@ def SculptBrushSettings(self, context, layout):
     sub = row.column(align=True)
 
     #       row 1
-    subsub = sub.row(align=True)
+
     if sculpt_tool == 'GRAB':
+        subsub = sub.row(align=True)
         subsub.scale_x = 0.5
         subsub.prop(brush, "use_grab_silhouette",  text='SILHOUETTE', toggle=True)
         subsub.prop(brush, "use_grab_active_vertex",  text='VERTEX', toggle=True)
     elif direction:
+        subsub = sub.row(align=True)
         subsub.scale_x = 1.6
         subsub.prop(brush, "direction", expand=True, text="")
 
     elif sculpt_tool == 'PAINT':
+        subsub = sub.row(align=True)
         subsub.prop(brush, "flow", slider=True, text="FLOW")
         subsub.prop(brush, "invert_flow_pressure", text="")
         subsub.prop(brush, "use_flow_pressure", text="")
     elif sculpt_tool == 'SMEAR':
+        subsub = sub.row(align=True)
+        subsub.scale_x = 0.33
         subsub.prop(brush, "smear_deform_type", expand=True)
     else:
+        subsub = sub.row(align=True)
         subsub.label(text="")
-        subsub.label(text="")
+
 
     #       row 2
-    sub.prop(brush, "normal_radius_factor", slider=True, text='NORMAL')
+    subsub = sub.row(align=True)
+    subsub.prop(brush, "normal_radius_factor", slider=True, text='NORMAL')
 
-    #row.separator(factor=1.5)
 
     # col 2
     sub = row.column(align=True)
@@ -1311,7 +1320,8 @@ def SculptBrushSettings(self, context, layout):
 
 
     #       row 2
-    sub.prop(brush, "hardness", slider=True, text='HARD')
+    subsub = sub.row(align=True)
+    subsub.prop(brush, "hardness", slider=True, text='HARD')
 
     #row.separator(factor=2)
 
@@ -1340,12 +1350,14 @@ def SculptBrushSettings(self, context, layout):
         subsub.label(text='')
 
     #       row 2
+    subsub = sub.row(align=True)
     if sculpt_tool == 'MASK':
-        sub.prop(brush, "mask_tool", expand=True)
+        subsub.scale_x = 0.5
+        subsub.prop(brush, "mask_tool", expand=True)
     elif sculpt_tool == 'PAINT':
-        sub.prop(brush, "wet_paint_radius_factor", slider=True, text='WET RAD')
+        subsub.prop(brush, "wet_paint_radius_factor", slider=True, text='WET RAD')
     else:
-        sub.prop(brush, "auto_smooth_factor", slider=True, text='SMTH')
+        subsub.prop(brush, "auto_smooth_factor", slider=True, text='SMTH')
 
 
 def TextureBrushSettings(self, context, layout):
@@ -1503,7 +1515,6 @@ def SmoothStroke(self, context, layout):
 def GPSmoothStroke(self, context, layout):
     mode = context.mode
     brush = get_brush_mode(self, context)
-    #brush = context.tool_settings.gpencil_paint.brush
     gp_settings = brush.gpencil_settings
 
     row = layout.row(align=True)

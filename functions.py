@@ -230,7 +230,6 @@ def update_toolset():
         if Tools[i][2] == '' and toolid == Tools[i][1]:
             bpy.types.WindowManager.tool_state[i] = True
 
-
         elif Tools[i][2] != '' and brushname == bpy.data.brushes[Tools[i][2]]:
             bpy.types.WindowManager.tool_state[i] = True
 

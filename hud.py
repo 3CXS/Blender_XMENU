@@ -9,19 +9,7 @@ from .functions import redraw_regions
 
 #-----------------------------------------------------------------------------------------------------------------------
 
-#SQUARE
-xpos = 20
-ypos = 200
-l = 80
-h = 30
-vertices = (
-    (xpos, ypos), (xpos+l, ypos),
-    (xpos+l, ypos), (xpos+l, ypos+h),
-    (xpos+l, ypos+h), (xpos, ypos+h),
-    (xpos, ypos+h), (xpos, ypos)
-    )
-shader1 = gpu.shader.from_builtin('2D_UNIFORM_COLOR')
-batch1 = batch_for_shader(shader1, 'LINES', {"pos":vertices})
+
 
 #PIVOT
 vertices2 = [(0.0, 0.0, 0.0), (1.0, 0.0, 0.0),
@@ -212,12 +200,7 @@ def draw_callback_2d(self, context):
                 uv = uvcord()
                 blf.draw(font_id, str(uv[1]))
 
-    #if cmode == 'SCULPT MODE':
-        #pass
 
-    #shader1.bind()
-    #shader1.uniform_float("color", (1, 1, 1, 1.0))
-    #batch1.draw(shader1)
 
 def draw_callback_3d(self, context):
     bgl.glLineWidth(2.5)
