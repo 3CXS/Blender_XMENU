@@ -7,6 +7,7 @@ import blf
 
 from bpy.props import StringProperty,BoolProperty,FloatProperty,IntProperty
 from bpy.types import Operator, AddonPreferences
+from mathutils import Vector
 
 from .functions import redraw_regions, update_toolset
 from .floaters import get_mouse_position, screensize
@@ -20,20 +21,19 @@ shader_1 = from_builtin('2D_UNIFORM_COLOR')
 shader_2 = from_builtin('2D_FLAT_COLOR')
 shader_3 = from_builtin('2D_SMOOTH_COLOR')
 
+
 # DRAW ----------------------------------------------------------------------------------------------
 
 def draw_callback(self, context, x=0, y=0):
 
     font_id = 0
 
-
-
     # menu bg
-    Draw_2D_Rectangle(x-10, y-160, 140, 200, [0.1, 0.1, 0.1, 0.9])
-    Draw_2D_Rectangle(x, y+20, 100, 4, [0.2, 0.5, 0.8, 1.0])
+    Draw_2D_Rectangle(x, y-200, 140, 200, [0.1, 0.1, 0.1, 0.9])
+    Draw_2D_Rectangle(x, y-5, 140, 4, [0.2, 0.5, 0.8, 1.0])
 
     # label
-    blf.position(font_id, x, y, 0)
+    blf.position(font_id, x, y-16, 0)
     blf.size(font_id, 14, 72)
     blf.color(font_id, 1, 1, 1, 1)
     text = 'xyx'
@@ -46,6 +46,84 @@ def draw_callback(self, context, x=0, y=0):
     bpy.ops.xm.button(x=x+60, y=y-60, w=50, h=20, text='XX04', cmd=3)
 
 
+#-- MODAL -----------------------------------------------------------------------------------------
+
+class ToolHUD(bpy.types.Operator):
+    bl_idname = "xm.toolhud"
+    bl_label = "HUD"
+
+    bpy.types.WindowManager.toolhud_state = bpy.props.BoolProperty(default = False)
+    bpy.types.WindowManager.leftclick = bpy.props.BoolProperty(default = False)  
+
+    mouse_pos: bpy.props.IntVectorProperty(size=2)
+    width: bpy.props.IntProperty()
+    hight: bpy.props.IntProperty()
+    def modal(self, context, event):
+
+        mouse_x = self.mouse_pos[0]
+        mouse_y = self.mouse_pos[1]
+
+
+
+        if bpy.types.WindowManager.toolhud_state == True:
+            if mouse_x > left and mouse_x < right and mouse_y < top and mouse_y > bottom :
+                if event.type == 'LEFTMOUSE':
+                    if event.value == 'PRESS':
+                        self.report({'INFO'}, "LMB")
+                        bpy.types.WindowManager.leftclick = True
+                    elif event.value == 'RELEASE':
+                        bpy.types.WindowManager.leftclick = False
+            else:
+                return {'CANCELLED'}
+        else:
+            self.report({'INFO'}, "MODAL OFF")
+            return {'CANCELLED'}
+
+        return {'RUNNING_MODAL'}
+
+    def invoke(self, context, event):
+
+        self.mouse_pos = event.mouse_x, event.mouse_y
+
+        mouse_x = self.mouse_pos[0]
+        mouse_y = self.mouse_pos[1]
+
+        left = mouse_x 
+        right = left + 140
+        top = mouse_y
+        bottom = mouse_y - 200
+
+        self.report({'INFO'}, "MODAL ON")
+        self.execute(context)
+        context.window_manager.modal_handler_add(self)
+
+        return {'RUNNING_MODAL'}
+
+    def execute(self, context):
+
+        mouse_x = self.mouse_pos[0]
+        mouse_y = self.mouse_pos[1]
+
+        self.report({'INFO'}, "Mouse coords are %d %d" % (mouse_x, mouse_y))
+
+        handler = bpy.app.driver_namespace.get('draw')
+
+        if bpy.types.WindowManager.toolhud_state == False:
+            bpy.types.WindowManager.toolhud_state = True
+
+            handler = bpy.types.SpaceView3D.draw_handler_add(
+                draw_callback, (None, None, mouse_x, mouse_y), 'WINDOW', 'POST_PIXEL')
+
+            dns = bpy.app.driver_namespace
+            dns['draw'] = handler
+
+        else:
+            bpy.types.WindowManager.toolhud_state = False
+            remove_draw()
+
+        redraw_regions()
+
+        return {'FINISHED'}
 
 # UI FUNCTIONS ---------------------------------------------------------------------------------------
 
@@ -60,37 +138,44 @@ class Button(bpy.types.Operator):
     h: bpy.props.IntProperty()
     text: bpy.props.StringProperty()
     cmd: bpy.props.IntProperty()
-    mouse_x: bpy.props.IntProperty()
-    mouse_y: bpy.props.IntProperty()
+
+    mouse_pos: bpy.props.IntVectorProperty(size=2)
 
     is_hovered:bpy.props.BoolProperty(default=False)
+    bt_state:bpy.props.BoolProperty(default=False)
 
-    def execute(self, context,):
+    def invoke(self, context, event):
+
+        self.mouse_pos = event.mouse_x, event.mouse_y
+
+        self.execute(context)
+
+    def execute(self, context):
         #context = bpy.context
-        Tools = toolset()
+        #Tools = toolset()
 
-        mouse_pos = get_mouse_position()
-        self.mouse_x = mouse_pos[0] - 28
-        self.mouse_y = screensize[1] - mouse_pos[1] - 135
+        mouse_x = self.mouse_pos[0]
+        mouse_y = self.mouse_pos[1]
 
-        left = self.x - self.w/2
+        left = self.x
         right = left + self.w
-        bottom = self.y - self.h
         top = self.y
+        bottom = self.y - self.h
+
         
-        if self.mouse_x > left and self.mouse_x < right and self.mouse_y < top and self.mouse_y > bottom :
+        if mouse_x > left and mouse_x < right and mouse_y < top and mouse_y > bottom :
             self.is_hovered = True
         else:
             self.is_hovered = False
   
-        if self.is_hovered == True:
+        if self.is_hovered == True and bpy.types.WindowManager.leftclick == True:
+            self.bt_state != self.bt_state
+            self.report({'INFO'}, 'XYYX')
+            #self.report({'INFO'}, self.bt_state)
+            #update_toolset()
+            #bpy.ops.xm.settool(tool_index = self.cmd)
 
-            if bpy.types.WindowManager.leftclick == True:
-
-                update_toolset()
-                bpy.ops.xm.settool(tool_index = self.cmd)
-
-        if bpy.types.WindowManager.tool_state[self.cmd] == True:
+        if self.bt_state == True:
             Draw_2D_Rectangle(self.x, self.y, self.w, self.h, [0.2, 0.5, 0.8, 1.0])
 
         else:
@@ -122,71 +207,6 @@ def Draw_2D_Rectangle(_posX, _posY, _width, _height, _color=[0, 0.5, 0.5, 1.0], 
     batch.draw(_shader)
     bgl.glDisable(bgl.GL_BLEND)
 
-
-#-- MENU FUNCTION -----------------------------------------------------------------------------------------
-
-class ToolHUD(bpy.types.Operator):
-    bl_idname = "xm.toolhud"
-    bl_label = "HUD"
-
-    bpy.types.WindowManager.toolhud_state = bpy.props.BoolProperty(default = False)
-    bpy.types.WindowManager.leftclick = bpy.props.BoolProperty(default = False)  
-
-    mouse_x: bpy.props.IntProperty()
-    mouse_y: bpy.props.IntProperty()
-
-    def modal(self, context, event):
-
-        mouse_pos = get_mouse_position()
-        self.amouse_x = mouse_pos[0] + 28
-        self.amouse_y = screensize[1] - mouse_pos[1] - 135
-
-        left = self.mouse_x 
-        right = left + 160
-        bottom = self.mouse_y - 200
-        top = self.mouse_y
-
-        if bpy.types.WindowManager.toolhud_state == True:
-            if self.amouse_x > left and self.amouse_x < right and self.amouse_y < top and self.amouse_y > bottom :
-                if event.value == 'PRESS':
-                    bpy.types.WindowManager.leftclick = True
-                elif event.value == 'RELEASE':
-                    bpy.types.WindowManager.leftclick = False
-
-                return {"RUNNING_MODAL"}
-        else:
-            return {'FINISHED'}
-
-        return {'PASS_THROUGH'}
-
-    def invoke(self, context, event):
-        mouse_pos = get_mouse_position()
-        self.mouse_x = mouse_pos[0] + 40
-        self.mouse_y = screensize[1] - mouse_pos[1] - 100
-
-        self.execute(context)
-
-        context.window_manager.modal_handler_add(self)
-
-        return {'RUNNING_MODAL'}
-
-    def execute(self, context):
-
-        handler = bpy.app.driver_namespace.get('draw')
-
-        if bpy.types.WindowManager.toolhud_state == False:
-            bpy.types.WindowManager.toolhud_state = True
-            handler = bpy.types.SpaceView3D.draw_handler_add(
-                draw_callback, (None, None, self.mouse_x, self.mouse_y), 'WINDOW', 'POST_PIXEL')
-
-            dns = bpy.app.driver_namespace
-            dns['draw'] = handler
-        else:
-            bpy.types.WindowManager.toolhud_state = False
-            remove_draw()
-            redraw_regions()
-        return {'FINISHED'}
-
 def remove_draw():
     handler = bpy.app.driver_namespace.get('draw')
     if handler:
@@ -199,6 +219,8 @@ def remove_draw():
 classes = (ToolHUD, Button)
 
 def register():
+
+
     bpy.types.WindowManager.toolhud_state = False
 
     for cls in classes:
