@@ -977,8 +977,6 @@ class SelectMenu(bpy.types.Panel):
             item.scale_x = 1.2
             item.operator('object.vertex_group_assign',text='',icon='CHECKMARK')
 
-
-
             col.separator(factor = 2)
             sub = col.row(align=True)
             sub.operator('mesh.select_linked',text='LINKED')
@@ -988,7 +986,6 @@ class SelectMenu(bpy.types.Panel):
             sub.operator('mesh.select_mirror',text='MIRROR')
 
             col.separator(factor = 2)
-
 
             sub = col.row(align=True)
             sub.operator_menu_enum("mesh.select_similar", "type")

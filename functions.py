@@ -164,6 +164,8 @@ class SetTool(bpy.types.Operator):
         Tool = Tools[self.tool_index][1]
         Brush = Tools[self.tool_index][2]
 
+        update_toolset()
+
         for screen in bpy.data.screens:
             for area in (a for a in screen.areas if a.type == 'VIEW_3D'):
                 region = next((region for region in area.regions if region.type == 'WINDOW'), None)
