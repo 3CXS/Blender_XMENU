@@ -31,6 +31,7 @@ def toolset():
 #------------------------------------------------------------------------------------------------------------------------------------
 
 Tools_Object= [ 
+                ('',                    '',                                 '',             '',                                 ''),
                 ('TWEAK',               'builtin.select',                   '',             'ops.generic.select',               'TWEAK'), 
                 ('BOX',                 'builtin.select_box',               '',             'ops.generic.select_box',           'BOX_SEL'),
                 ('CIRCLE',              'builtin.select_circle',            '',             'ops.generic.select_circle',        'CIRCLE_SEL'),
@@ -48,7 +49,8 @@ Tools_Object= [
                 ('CUBE_ADD',            'builtin.primitive_cube_add',       '',             'ops.mesh.primitive_cube_add_gizmo','')
                 ] 
 
-Tools_Edit = [ 
+Tools_Edit = [
+                ('',                    '',                                 '',             '',                                 ''),
                 ('TWEAK',               'builtin.select',                   '',             'ops.generic.select',               'TWEAK'), 
                 ('BOX',                 'builtin.select_box',               '',             'ops.generic.select_box',           'BOX_SEL'),
                 ('CIRCLE',              'builtin.select_circle',            '',             'ops.generic.select_circle',        'CIRCLE_SEL'),
@@ -90,6 +92,7 @@ Tools_Edit = [
                 ('RIP EDGE',            'builtin.rip_edge',                 '',             'ops.mesh.rip_edge',                '')
                 ] 
 Tools_Sculpt= [ 
+                ('',                    '',                                 '',             '',                                 ''),
                 ('GRAB',                'builtin_brush.Grab',               '',             'brush.sculpt.grab',                ''),
                 ('SHARP',               'builtin_brush.Draw Sharp',         '',             'brush.sculpt.draw_sharp',          ''),
                 ('STRIPS',              'builtin_brush.Clay Strips',        '',             'brush.sculpt.clay_strips',         ''),
@@ -129,7 +132,8 @@ Tools_Sculpt= [
                 ('PAINT',               'builtin_brush.Paint',              '',             'brush.sculpt.paint',               ''),
                 ('SMEAR',               'builtin_brush.Smear',              '',             'brush.sculpt.smear',               ''),
                 ]   
-Tools_Texture= [ 
+Tools_Texture= [
+                ('',                    '',                                 '',             '',                                 ''),
                 ('DRAW',                'builtin_brush.Draw',               '',             'brush.paint_texture.draw',         ''), 
                 ('SOFTEN',              'builtin_brush.Soften',             '',             'brush.paint_texture.soften',       ''),
                 ('SMEAR',               'builtin_brush.Smear',              '',             'brush.paint_texture.smear',        ''),
@@ -137,13 +141,15 @@ Tools_Texture= [
                 ('FILL',                'builtin_brush.Fill',               '',             'brush.paint_texture.fill',         ''),
                 ('MASK',                'builtin_brush.Mask',               '',             'brush.paint_texture.mask',         '')
                 ]
-Tools_Vertex= [ 
+Tools_Vertex= [
+                ('',                    '',                                 '',             '',                                 ''),
                 ('DRAW',                'builtin_brush.Draw',               '',             'brush.paint_vertex.draw',          ''), 
                 ('BLUR',                'builtin_brush.Blur',               '',             'brush.paint_vertex.blur',          ''),
                 ('AVERAGE',             'builtin_brush.Average',            '',             'brush.paint_vertex.average',       ''),
                 ('SMEAR',               'builtin_brush.Smear',              '',             'brush.paint_vertex.smear',         '')
                 ] 
-Tools_Weight= [ 
+Tools_Weight= [
+                ('',                    '',                                 '',             '',                                 ''),
                 ('DRAW',                'builtin_brush.Draw',               '',             'brush.paint_vertex.draw',          ''), 
                 ('BLUR',                'builtin_brush.Blur',               '',             'brush.paint_vertex.blur',          ''),
                 ('AVERAGE',             'builtin_brush.Average',            '',             'brush.paint_vertex.average',       ''),
@@ -152,7 +158,8 @@ Tools_Weight= [
                 ('SAMPLE',              'builtin.sample_weight',            '',             'ops.paint.weight_sample',          ''),
                 ('SAMPLE GRP',          'builtin.sample_vertex_group',      '',             'ops.paint.weight_sample_group',    '')
                 ]
-Tools_GP_Draw= [ 
+Tools_GP_Draw= [
+                ('',                    '',                                 '',             '',                                 ''),
                 ('PEN',                 'builtin_brush.Draw',               '',             'brush.gpencil_draw.draw',          ''),
                 ('FILL',                'builtin_brush.Fill',               '',             'brush.gpencil_draw.fill',          ''),
                 ('ERASE',               'builtin_brush.Erase',              '',             'brush.gpencil_draw.erase',         ''),
@@ -168,7 +175,8 @@ Tools_GP_Draw= [
                 ('INTERPOLATE',         'builtin.interpolate',              '',             'ops.gpencil.primitive_line',       ''),
                 ]
 
-Tools_GP_Edit= [ 
+Tools_GP_Edit= [
+                ('',                    '',                                 '',             '',                                 ''), 
                 ('TWEAK',               'builtin.select',                   '',             'ops.generic.select',               'TWEAK'), 
                 ('BOX',                 'builtin.select_box',               '',             'ops.generic.select_box',           'BOX_SEL'),
                 ('CIRCLE',              'builtin.select_circle',            '',             'ops.generic.select_circle',        'CIRCLE_SEL'),
@@ -186,7 +194,8 @@ Tools_GP_Edit= [
                 ('X FILL',              'builtin.transform_fill',           '',             'ops.gpencil.transform_fill',       ''),
                 ('INTER',               'builtin.interpolate',              '',             'ops.gpencil.primitive_line',       ''),
                 ]
-Tools_GP_Sculpt= [ 
+Tools_GP_Sculpt= [
+                ('',                    '',                                 '',             '',                                 ''),
                 ('SMOOTH',              'builtin_brush.Smooth',             '',             'ops.gpencil.sculpt_smooth',        ''), 
                 ('THICKNESS',           'builtin_brush.Thickness',          '',             'ops.gpencil.sculpt_thickness',     ''),
                 ('STRENGTH',            'builtin_brush.Strength',           '',             'ops.gpencil.sculpt_strength',      ''),
@@ -197,7 +206,8 @@ Tools_GP_Sculpt= [
                 ('PINCH',               'builtin_brush.Pinch',              '',             'ops.gpencil.sculpt_pinch',         ''),
                 ('CLONE',               'builtin_brush.Clone',              '',             'ops.gpencil.sculpt_clone',         ''),
                 ]
-Tools_GP_Weight= [ 
+Tools_GP_Weight= [
+                ('',                    '',                                 '',             '',                                 ''),
                 ('WEIGHT',              'builtin_brush.Weight',             '',             'ops.gpencil.sculpt_weight',        ''), 
                 ]
 

@@ -19,10 +19,29 @@ class ModesMenu(bpy.types.Menu):
 
         col = pie.column()
         col.label(text='')
+        col.label(text='')
+        col.label(text='')
+
+        col.operator("wm.save_mainfile", icon='FILE_TICK', text="SAVE")
+        col.operator("wm.save_as_mainfile", text="SAVE AS")
+
+        sub = col.row(align=True)
+        sub.operator("wm.open_mainfile", text="OPEN")
+        sub.menu("TOPBAR_MT_file_open_recent", text="RECENT")
+
+        col.popover("OBJECT_PT_import_panel")
+        sub = col.row(align=True)
+        sub.operator("wm.link", icon='LINK_BLEND', text="LINK")
+        sub.operator("wm.append", icon='APPEND_BLEND', text="APND")
+
+
 
         col = pie.column()
+        col.label(text='')
         col.scale_y = 1.2
         ShadingMode(self, context, col)
+        col.label(text='')
+        col.operator("screen.screenshot_area", text="SCREEN")
 
         col = pie.column()
         col.label(text='')
@@ -31,36 +50,6 @@ class ModesMenu(bpy.types.Menu):
         col.scale_y = 1.3
         ModeSelector(self, context, col)
 
-#-----------------------------------------------------------------------------------------------------------------------
-#PIE-FILE:
-
-class FileMenu(bpy.types.Menu):
-    bl_label = ""
-    bl_idname = "OBJECT_MT_file_menu"
-
-    def draw(self, context):
-        layout = self.layout
-
-        pie = layout.menu_pie()
-
-        col = pie.column()
-        col.operator("wm.save_mainfile", icon='FILE_TICK', text="SAVE")
-        col.operator("wm.save_as_mainfile", text="SAVE AS")
-
-        col = pie.column()
-        col.label(text='')
-        col.operator("screen.screenshot_area", text="SCREEN")
-
-        col = pie.column()
-        col.popover("OBJECT_PT_import_panel")
-        sub = col.row(align=True)
-        sub.operator("wm.link", icon='LINK_BLEND', text="LINK")
-        sub.operator("wm.append", icon='APPEND_BLEND', text="APND")
-
-        col = pie.column()
-        sub = col.row(align=True)
-        sub.operator("wm.open_mainfile", text="OPEN")
-        sub.menu("TOPBAR_MT_file_open_recent", text="RECENT")
 
 #-----------------------------------------------------------------------------------------------------------------------
 #PANEL-X1:
@@ -85,16 +74,16 @@ class ToolMenu(bpy.types.Panel):
 
         if context.mode == 'OBJECT':
             row = col.row(align=True)
-            tool_bt(layout=row, cmd=5, w=1.4, h=1, text=False, icon='CUSTOM')
             tool_bt(layout=row, cmd=6, w=1.4, h=1, text=False, icon='CUSTOM')
             tool_bt(layout=row, cmd=7, w=1.4, h=1, text=False, icon='CUSTOM')
             tool_bt(layout=row, cmd=8, w=1.4, h=1, text=False, icon='CUSTOM')
+            tool_bt(layout=row, cmd=9, w=1.4, h=1, text=False, icon='CUSTOM')
             row.separator(factor = 2)
-            tool_bt(layout=row, cmd=0, w=1.4, h=1, text=False, icon='CUSTOM')
             tool_bt(layout=row, cmd=1, w=1.4, h=1, text=False, icon='CUSTOM')
             tool_bt(layout=row, cmd=2, w=1.4, h=1, text=False, icon='CUSTOM')
             tool_bt(layout=row, cmd=3, w=1.4, h=1, text=False, icon='CUSTOM')
             tool_bt(layout=row, cmd=4, w=1.4, h=1, text=False, icon='CUSTOM')
+            tool_bt(layout=row, cmd=5, w=1.4, h=1, text=False, icon='CUSTOM')
 
             col.separator(factor=2)
 
@@ -201,16 +190,16 @@ class ToolMenu(bpy.types.Panel):
             sub = col.column()
             #sub.ui_units_x = 6
             row = col.row(align=True)
-            tool_bt(layout=row, cmd=5, w=1.4, h=1, text=False, icon='CUSTOM')
             tool_bt(layout=row, cmd=6, w=1.4, h=1, text=False, icon='CUSTOM')
             tool_bt(layout=row, cmd=7, w=1.4, h=1, text=False, icon='CUSTOM')
             tool_bt(layout=row, cmd=8, w=1.4, h=1, text=False, icon='CUSTOM')
+            tool_bt(layout=row, cmd=9, w=1.4, h=1, text=False, icon='CUSTOM')
             row.separator(factor = 2)
-            tool_bt(layout=row, cmd=0, w=1.4, h=1, text=False, icon='CUSTOM')
             tool_bt(layout=row, cmd=1, w=1.4, h=1, text=False, icon='CUSTOM')
             tool_bt(layout=row, cmd=2, w=1.4, h=1, text=False, icon='CUSTOM')
             tool_bt(layout=row, cmd=3, w=1.4, h=1, text=False, icon='CUSTOM')
             tool_bt(layout=row, cmd=4, w=1.4, h=1, text=False, icon='CUSTOM')
+            tool_bt(layout=row, cmd=5, w=1.4, h=1, text=False, icon='CUSTOM')
 
             sub = col.row(align=True)
             sub.alignment = 'CENTER'
@@ -287,30 +276,30 @@ class ToolMenu(bpy.types.Panel):
 
 #           tools:
             sub = col.row(align=True)
-            tool_bt(layout=sub, cmd=20, w=1.2, h=1, text=False, icon='MOD_LINEART')
+            tool_bt(layout=sub, cmd=21, w=1.2, h=1, text=False, icon='MOD_LINEART')
             empty = sub.column()
             empty.ui_units_x = 1.2
             empty.label(text='')
             sub.separator()
-            tool_bt(layout=sub, cmd=29, w=1.2, h=1, text=False, icon='UV_EDGESEL')
-            tool_bt(layout=sub, cmd=32, w=1.2, h=1, text=False, icon='EXPORT')
+            tool_bt(layout=sub, cmd=30, w=1.2, h=1, text=False, icon='UV_EDGESEL')
+            tool_bt(layout=sub, cmd=33, w=1.2, h=1, text=False, icon='EXPORT')
             sub.separator()
-            tool_bt(layout=sub, cmd=34, w=1.2, h=1, text=False, icon='CURVE_NCIRCLE')
+            tool_bt(layout=sub, cmd=35, w=1.2, h=1, text=False, icon='CURVE_NCIRCLE')
             sub.separator()
-            tool_bt(layout=sub, cmd=18, w=1.2, h=1, text=False, icon='MOD_MESHDEFORM')
-            tool_bt(layout=sub, cmd=19, w=1.2, h=1, text=False, icon='MOD_BEVEL')
+            tool_bt(layout=sub, cmd=19, w=1.2, h=1, text=False, icon='MOD_MESHDEFORM')
+            tool_bt(layout=sub, cmd=20, w=1.2, h=1, text=False, icon='MOD_BEVEL')
 
             sub = col.row(align=True)
-            tool_bt(layout=sub, cmd=22, w=1.2, h=1, text=False, icon='SNAP_MIDPOINT')
-            tool_bt(layout=sub, cmd=24, w=1.2, h=1, text=False, icon='MOD_DATA_TRANSFER')
+            tool_bt(layout=sub, cmd=23, w=1.2, h=1, text=False, icon='SNAP_MIDPOINT')
+            tool_bt(layout=sub, cmd=25, w=1.2, h=1, text=False, icon='MOD_DATA_TRANSFER')
             sub.separator()
-            tool_bt(layout=sub, cmd=30, w=1.2, h=1, text=False, icon='UV_VERTEXSEL')
-            tool_bt(layout=sub, cmd=31, w=1.2, h=1, text=False, icon='IMPORT')
+            tool_bt(layout=sub, cmd=31, w=1.2, h=1, text=False, icon='UV_VERTEXSEL')
+            tool_bt(layout=sub, cmd=32, w=1.2, h=1, text=False, icon='IMPORT')
             sub.separator()
-            tool_bt(layout=sub, cmd=35, w=1.2, h=1, text=False, icon='TRANSFORM_ORIGINS')
+            tool_bt(layout=sub, cmd=36, w=1.2, h=1, text=False, icon='TRANSFORM_ORIGINS')
             sub.separator()
-            tool_bt(layout=sub, cmd=16, w=1.2, h=1, text=False, icon='MOD_EXPLODE')
-            tool_bt(layout=sub, cmd=15, w=1.2, h=1, text=False, icon='MOD_SOLIDIFY')
+            tool_bt(layout=sub, cmd=17, w=1.2, h=1, text=False, icon='MOD_EXPLODE')
+            tool_bt(layout=sub, cmd=16, w=1.2, h=1, text=False, icon='MOD_SOLIDIFY')
 
             col.separator(factor=1)
 
@@ -380,60 +369,25 @@ class ToolMenu(bpy.types.Panel):
             subsub.scale_y = 1.4
             subsub.menu_contents("VIEW3D_MT_Falloff")
 
-            col.separator(factor=2)
-            sub = col.row(align=True)
-            subsub = sub.column(align=True)
-            subsub.ui_units_x = 2
-            subsub.scale_y = 0.7
-            subsub.operator('sculpt.set_pivot_position', text='PVT M').mode='UNMASKED'
-            subsub.operator('sculpt.set_pivot_position', text='RESET').mode='ORIGIN'
-            tool_bt(layout=sub, cmd=18, w=2, h=1.4, text=False, icon='LARGE')
-            tool_bt(layout=sub, cmd=0, w=2, h=1.4, text=False, icon='LARGE')
-            sub.separator(factor = 1)
-            subsub = sub.row(align=True)
-            tool_bt(layout=subsub, cmd=19, w=1.2, h=1, text=False, icon='CUSTOM')
-            tool_bt(layout=subsub, cmd=21, w=1.2, h=1, text=False, icon='CUSTOM')
+ 
 
             col.separator(factor=1)
             sub = col.row(align=True)
             sub.scale_y = 1.2
             SculptBrushSettings(self, context, layout=sub)
 
-            col.separator(factor=1)
-            sub = col.row(align=True)
-            tool_bt(layout=sub, cmd=1, w=2, h=1.4, text=False, icon='LARGE')
-            tool_bt(layout=sub, cmd=2, w=2, h=1.4, text=False, icon='LARGE')
-            tool_bt(layout=sub, cmd=3, w=2, h=1.4, text=False, icon='LARGE')
-
-            sub.separator(factor = 1)
-            tool_bt(layout=sub, cmd=7, w=2, h=1.4, text=True, icon='LARGE')
-
-            sub = col.row(align=True)
-            tool_bt(layout=sub, cmd=4, w=2, h=1.4, text=False, icon='LARGE')
-            tool_bt(layout=sub, cmd=5, w=2, h=1.4, text=False, icon='LARGE')
-            tool_bt(layout=sub, cmd=6, w=2, h=1.4, text=False, icon='LARGE')
-
-            sub.separator(factor = 1)
-            tool_bt(layout=sub, cmd=8, w=2, h=1.4, text=True, icon='LARGE')
-
-            sub = col.row(align=True)
-            tool_bt(layout=sub, cmd=9, w=2, h=1.4, text=False, icon='LARGE')
-            tool_bt(layout=sub, cmd=10, w=2, h=1.4, text=False, icon='LARGE')
-            tool_bt(layout=sub, cmd=11, w=2, h=1.4, text=False, icon='LARGE')
-
-            sub.separator(factor = 1)
-            tool_bt(layout=sub, cmd=12, w=2, h=1.4, text=True, icon='LARGE')
-
+           
             sub = col.row(align=True)
             sub.alignment = 'CENTER'
             sub.scale_y = 0.6
             sub.label(text='-----------------------------------------------------')
 
+
             sub = col.row(align=True)
             subsub = sub.column(align=True)
             subsubsub = subsub.row(align=True)
-            tool_bt(layout=subsubsub, cmd=36, w=2, h=1.4, text=True, icon='LARGE')
             tool_bt(layout=subsubsub, cmd=37, w=2, h=1.4, text=True, icon='LARGE')
+            tool_bt(layout=subsubsub, cmd=38, w=2, h=1.4, text=True, icon='LARGE')
 
             Color(self, context, layout=subsub)   
             sub.separator(factor = 1)
@@ -455,6 +409,7 @@ class ToolMenu(bpy.types.Panel):
             #sub = col.row(align=True)
             #ColorPalette(self, context, layout=sub)
 
+
     #PAINT TEXTURE -----------------------------------------------------------------------------------------------
 
         if context.mode == 'PAINT_TEXTURE':
@@ -474,15 +429,15 @@ class ToolMenu(bpy.types.Panel):
 
             sub = col.row(align=True)
             BrushCopy(self, context, layout=sub)
-            tool_bt(layout=sub, cmd=0, w=4, h=1.4, text=False, icon='LARGE')
+            tool_bt(layout=sub, cmd=1, w=4, h=1.4, text=False, icon='LARGE')
             col.separator(factor = 1)
 
             sub = col.row(align=True)
-            tool_bt(layout=sub, cmd=1, w=2, h=1.4, text=False, icon='LARGE')
             tool_bt(layout=sub, cmd=2, w=2, h=1.4, text=False, icon='LARGE')
             tool_bt(layout=sub, cmd=3, w=2, h=1.4, text=False, icon='LARGE')
             tool_bt(layout=sub, cmd=4, w=2, h=1.4, text=False, icon='LARGE')
             tool_bt(layout=sub, cmd=5, w=2, h=1.4, text=False, icon='LARGE')
+            tool_bt(layout=sub, cmd=6, w=2, h=1.4, text=False, icon='LARGE')
             col.separator(factor = 1)
 
             sub = col.row(align=True)
@@ -520,14 +475,14 @@ class ToolMenu(bpy.types.Panel):
             col.separator(factor = 1)
             sub = col.row(align=True)
             BrushCopy(self, context, layout=sub)
-            tool_bt(layout=sub, cmd=0, w=4, h=1.4, text=False, icon='LARGE')
+            tool_bt(layout=sub, cmd=1, w=4, h=1.4, text=False, icon='LARGE')
 
             col.separator(factor = 1)
 
             sub = col.row(align=True)
-            tool_bt(layout=sub, cmd=1, w=2, h=1.4, text=False, icon='LARGE')
             tool_bt(layout=sub, cmd=2, w=2, h=1.4, text=False, icon='LARGE')
             tool_bt(layout=sub, cmd=3, w=2, h=1.4, text=False, icon='LARGE')
+            tool_bt(layout=sub, cmd=4, w=2, h=1.4, text=False, icon='LARGE')
             col.separator(factor = 1)
 
             sub = col.row()
@@ -567,16 +522,16 @@ class ToolMenu(bpy.types.Panel):
 
             sub = col.row(align=True)
             BrushCopy(self, context, layout=sub)
-            tool_bt(layout=sub, cmd=0, w=4, h=1.4, text=False, icon='LARGE')
+            tool_bt(layout=sub, cmd=1, w=4, h=1.4, text=False, icon='LARGE')
             col.separator(factor = 1)
 
             sub = col.row(align=True)
-            tool_bt(layout=sub, cmd=1, w=2, h=1.4, text=False, icon='LARGE')
             tool_bt(layout=sub, cmd=2, w=2, h=1.4, text=False, icon='LARGE')
             tool_bt(layout=sub, cmd=3, w=2, h=1.4, text=False, icon='LARGE')
             tool_bt(layout=sub, cmd=4, w=2, h=1.4, text=False, icon='LARGE')
             tool_bt(layout=sub, cmd=5, w=2, h=1.4, text=False, icon='LARGE')
             tool_bt(layout=sub, cmd=6, w=2, h=1.4, text=False, icon='LARGE')
+            tool_bt(layout=sub, cmd=7, w=2, h=1.4, text=False, icon='LARGE')
             col.separator(factor = 1)
 
             sub = col.row()
@@ -610,20 +565,20 @@ class ToolMenu(bpy.types.Panel):
             split = sub.split(factor=0.5)         
             BrushCopy(self, context, layout=split)
             col.separator()
-            tool_bt(layout=split, cmd=0, w=2.4, h=1.4, text=False, icon='LARGE')
+            tool_bt(layout=split, cmd=1, w=2.4, h=1.4, text=False, icon='LARGE')
             sub = col.row(align=True)
-            tool_bt(layout=sub, cmd=1, w=2.4, h=1.4, text=False, icon='LARGE')
             tool_bt(layout=sub, cmd=2, w=2.4, h=1.4, text=False, icon='LARGE')
             tool_bt(layout=sub, cmd=3, w=2.4, h=1.4, text=False, icon='LARGE')
             tool_bt(layout=sub, cmd=4, w=2.4, h=1.4, text=False, icon='LARGE')
             tool_bt(layout=sub, cmd=5, w=2.4, h=1.4, text=False, icon='LARGE')
+            tool_bt(layout=sub, cmd=6, w=2.4, h=1.4, text=False, icon='LARGE')
             sub = col.row(align=True)
-            tool_bt(layout=sub, cmd=6, w=1.2, h=1, text=False, icon='IPO_LINEAR')
-            tool_bt(layout=sub, cmd=7, w=1.2, h=1, text=False, icon='IPO_CONSTANT')
-            tool_bt(layout=sub, cmd=8, w=1.2, h=1, text=False, icon='IPO_EASE_OUT')
-            tool_bt(layout=sub, cmd=9, w=1.2, h=1, text=False, icon='IPO_EASE_IN_OUT')
-            tool_bt(layout=sub, cmd=10, w=1.2, h=1, text=False, icon='MESH_PLANE')
-            tool_bt(layout=sub, cmd=11, w=1.2, h=1, text=False, icon='MESH_CIRCLE')
+            tool_bt(layout=sub, cmd=7, w=1.2, h=1, text=False, icon='IPO_LINEAR')
+            tool_bt(layout=sub, cmd=8, w=1.2, h=1, text=False, icon='IPO_CONSTANT')
+            tool_bt(layout=sub, cmd=9, w=1.2, h=1, text=False, icon='IPO_EASE_OUT')
+            tool_bt(layout=sub, cmd=10, w=1.2, h=1, text=False, icon='IPO_EASE_IN_OUT')
+            tool_bt(layout=sub, cmd=11, w=1.2, h=1, text=False, icon='MESH_PLANE')
+            tool_bt(layout=sub, cmd=12, w=1.2, h=1, text=False, icon='MESH_CIRCLE')
 
             col.separator()
 
@@ -666,16 +621,16 @@ class ToolMenu(bpy.types.Panel):
 
             col.separator()
             sub = col.row(align=True)
-            tool_bt(layout=sub, cmd=0, w=2, h=1.4, text=False, icon='LARGE')
             tool_bt(layout=sub, cmd=1, w=2, h=1.4, text=False, icon='LARGE')
             tool_bt(layout=sub, cmd=2, w=2, h=1.4, text=False, icon='LARGE')
             tool_bt(layout=sub, cmd=3, w=2, h=1.4, text=False, icon='LARGE')
             tool_bt(layout=sub, cmd=4, w=2, h=1.4, text=False, icon='LARGE')
-            sub = col.row(align=True)
             tool_bt(layout=sub, cmd=5, w=2, h=1.4, text=False, icon='LARGE')
+            sub = col.row(align=True)
             tool_bt(layout=sub, cmd=6, w=2, h=1.4, text=False, icon='LARGE')
             tool_bt(layout=sub, cmd=7, w=2, h=1.4, text=False, icon='LARGE')
             tool_bt(layout=sub, cmd=8, w=2, h=1.4, text=False, icon='LARGE')
+            tool_bt(layout=sub, cmd=9, w=2, h=1.4, text=False, icon='LARGE')
 
             col.separator()
             sub = col.split(factor=0.75)
@@ -687,17 +642,17 @@ class ToolMenu(bpy.types.Panel):
             col.separator()
             sub = col.row(align=True)
             subsub = sub.column(align=True)
-            tool_bt(layout=subsub, cmd=9, w=2, h=1, text=True, icon='OFF')
             tool_bt(layout=subsub, cmd=10, w=2, h=1, text=True, icon='OFF')
-            subsub = sub.column(align=True)
             tool_bt(layout=subsub, cmd=11, w=2, h=1, text=True, icon='OFF')
-            tool_bt(layout=subsub, cmd=12, w=2, h=1, text=True, icon='OFF')
             subsub = sub.column(align=True)
+            tool_bt(layout=subsub, cmd=12, w=2, h=1, text=True, icon='OFF')
             tool_bt(layout=subsub, cmd=13, w=2, h=1, text=True, icon='OFF')
-            sub.separator(factor=1)
             subsub = sub.column(align=True)
             tool_bt(layout=subsub, cmd=14, w=2, h=1, text=True, icon='OFF')
+            sub.separator(factor=1)
+            subsub = sub.column(align=True)
             tool_bt(layout=subsub, cmd=15, w=2, h=1, text=True, icon='OFF')
+            tool_bt(layout=subsub, cmd=16, w=2, h=1, text=True, icon='OFF')
 
             col.separator(factor=2)
             sub = col.row(align=True)
@@ -758,17 +713,17 @@ class ToolMenu(bpy.types.Panel):
             subsub.menu_contents("VIEW3D_MT_Falloff")
             col.separator()
             sub = col.row(align=True)
-            tool_bt(layout=sub, cmd=4, w=2.2, h=1.4, text=True, icon='LARGE')
             tool_bt(layout=sub, cmd=5, w=2.2, h=1.4, text=True, icon='LARGE')
             tool_bt(layout=sub, cmd=6, w=2.2, h=1.4, text=True, icon='LARGE')
             tool_bt(layout=sub, cmd=7, w=2.2, h=1.4, text=True, icon='LARGE')
             tool_bt(layout=sub, cmd=8, w=2.2, h=1.4, text=True, icon='LARGE')
+            tool_bt(layout=sub, cmd=9, w=2.2, h=1.4, text=True, icon='LARGE')
             col.separator()
             sub = col.row(align=True)
-            tool_bt(layout=sub, cmd=0, w=2.8, h=1, text=False, icon='OFF')
             tool_bt(layout=sub, cmd=1, w=2.8, h=1, text=False, icon='OFF')
             tool_bt(layout=sub, cmd=2, w=2.8, h=1, text=False, icon='OFF')
             tool_bt(layout=sub, cmd=3, w=2.8, h=1, text=False, icon='OFF')
+            tool_bt(layout=sub, cmd=4, w=2.8, h=1, text=False, icon='OFF')
             sub = col.row(align=True)
             sub.alignment = 'CENTER'
             sub.label(text='-----------------------------------------------------')
@@ -854,27 +809,68 @@ class PropMenu(bpy.types.Panel):
 
         if context.mode == 'SCULPT':
             col = layout.column()
-            col.menu_contents("VIEW3D_MT_dynamesh")
+            sub = col.row()
+            sub.menu_contents("VIEW3D_MT_dynamesh")
+
+            sub.menu_contents("VIEW3D_MT_remesh")
+
+            sub = col.row(align=True)
+            sub.scale_y = 0.6
+            sub.alignment = 'CENTER'
+            sub.label(text='-----------------------------------------------------')
+
+
+            sub = col.row(align=True)
+            op = sub.operator('sculpt.expand',text='ACTIVE>')
+            op.target='FACE_SETS'
+            op.falloff_type='BOUNDARY_FACE_SET'
+            op.invert=False
+            op.use_modify_active=True
+
+            op = sub.operator('sculpt.expand',text='TOPO>')
+            op.target='FACE_SETS'
+            op.falloff_type='GEODESIC'
+            op.invert=False
+            op.use_modify_active=False
+
+            item = sub.row(align=True)
+            item.scale_y = 1
+            item.scale_x = 1.4
+            item.operator('sculpt.face_set_edit',text='', icon='REMOVE').mode='SHRINK'
+            item.operator('sculpt.face_set_edit',text='', icon='ADD').mode='GROW'
+
+
+            sub = col.row()
+            SculptFaceSet(self, context, layout=sub)
+
+
+
+            sub = col.row(align=True)
+            sub.operator('mesh.face_set_extract', text='EXT FSET')
+            sub.operator('mesh.paint_mask_extract', text='EXT MASK')
+
+            sub = col.row(align=True)
+            sub.scale_y = 0.6
+            sub.alignment = 'CENTER'
+            sub.label(text='-----------------------------------------------------')
+
+
 
             col.separator(factor = 1)
-            col.menu_contents("VIEW3D_MT_remesh")
 
-            col.separator(factor = 1)
-            subrow = col.row(align=False)
-            subcol = subrow.column(align=False)
-            subcol.ui_units_x = 3
-            item = subcol.row()
+            sub = col.row(align=False)
+            subsub = sub.column(align=False)
+            subsub.ui_units_x = 3
+            item = subsub.row()
             item.scale_y = 0.5
             item.label(text='FILTER')
-            item = subcol.row()
-            tool_bt(layout=item, cmd=33, w=3, h=1, text=False, icon='OFF')
-            item = subcol.row()
-            tool_bt(layout=item, cmd=34, w=3, h=1, text=False, icon='OFF')
-            item = subcol.row()
-            tool_bt(layout=item, cmd=35, w=3, h=1, text=False, icon='OFF')
+            item = subsub.row(align=True)
+            tool_bt(layout=item, cmd=34, w=1, h=1, text=False, icon='OFF')
+            tool_bt(layout=item, cmd=35, w=1, h=1, text=False, icon='OFF')
+            tool_bt(layout=item, cmd=36, w=1, h=1, text=False, icon='OFF')
 
             col.separator(factor = 1)
-            SculptFilterSettings(self, context, layout=subrow)
+            SculptFilterSettings(self, context, layout=sub)
 
             col.separator(factor = 1)
             VertexColor(self, context, layout=col)
@@ -1070,16 +1066,16 @@ class SelectMenu(bpy.types.Panel):
             col.separator(factor=1)
 
             sub = col.row()
-            tool_bt(layout=sub, cmd=13, w=2, h=1.4, text=False, icon='LARGE') 
+            tool_bt(layout=sub, cmd=14, w=2, h=1.4, text=False, icon='LARGE') 
             subsub = sub.column()
             subsub.ui_units_x = 3.4
             item = subsub.column()
             item.scale_y = 0.5
             item.label(text="MASK")
             grid = subsub.grid_flow(columns=3, align=True)
-            tool_bt(layout=grid, cmd=27, w=1.2, h=0.8, text=False, icon='CUSTOM')
-            tool_bt(layout=grid, cmd=28, w=1, h=0.8, text=False, icon='CUSTOM')
-            tool_bt(layout=grid, cmd=29, w=1.2, h=0.8, text=False, icon='CUSTOM')
+            tool_bt(layout=grid, cmd=28, w=1.2, h=0.8, text=False, icon='CUSTOM')
+            tool_bt(layout=grid, cmd=29, w=1, h=0.8, text=False, icon='CUSTOM')
+            tool_bt(layout=grid, cmd=30, w=1.2, h=0.8, text=False, icon='CUSTOM')
 
             subsub = sub.column()
             subsub.ui_units_x = 2.4
@@ -1087,8 +1083,8 @@ class SelectMenu(bpy.types.Panel):
             item.scale_y = 0.5
             item.label(text="TRIM")
             grid = subsub.grid_flow(columns=2, align=True)
-            tool_bt(layout=grid, cmd=16, w=1.2, h=0.8, icon="CUSTOM", text=False)
             tool_bt(layout=grid, cmd=17, w=1.2, h=0.8, icon="CUSTOM", text=False)
+            tool_bt(layout=grid, cmd=18, w=1.2, h=0.8, icon="CUSTOM", text=False)
 
             sub = col.row(align=True)
             sub.scale_y = 0.6
@@ -1096,13 +1092,13 @@ class SelectMenu(bpy.types.Panel):
             sub.label(text='-----------------------------------------------------')
 
             sub = col.row()
-            tool_bt(layout=sub, cmd=14, w=2, h=1.4, text=False, icon='LARGE')
+            tool_bt(layout=sub, cmd=15, w=2, h=1.4, text=False, icon='LARGE')
             subsub = sub.column()       
             grid = subsub.grid_flow(columns=2, align=True)
-            tool_bt(layout=grid, cmd=30, w=1.5, h=0.75, text=False, icon='CUSTOM')
             tool_bt(layout=grid, cmd=31, w=1.5, h=0.75, text=False, icon='CUSTOM')
-            tool_bt(layout=subsub, cmd=32, w=1.2, h=0.5, text=False, icon='OFF')
-            tool_bt(layout=sub, cmd=15, w=2.4, h=1.4, text=False, icon='LARGE')
+            tool_bt(layout=grid, cmd=32, w=1.5, h=0.75, text=False, icon='CUSTOM')
+            tool_bt(layout=subsub, cmd=33, w=1.2, h=0.5, text=False, icon='OFF')
+            tool_bt(layout=sub, cmd=16, w=2.4, h=1.4, text=False, icon='LARGE')
             col.separator(factor = 1)
 
             sub = col.row(align=True)
@@ -1139,7 +1135,7 @@ class SelectMenu(bpy.types.Panel):
 #-----------------------------------------------------------------------------------------------------------------------
 
 addon_keymaps = []
-classes = (PropMenu, ModesMenu, FileMenu, ToolMenu, SelectMenu)
+classes = (PropMenu, ModesMenu, ToolMenu, SelectMenu)
 
 def register():
     for cls in classes:
@@ -1167,10 +1163,6 @@ def register():
         addon_keymaps.append((km, kmi))
     
         km = wm.keyconfigs.addon.keymaps.new(name='Window', space_type='EMPTY')
-
-        kmi = km.keymap_items.new('wm.call_menu_pie', 'S', 'PRESS', ctrl=True, shift=False, alt=False)
-        kmi.properties.name = FileMenu.bl_idname
-        addon_keymaps.append((km, kmi))
 
         kmi = km.keymap_items.new('wm.call_panel', 'D', 'PRESS', ctrl=False, shift=False, alt=False)
         kmi.properties.name = PropMenu.bl_idname

@@ -143,16 +143,16 @@ class XPanel(bpy.types.Panel):
             row = top_left.row(align=True)
 
             # toolset:
-            tool_bt(layout=row, cmd=5, w=1.4, h=1, text=False, icon='CUSTOM')
             tool_bt(layout=row, cmd=6, w=1.4, h=1, text=False, icon='CUSTOM')
             tool_bt(layout=row, cmd=7, w=1.4, h=1, text=False, icon='CUSTOM')
             tool_bt(layout=row, cmd=8, w=1.4, h=1, text=False, icon='CUSTOM')
+            tool_bt(layout=row, cmd=9, w=1.4, h=1, text=False, icon='CUSTOM')
             row.separator(factor = 2)
-            tool_bt(layout=row, cmd=0, w=1.4, h=1, text=False, icon='CUSTOM')
             tool_bt(layout=row, cmd=1, w=1.4, h=1, text=False, icon='CUSTOM')
             tool_bt(layout=row, cmd=2, w=1.4, h=1, text=False, icon='CUSTOM')
             tool_bt(layout=row, cmd=3, w=1.4, h=1, text=False, icon='CUSTOM')
             tool_bt(layout=row, cmd=4, w=1.4, h=1, text=False, icon='CUSTOM')
+            tool_bt(layout=row, cmd=5, w=1.4, h=1, text=False, icon='CUSTOM')
 
     #TOP-MID----------------------------------------------------------------------------------
 
@@ -229,9 +229,9 @@ class XPanel(bpy.types.Panel):
             empty.separator()
 
             # annotate & measure:
-            tool_bt(layout=row, cmd=9, w=1.2, h=1, text=False, icon='OUTLINER_DATA_GP_LAYER')
-            tool_bt(layout=row, cmd=12, w=1.2, h=1, text=False, icon='OUTLINER_DATA_LIGHTPROBE')
-            tool_bt(layout=row, cmd=13, w=1.2, h=1, text=False, icon='DRIVER_ROTATIONAL_DIFFERENCE')
+            tool_bt(layout=row, cmd=10, w=1.2, h=1, text=False, icon='OUTLINER_DATA_GP_LAYER')
+            tool_bt(layout=row, cmd=13, w=1.2, h=1, text=False, icon='OUTLINER_DATA_LIGHTPROBE')
+            tool_bt(layout=row, cmd=14, w=1.2, h=1, text=False, icon='DRIVER_ROTATIONAL_DIFFERENCE')
 
     #MAIN-LEFT-------------------------------------------------------------------------------
 
@@ -324,16 +324,16 @@ class XPanel(bpy.types.Panel):
             row = top_left.row(align=True)
 
             # toolset:
-            tool_bt(layout=row, cmd=5, w=1.4, h=1, text=False, icon='CUSTOM')
             tool_bt(layout=row, cmd=6, w=1.4, h=1, text=False, icon='CUSTOM')
             tool_bt(layout=row, cmd=7, w=1.4, h=1, text=False, icon='CUSTOM')
             tool_bt(layout=row, cmd=8, w=1.4, h=1, text=False, icon='CUSTOM')
+            tool_bt(layout=row, cmd=9, w=1.4, h=1, text=False, icon='CUSTOM')
             row.separator(factor = 2)
-            tool_bt(layout=row, cmd=0, w=1.4, h=1, text=False, icon='CUSTOM')
             tool_bt(layout=row, cmd=1, w=1.4, h=1, text=False, icon='CUSTOM')
             tool_bt(layout=row, cmd=2, w=1.4, h=1, text=False, icon='CUSTOM')
             tool_bt(layout=row, cmd=3, w=1.4, h=1, text=False, icon='CUSTOM')
             tool_bt(layout=row, cmd=4, w=1.4, h=1, text=False, icon='CUSTOM')
+            tool_bt(layout=row, cmd=5, w=1.4, h=1, text=False, icon='CUSTOM')
 
     #TOP-MID---------------------------------------------------------------------------------
 
@@ -411,9 +411,9 @@ class XPanel(bpy.types.Panel):
             empty.separator()
 
             # annotate & measure:
-            tool_bt(layout=row, cmd=9, w=1.2, h=1, text=False, icon='OUTLINER_DATA_GP_LAYER')
-            tool_bt(layout=row, cmd=10, w=1.2, h=1, text=False, icon='OUTLINER_DATA_LIGHTPROBE')
-            tool_bt(layout=row, cmd=11, w=1.2, h=1, text=False, icon='DRIVER_ROTATIONAL_DIFFERENCE')
+            tool_bt(layout=row, cmd=10, w=1.2, h=1, text=False, icon='OUTLINER_DATA_GP_LAYER')
+            tool_bt(layout=row, cmd=11, w=1.2, h=1, text=False, icon='OUTLINER_DATA_LIGHTPROBE')
+            tool_bt(layout=row, cmd=12, w=1.2, h=1, text=False, icon='DRIVER_ROTATIONAL_DIFFERENCE')
 
     #MAIN-LEFT-----------------------------------------------------------------------------
 
@@ -533,6 +533,13 @@ class XPanel(bpy.types.Panel):
 
             row.separator(factor=2)
 
+            # toolsettings:
+            sub = row.column(align=True)
+            sub.ui_units_x = 6
+            SculptToolSettings(self, context, layout=sub)
+
+            row.separator(factor=2)
+
             # brush settings:
             sub = row.column(align=True)
             sub.ui_units_x = 17
@@ -545,13 +552,6 @@ class XPanel(bpy.types.Panel):
             sub.ui_units_x = 2
             sub.scale_y = 1.4
             sub.menu_contents("VIEW3D_MT_Falloff")
-
-            row.separator(factor=2)
-
-            # toolsettings:
-            sub = row.column(align=True)
-            sub.ui_units_x = 6
-            SculptToolSettings(self, context, layout=sub)
 
             row.separator(factor=2)
 
@@ -600,12 +600,12 @@ class XPanel(bpy.types.Panel):
             # paint / grab
             sub = row.column()
             subsub = sub.row(align=True)
-            tool_bt(layout=subsub, cmd=36, w=2, h=1.4, text=False, icon='LARGE')
             tool_bt(layout=subsub, cmd=37, w=2, h=1.4, text=False, icon='LARGE')
+            tool_bt(layout=subsub, cmd=38, w=2, h=1.4, text=False, icon='LARGE')
             subsub.separator(factor = 1)
-            tool_bt(layout=subsub, cmd=0, w=2, h=1.4, text=False, icon='LARGE')
-            tool_bt(layout=subsub, cmd=19, w=1.2, h=1.4, text=False, icon='CUSTOM')
-            tool_bt(layout=subsub, cmd=21, w=1.2, h=1.4, text=False, icon='CUSTOM')
+            tool_bt(layout=subsub, cmd=1, w=2, h=1.4, text=False, icon='LARGE')
+            tool_bt(layout=subsub, cmd=20, w=1.2, h=1.4, text=False, icon='CUSTOM')
+            tool_bt(layout=subsub, cmd=22, w=1.2, h=1.4, text=False, icon='CUSTOM')
             sub.separator(factor = 0.4)
             subsub = sub.row()
             subsub.ui_units_x = 6
@@ -615,14 +615,14 @@ class XPanel(bpy.types.Panel):
             row.separator(factor = 0.4)
             sub = row.column()
             subsub = sub.row(align=True)
-            tool_bt(layout=subsub, cmd=1, w=2, h=1.4, text=False, icon='LARGE')
             tool_bt(layout=subsub, cmd=2, w=2, h=1.4, text=False, icon='LARGE')
             tool_bt(layout=subsub, cmd=3, w=2, h=1.4, text=False, icon='LARGE')
+            tool_bt(layout=subsub, cmd=4, w=2, h=1.4, text=False, icon='LARGE')
             sub.separator(factor = 0.4)
             subsub = sub.row(align=True)
-            tool_bt(layout=subsub, cmd=4, w=2, h=1.4, text=False, icon='LARGE')
             tool_bt(layout=subsub, cmd=5, w=2, h=1.4, text=False, icon='LARGE')
             tool_bt(layout=subsub, cmd=6, w=2, h=1.4, text=False, icon='LARGE')
+            tool_bt(layout=subsub, cmd=7, w=2, h=1.4, text=False, icon='LARGE')
             sub.separator(factor = 0.4)
 
             # extra
@@ -630,15 +630,15 @@ class XPanel(bpy.types.Panel):
             empty = subsub.column()
             empty.ui_units_x = 3.5
             empty.separator()
-            tool_bt(layout=subsub, cmd=20, w=1.2, h=1, text=False, icon='CUSTOM')
-            tool_bt(layout=subsub, cmd=25, w=1.2, h=1, text=False, icon='CUSTOM')
+            tool_bt(layout=subsub, cmd=21, w=1.2, h=1, text=False, icon='CUSTOM')
             tool_bt(layout=subsub, cmd=26, w=1.2, h=1, text=False, icon='CUSTOM')
+            tool_bt(layout=subsub, cmd=27, w=1.2, h=1, text=False, icon='CUSTOM')
 
             # crease & transform
             sub = row.column()
             subsub = sub.row(align=True)
-            tool_bt(layout=subsub, cmd=7, w=2, h=1.4, text=False, icon='LARGE')
             tool_bt(layout=subsub, cmd=8, w=2, h=1.4, text=False, icon='LARGE')
+            tool_bt(layout=subsub, cmd=9, w=2, h=1.4, text=False, icon='LARGE')
 
             sub.separator(factor = 0.4)
 
@@ -648,33 +648,33 @@ class XPanel(bpy.types.Panel):
             item.scale_y = 0.7
             item.operator('sculpt.set_pivot_position', text='PVT M').mode='UNMASKED'
             item.operator('sculpt.set_pivot_position', text='RESET').mode='ORIGIN'
-            tool_bt(layout=subsub, cmd=18, w=2, h=1.4, text=False, icon='LARGE')
+            tool_bt(layout=subsub, cmd=19, w=2, h=1.4, text=False, icon='LARGE')
 
             # polish
             sub = row.column()
             subsub = sub.row(align=True)
-            tool_bt(layout=subsub, cmd=9, w=2, h=1.4, text=True, icon='LARGE')
             tool_bt(layout=subsub, cmd=10, w=2, h=1.4, text=True, icon='LARGE')
+            tool_bt(layout=subsub, cmd=11, w=2, h=1.4, text=True, icon='LARGE')
             sub.separator(factor = 0.4)
             subsub = sub.row(align=True)
-            tool_bt(layout=subsub, cmd=11, w=2, h=1.4, text=True, icon='LARGE')
             tool_bt(layout=subsub, cmd=12, w=2, h=1.4, text=True, icon='LARGE')
+            tool_bt(layout=subsub, cmd=13, w=2, h=1.4, text=True, icon='LARGE')
 
             row.separator(factor = 0.4)
 
             # mask
             sub = row.column()
             subsub = sub.row(align=True)
-            tool_bt(layout=subsub, cmd=13, w=2, h=1.4, text=False, icon='LARGE') 
+            tool_bt(layout=subsub, cmd=14, w=2, h=1.4, text=False, icon='LARGE') 
             item = subsub.column()
             item.ui_units_x = 3.4
             label = item.column()
             label.scale_y = 0.5
             label.label(text="MASK")
             grid = item.grid_flow(columns=3, align=True)
-            tool_bt(layout=grid, cmd=27, w=1.2, h=0.8, text=False, icon='CUSTOM')
-            tool_bt(layout=grid, cmd=28, w=1, h=0.8, text=False, icon='CUSTOM')
-            tool_bt(layout=grid, cmd=29, w=1.2, h=0.8, text=False, icon='CUSTOM')
+            tool_bt(layout=grid, cmd=28, w=1.2, h=0.8, text=False, icon='CUSTOM')
+            tool_bt(layout=grid, cmd=29, w=1, h=0.8, text=False, icon='CUSTOM')
+            tool_bt(layout=grid, cmd=30, w=1.2, h=0.8, text=False, icon='CUSTOM')
 
             # trim
             item = subsub.column()
@@ -683,24 +683,24 @@ class XPanel(bpy.types.Panel):
             label.scale_y = 0.5
             label.label(text="TRIM")
             grid = item.grid_flow(columns=2, align=True)
-            tool_bt(layout=grid, cmd=16, w=1.2, h=0.8, icon="CUSTOM", text=False)
             tool_bt(layout=grid, cmd=17, w=1.2, h=0.8, icon="CUSTOM", text=False)
+            tool_bt(layout=grid, cmd=18, w=1.2, h=0.8, icon="CUSTOM", text=False)
 
             sub.separator(factor = 0.4)
 
             # face sets
             subsub = sub.row(align=True)
-            tool_bt(layout=subsub, cmd=14, w=2, h=1.4, text=False, icon='LARGE')
+            tool_bt(layout=subsub, cmd=15, w=2, h=1.4, text=False, icon='LARGE')
             item = subsub.column()       
             grid = item.grid_flow(columns=2, align=True)
-            tool_bt(layout=grid, cmd=30, w=1.5, h=0.75, text=False, icon='CUSTOM')
             tool_bt(layout=grid, cmd=31, w=1.5, h=0.75, text=False, icon='CUSTOM')
-            tool_bt(layout=item, cmd=32, w=1.2, h=0.5, text=False, icon='OFF')
+            tool_bt(layout=grid, cmd=32, w=1.5, h=0.75, text=False, icon='CUSTOM')
+            tool_bt(layout=item, cmd=33, w=1.2, h=0.5, text=False, icon='OFF')
 
             # hide
             item = subsub.column()
             item.ui_units_x = 2.4
-            tool_bt(layout=item, cmd=15, w=2.4, h=1.4, text=False, icon='LARGE')
+            tool_bt(layout=item, cmd=16, w=2.4, h=1.4, text=False, icon='LARGE')
 
             sub.separator(factor = 0.4)
 
@@ -726,11 +726,11 @@ class XPanel(bpy.types.Panel):
             subsub.scale_y = 0.5
             subsub.label(text='FILTER')
             subsub = sub.row()
-            tool_bt(layout=subsub, cmd=33, w=3, h=1, text=False, icon='OFF')
-            subsub = sub.row()
             tool_bt(layout=subsub, cmd=34, w=3, h=1, text=False, icon='OFF')
             subsub = sub.row()
             tool_bt(layout=subsub, cmd=35, w=3, h=1, text=False, icon='OFF')
+            subsub = sub.row()
+            tool_bt(layout=subsub, cmd=36, w=3, h=1, text=False, icon='OFF')
 
             SculptFilterSettings(self, context, layout=row)
 
@@ -766,11 +766,11 @@ class XPanel(bpy.types.Panel):
             row.separator()
 
             # toolset:
-            tool_bt(layout=row, cmd=0, w=2, h=1.4, text=False, icon='LARGE')
-            row.separator()
             tool_bt(layout=row, cmd=1, w=2, h=1.4, text=False, icon='LARGE')
+            row.separator()
             tool_bt(layout=row, cmd=2, w=2, h=1.4, text=False, icon='LARGE')
             tool_bt(layout=row, cmd=3, w=2, h=1.4, text=False, icon='LARGE')
+            tool_bt(layout=row, cmd=4, w=2, h=1.4, text=False, icon='LARGE')
             row.separator()
 
             # falloff:
@@ -828,13 +828,13 @@ class XPanel(bpy.types.Panel):
             row.separator()
 
             # toolset:
-            tool_bt(layout=row, cmd=0, w=2, h=1.4, text=False, icon='LARGE')
-            row.separator()
             tool_bt(layout=row, cmd=1, w=2, h=1.4, text=False, icon='LARGE')
+            row.separator()
             tool_bt(layout=row, cmd=2, w=2, h=1.4, text=False, icon='LARGE')
             tool_bt(layout=row, cmd=3, w=2, h=1.4, text=False, icon='LARGE')
             tool_bt(layout=row, cmd=4, w=2, h=1.4, text=False, icon='LARGE')
             tool_bt(layout=row, cmd=5, w=2, h=1.4, text=False, icon='LARGE')
+            tool_bt(layout=row, cmd=6, w=2, h=1.4, text=False, icon='LARGE')
             row.separator()
 
             # falloff:
@@ -881,14 +881,14 @@ class XPanel(bpy.types.Panel):
             row = top_mid.row(align=True)
 
             # toolset:
-            tool_bt(layout=row, cmd=0, w=2, h=1.4, text=False, icon='LARGE')
-            row.separator()
             tool_bt(layout=row, cmd=1, w=2, h=1.4, text=False, icon='LARGE')
+            row.separator()
             tool_bt(layout=row, cmd=2, w=2, h=1.4, text=False, icon='LARGE')
             tool_bt(layout=row, cmd=3, w=2, h=1.4, text=False, icon='LARGE')
             tool_bt(layout=row, cmd=4, w=2, h=1.4, text=False, icon='LARGE')
             tool_bt(layout=row, cmd=5, w=2, h=1.4, text=False, icon='LARGE')
             tool_bt(layout=row, cmd=6, w=2, h=1.4, text=False, icon='LARGE')
+            tool_bt(layout=row, cmd=7, w=2, h=1.4, text=False, icon='LARGE')
             row.separator()
 
             # falloff:
@@ -956,20 +956,20 @@ class XPanel(bpy.types.Panel):
             row.separator()
 
             # toolset:
-            tool_bt(layout=row, cmd=0, w=2.4, h=1.4, text=False, icon='LARGE')
-            row.separator()
             tool_bt(layout=row, cmd=1, w=2.4, h=1.4, text=False, icon='LARGE')
+            row.separator()
             tool_bt(layout=row, cmd=2, w=2.4, h=1.4, text=False, icon='LARGE')
             tool_bt(layout=row, cmd=3, w=2.4, h=1.4, text=False, icon='LARGE')
             tool_bt(layout=row, cmd=4, w=2.4, h=1.4, text=False, icon='LARGE')
             tool_bt(layout=row, cmd=5, w=2.4, h=1.4, text=False, icon='LARGE')
+            tool_bt(layout=row, cmd=6, w=2.4, h=1.4, text=False, icon='LARGE')
             row.separator()
-            tool_bt(layout=row, cmd=6, w=1.2, h=1, text=False, icon='IPO_LINEAR')
-            tool_bt(layout=row, cmd=7, w=1.2, h=1, text=False, icon='IPO_CONSTANT')
-            tool_bt(layout=row, cmd=8, w=1.2, h=1, text=False, icon='IPO_EASE_OUT')
-            tool_bt(layout=row, cmd=9, w=1.2, h=1, text=False, icon='IPO_EASE_IN_OUT')
-            tool_bt(layout=row, cmd=10, w=1.2, h=1, text=False, icon='MESH_PLANE')
-            tool_bt(layout=row, cmd=11, w=1.2, h=1, text=False, icon='MESH_CIRCLE')
+            tool_bt(layout=row, cmd=7, w=1.2, h=1, text=False, icon='IPO_LINEAR')
+            tool_bt(layout=row, cmd=8, w=1.2, h=1, text=False, icon='IPO_CONSTANT')
+            tool_bt(layout=row, cmd=9, w=1.2, h=1, text=False, icon='IPO_EASE_OUT')
+            tool_bt(layout=row, cmd=10, w=1.2, h=1, text=False, icon='IPO_EASE_IN_OUT')
+            tool_bt(layout=row, cmd=11, w=1.2, h=1, text=False, icon='MESH_PLANE')
+            tool_bt(layout=row, cmd=12, w=1.2, h=1, text=False, icon='MESH_CIRCLE')
             row.separator()
 
             # smoothstroke:
@@ -1046,16 +1046,16 @@ class XPanel(bpy.types.Panel):
             row.alignment = 'CENTER'
 
             # toolset:
-            tool_bt(layout=row, cmd=5, w=1.4, h=1, text=False, icon='CUSTOM')
             tool_bt(layout=row, cmd=6, w=1.4, h=1, text=False, icon='CUSTOM')
             tool_bt(layout=row, cmd=7, w=1.4, h=1, text=False, icon='CUSTOM')
             tool_bt(layout=row, cmd=8, w=1.4, h=1, text=False, icon='CUSTOM')
+            tool_bt(layout=row, cmd=9, w=1.4, h=1, text=False, icon='CUSTOM')
             row.separator(factor = 2)
-            tool_bt(layout=row, cmd=0, w=1.4, h=1, text=False, icon='CUSTOM')
             tool_bt(layout=row, cmd=1, w=1.4, h=1, text=False, icon='CUSTOM')
             tool_bt(layout=row, cmd=2, w=1.4, h=1, text=False, icon='CUSTOM')
             tool_bt(layout=row, cmd=3, w=1.4, h=1, text=False, icon='CUSTOM')
             tool_bt(layout=row, cmd=4, w=1.4, h=1, text=False, icon='CUSTOM')
+            tool_bt(layout=row, cmd=5, w=1.4, h=1, text=False, icon='CUSTOM')
             row.separator(factor = 2)
 
             # toolsettings
@@ -1067,16 +1067,16 @@ class XPanel(bpy.types.Panel):
 
             # functions
             col = row.column(align=True)
-            tool_bt(layout=col, cmd=9, w=2, h=0.7, text=True, icon='OFF')
             tool_bt(layout=col, cmd=10, w=2, h=0.7, text=True, icon='OFF')
-            col = row.column(align=True)
             tool_bt(layout=col, cmd=11, w=2, h=0.7, text=True, icon='OFF')
-            tool_bt(layout=col, cmd=12, w=2, h=0.7, text=True, icon='OFF')
             col = row.column(align=True)
+            tool_bt(layout=col, cmd=12, w=2, h=0.7, text=True, icon='OFF')
             tool_bt(layout=col, cmd=13, w=2, h=0.7, text=True, icon='OFF')
             col = row.column(align=True)
             tool_bt(layout=col, cmd=14, w=2, h=0.7, text=True, icon='OFF')
+            col = row.column(align=True)
             tool_bt(layout=col, cmd=15, w=2, h=0.7, text=True, icon='OFF')
+            tool_bt(layout=col, cmd=16, w=2, h=0.7, text=True, icon='OFF')
 
     #TOP-RIGHT-----------------------------------------------------------------------------
 
@@ -1108,16 +1108,16 @@ class XPanel(bpy.types.Panel):
             row = top_mid.row(align=True)
 
             # toolset:
-            tool_bt(layout=row, cmd=4, w=2.2, h=1.4, text=False, icon='LARGE')
             tool_bt(layout=row, cmd=5, w=2.2, h=1.4, text=False, icon='LARGE')
             tool_bt(layout=row, cmd=6, w=2.2, h=1.4, text=False, icon='LARGE')
             tool_bt(layout=row, cmd=7, w=2.2, h=1.4, text=False, icon='LARGE')
             tool_bt(layout=row, cmd=8, w=2.2, h=1.4, text=False, icon='LARGE')
+            tool_bt(layout=row, cmd=9, w=2.2, h=1.4, text=False, icon='LARGE')
             row.separator(factor=1)
-            tool_bt(layout=row, cmd=1, w=2.8, h=1, text=False, icon='OFF')
             tool_bt(layout=row, cmd=2, w=2.8, h=1, text=False, icon='OFF')
-            tool_bt(layout=row, cmd=0, w=2.8, h=1, text=False, icon='OFF')
             tool_bt(layout=row, cmd=3, w=2.8, h=1, text=False, icon='OFF')
+            tool_bt(layout=row, cmd=1, w=2.8, h=1, text=False, icon='OFF')
+            tool_bt(layout=row, cmd=4, w=2.8, h=1, text=False, icon='OFF')
             row.separator(factor=1)
 
             # falloff:
@@ -1170,7 +1170,7 @@ class XPanel(bpy.types.Panel):
             row = top_mid.row(align=True)
 
             # toolset:
-            tool_bt(layout=row, cmd=0, w=2.2, h=1.4, text=False, icon='LARGE')
+            tool_bt(layout=row, cmd=1, w=2.2, h=1.4, text=False, icon='LARGE')
 
     #TOP-RIGHT-------------------------------------------------------------------------------
 

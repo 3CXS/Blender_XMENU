@@ -147,7 +147,19 @@ def draw(self, context):
         brush = context.tool_settings.sculpt.brush
         ColorHud(self, context, layout=mid)
         PaintHud(mid, brush, self, context)
-        mid.separator(factor = 4)
+        mid.separator(factor = 2)
+
+        sub = mid.row(align=True)
+        sub.ui_units_x = 2.5
+        sub.operator("sculpt.dynamic_topology_toggle",
+            depress=True if context.sculpt_object.use_dynamic_topology_sculpting else False,
+            text="DYNA",emboss=True,)
+
+        sub = mid.row(align=True)
+        sub.ui_units_x = 2.5
+        sub.operator('object.voxel_remesh', text="RMESH")
+        mid.separator(factor = 2)
+
         sub = mid.row()
         sub.ui_units_x = 4
         sub.menu_contents("VIEW3D_MT_sym")

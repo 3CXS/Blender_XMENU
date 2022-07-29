@@ -12,7 +12,7 @@ from bpy.types import Operator, AddonPreferences
 from mathutils import Vector, Matrix 
 
 from .functions import redraw_regions, update_toolset
-from .floaters import get_mouse_position, screensize
+from .floaters import get_mouse_position, screensize, detect_click
 from .toolsets import toolset
 
 
@@ -26,89 +26,198 @@ shader_2 = from_builtin('2D_FLAT_COLOR')
 shader_3 = from_builtin('2D_SMOOTH_COLOR')
 
 
-# DRAW ----------------------------------------------------------------------------------------------
+#-- MODAL -----------------------------------------------------------------------------------------
 
-def draw_callback(self, context, menu_pos, mouse_pos, offset):
+class ToolHUD(bpy.types.Operator):
+    bl_idname = "xm.toolhud"
+    bl_label = "HUD"
 
-    context = bpy.context
+    bpy.types.WindowManager.toolhud_state = bpy.props.BoolProperty(default = False)
+    bpy.types.WindowManager.leftclick = bpy.props.BoolProperty(default = False)
+    bpy.types.WindowManager.menu_move = bpy.props.BoolProperty(default = False)
 
-    font_id = 0
+    bpy.types.WindowManager.menu_pos = bpy.props.IntVectorProperty(size=2)
+    bpy.types.WindowManager.offset_pos = bpy.props.IntVectorProperty(size=2)
 
-    mouse_x = mouse_pos[0]
-    mouse_y = mouse_pos[1]
+    left: bpy.props.IntProperty()
+    right: bpy.props.IntProperty()
+    top: bpy.props.IntProperty()
+    bottom: bpy.props.IntProperty()
 
-    menu_x = menu_pos[0]
-    menu_y = menu_pos[1]
+    def modal(self, context, event):
 
-    if bpy.types.WindowManager.menu_move == True:
+        mouse_pos = rel_mouse()
+        mouse_x = mouse_pos[0]
+        mouse_y = mouse_pos[1]
 
-        menu_pos = mouse_x , mouse_y
+        menu_pos = bpy.types.WindowManager.menu_pos
         menu_x = menu_pos[0]
         menu_y = menu_pos[1]
 
+        self.left = menu_x
+        self.right = self.left + 220
+        self.top = menu_y
+        self.bottom = self.top - 240
+
+        if bpy.types.WindowManager.toolhud_state == True:
+
+            if mouse_x > self.left and mouse_x < self.right and mouse_y < self.top and mouse_y > self.bottom :
+
+                return {'RUNNING_MODAL'}
+
+            else:
+                return {'PASS_THROUGH'}
+
+        else:
+            self.report({'INFO'}, "MODAL OFF")
+            return {'FINISHED'}
+
+
+    def invoke(self, context, event):
+
+        mouse_pos = get_mouse_position()
+        mouse_x = mouse_pos[0]
+        mouse_y = screensize[1] - mouse_pos[1]
+
+        menu_x = event.mouse_region_x
+        menu_y = event.mouse_region_y
+        bpy.types.WindowManager.menu_pos = menu_x, menu_y
+
+        offset_x = mouse_x - menu_x
+        offset_y = mouse_y - menu_y
+        bpy.types.WindowManager.offset_pos = offset_x, offset_y
+
+        self.execute(context)
+        context.window_manager.modal_handler_add(self)
+        self.report({'INFO'}, "MODAL ON")
+        return {'RUNNING_MODAL'}
+
+    def execute(self, context):
+        handler = bpy.app.driver_namespace.get('draw')
+
+        if bpy.types.WindowManager.toolhud_state == False:
+            bpy.types.WindowManager.toolhud_state = True
+            #self.report({'INFO'}, "Offset  %d %d" % (bpy.types.WindowManager.offset_pos[0], bpy.types.WindowManager.offset_pos[1]))
+            self.report({'INFO'}, "MENU ON")
+            handler = bpy.types.SpaceView3D.draw_handler_add(
+                draw_callback, (None, None,), 'WINDOW', 'POST_PIXEL')
+            dns = bpy.app.driver_namespace
+            dns['draw'] = handler
+
+        else:
+            bpy.types.WindowManager.toolhud_state = False
+            self.report({'INFO'}, "MENU OFF")
+            remove_draw()
+
+        redraw_regions()
+
+        return {'FINISHED'}
+
+# DRAW ----------------------------------------------------------------------------------------------
+
+def draw_callback(self, context):
+
+    context = bpy.context
+    font_id = 0
+    bpy.types.WindowManager.leftclick = detect_click(button='LEFT', watchtime = 5)
+    menu_pos = bpy.types.WindowManager.menu_pos
+    menu_x = menu_pos[0]
+    menu_y = menu_pos[1]
+    mouse_pos = rel_mouse()
+    mouse_x = mouse_pos[0]
+    mouse_y = mouse_pos[1]
+
+    left = menu_x
+    right = left + 220
+    top = menu_y
+    bottom = top - 240
+
+    if mouse_x > left and mouse_x < left+20 and mouse_y < top and mouse_y > top-12 :
+        if bpy.types.WindowManager.leftclick == True:
+            menu_pos = mouse_x , mouse_y
+            print('move')
+
+
+
+
+
+    #print({'INFO'}, "Offset  %d %d" % (mouse_pos[0], mouse_pos[1]))
+
+    #menu_pos = mouse_pos[0] ,mouse_pos[1]
 
     # menu move
-    Draw_Text(2, 2, '>>', 12, font_id=0, color=[1, 1, 1, 1], menu_pos=menu_pos)
-
+    Draw_Text(0, 0, '>>', 12, font_id=0, color=[1, 1, 1, 1], menu_pos=menu_pos)
+    #Rectangle(0, 0, 20, 12, [0.2, 0.5, 0.8, 1.0], menu_pos=menu_pos)
     # menu bg
-    #Rectangle(0, 0, 220, 210, [0.2, 0.2, 0.2, 0.8], menu_pos=menu_pos)
-
+    Rectangle(0, 0, 220, 300, [0.5, 0.7, 1, 0.75], menu_pos=menu_pos)
+    #Rectangle_Border(menu_x, menu_y-200, 140, 200, [0.6, 0.6, 0.6, 1])
 
     # MENU ---------------------------------------------------------------------------------
 
     if context.mode == 'SCULPT':
-        # mask
-        bpy.ops.xm.button(x=5, y=20, w=30, h=30, text='', icon='icon_05', tool=14, corner='left', menu_pos=menu_pos, mouse_pos=mouse_pos)
-
-        bpy.ops.xm.button(x=36, y=20, w=23, h=30, text='', icon='icon_05', tool=28, corner='none', menu_pos=menu_pos, mouse_pos=mouse_pos)
-        bpy.ops.xm.button(x=60, y=20, w=23, h=30, text='', icon='icon_05', tool=29, corner='none', menu_pos=menu_pos, mouse_pos=mouse_pos)
-        bpy.ops.xm.button(x=84, y=20, w=23, h=30, text='', icon='icon_05', tool=30, corner='right', menu_pos=menu_pos, mouse_pos=mouse_pos)
-
-        # faceset
-        bpy.ops.xm.button(x=112, y=20, w=30, h=30, text='', icon='icon_05', tool=15, corner='left', menu_pos=menu_pos, mouse_pos=mouse_pos)
-
-        bpy.ops.xm.button(x=143, y=20, w=22, h=16, text='', icon='icon_05', tool=31, corner='none', menu_pos=menu_pos, mouse_pos=mouse_pos)
-        bpy.ops.xm.button(x=166, y=20, w=22, h=16, text='', icon='icon_05', tool=32, corner='topright', menu_pos=menu_pos, mouse_pos=mouse_pos)
-
-        bpy.ops.xm.button(x=143, y=37, w=45, h=13, text='EDIT', tool=33, corner='bottomright', menu_pos=menu_pos, mouse_pos=mouse_pos)
-
-        bpy.ops.xm.button(x=190, y=20, w=24, h=30, text='', icon='icon_05', tool=16, corner='all', menu_pos=menu_pos, mouse_pos=mouse_pos)
-
         # transform
-        bpy.ops.xm.button(x=5, y=56, w=50, h=14, text='PVT M', icon='', op='sculpt.set_pivot_position', cmd="mode='UNMASKED'", corner='topleft', menu_pos=menu_pos, mouse_pos=mouse_pos)
-        bpy.ops.xm.button(x=5, y=72, w=50, h=14 , text='RESET', icon='', op='sculpt.set_pivot_position', cmd="mode='ORIGIN'", corner='bottomleft', menu_pos=menu_pos, mouse_pos=mouse_pos)
-        bpy.ops.xm.button(x=56, y=56, w=50, h=30, text='', icon='icon_01', tool=19, corner='right', menu_pos=menu_pos, mouse_pos=mouse_pos)
+        bpy.ops.xm.button(x=5, y=30, w=50, h=14, text='PVT M', icon='', op='sculpt.set_pivot_position', cmd="mode='UNMASKED'", corner='topleft')
+        bpy.ops.xm.button(x=5, y=46, w=50, h=14 , text='RESET', icon='', op='sculpt.set_pivot_position', cmd="mode='ORIGIN'", corner='bottomleft')
+        bpy.ops.xm.button(x=56, y=30, w=50, h=30, text='', icon='icon_01', tool=19, corner='right')
 
         # grab
-        bpy.ops.xm.button(x=112, y=56, w=40, h=30, text='', icon='icon_03', tool=1, corner='left', menu_pos=menu_pos, mouse_pos=mouse_pos)
-        bpy.ops.xm.button(x=153, y=56, w=30, h=30, text='', icon='icon_03', tool=20, corner='none', menu_pos=menu_pos, mouse_pos=mouse_pos)
-        bpy.ops.xm.button(x=184, y=56, w=30, h=30, text='', icon='icon_03', tool=22, corner='right', menu_pos=menu_pos, mouse_pos=mouse_pos)
+        bpy.ops.xm.button(x=112, y=30, w=40, h=30, text='', icon='icon_03', tool=1, corner='left')
+        bpy.ops.xm.button(x=153, y=30, w=30, h=30, text='', icon='icon_03', tool=20, corner='none')
+        bpy.ops.xm.button(x=184, y=30, w=30, h=30, text='', icon='icon_03', tool=22, corner='right')
 
         # clay
-        bpy.ops.xm.button(x=5, y=92, w=50, h=30, text='', icon='icon_02', tool=2, corner='topleft', menu_pos=menu_pos, mouse_pos=mouse_pos)
-        bpy.ops.xm.button(x=56, y=92, w=50, h=30, text='', icon='icon_02', tool=3, corner='none', menu_pos=menu_pos, mouse_pos=mouse_pos)
-        bpy.ops.xm.button(x=107, y=92, w=50, h=30, text='', icon='icon_02', tool=4, corner='topright', menu_pos=menu_pos, mouse_pos=mouse_pos)
+        bpy.ops.xm.button(x=5, y=71, w=50, h=30, text='', icon='icon_02', tool=2, corner='topleft')
+        bpy.ops.xm.button(x=56, y=71, w=50, h=30, text='', icon='icon_02', tool=3, corner='none')
+        bpy.ops.xm.button(x=107, y=71, w=50, h=30, text='', icon='icon_02', tool=4, corner='topright')
 
         # crease
-        bpy.ops.xm.button(x=164, y=92, w=50, h=30, text='', icon='icon_02', tool=8, corner='top', menu_pos=menu_pos, mouse_pos=mouse_pos)
+        bpy.ops.xm.button(x=164, y=71, w=50, h=30, text='', icon='icon_02', tool=8, corner='top')
 
         # clay
-        bpy.ops.xm.button(x=5, y=123, w=50, h=30, text='', icon='icon_02', tool=5, corner='bottomleft', menu_pos=menu_pos, mouse_pos=mouse_pos)
-        bpy.ops.xm.button(x=56, y=123, w=50, h=30, text='', icon='icon_02', tool=6, corner='none', menu_pos=menu_pos, mouse_pos=mouse_pos)
-        bpy.ops.xm.button(x=107, y=123, w=50, h=30, text='', icon='icon_02', tool=7, corner='bottomright', menu_pos=menu_pos, mouse_pos=mouse_pos)
+        bpy.ops.xm.button(x=5, y=102, w=50, h=30, text='', icon='icon_02', tool=5, corner='bottomleft')
+        bpy.ops.xm.button(x=56, y=102, w=50, h=30, text='', icon='icon_02', tool=6, corner='none')
+        bpy.ops.xm.button(x=107, y=102, w=50, h=30, text='', icon='icon_02', tool=7, corner='bottomright')
 
         # pinch
-        bpy.ops.xm.button(x=164, y=123, w=50, h=30, text='', icon='icon_03', tool=9, corner='bottom', menu_pos=menu_pos, mouse_pos=mouse_pos)
+        bpy.ops.xm.button(x=164, y=102, w=50, h=30, text='', icon='icon_03', tool=9, corner='bottom')
 
         # polish
-        bpy.ops.xm.button(x=5, y=159, w=50, h=30, text='', icon='icon_04', tool=10, corner='left', menu_pos=menu_pos, mouse_pos=mouse_pos)
-        bpy.ops.xm.button(x=56, y=159, w=50, h=30, text='', icon='icon_04', tool=11, corner='none', menu_pos=menu_pos, mouse_pos=mouse_pos)
-        bpy.ops.xm.button(x=107, y=159, w=50, h=30, text='', icon='icon_04', tool=12, corner='right', menu_pos=menu_pos, mouse_pos=mouse_pos)
+        bpy.ops.xm.button(x=5, y=141, w=50, h=30, text='', icon='icon_04', tool=10, corner='left')
+        bpy.ops.xm.button(x=56, y=141, w=50, h=30, text='', icon='icon_04', tool=11, corner='none')
+        bpy.ops.xm.button(x=107, y=141, w=50, h=30, text='', icon='icon_04', tool=12, corner='right')
 
         # smooth
-        bpy.ops.xm.button(x=164, y=159, w=50, h=30, text='', icon='icon_04', tool=13, corner='all', menu_pos=menu_pos, mouse_pos=mouse_pos)
+        bpy.ops.xm.button(x=164, y=141, w=50, h=30, text='', icon='icon_04', tool=13, corner='all')
 
         # functions
+        #bpy.ops.xm.button(x=5, y=200, w=60, h=16, text='DYNA', icon='', op='sculpt.dynamic_topology_toggle', corner='all')
+        #bpy.ops.xm.button(x=80, y=200, w=60, h=16, text='REMESH', icon='', op='object.voxel_remesh', corner='all')
+        #bpy.ops.xm.button(x=140, y=200, w=60, h=16, text='XX', icon='', op='paint.mask_flood_fill', cmd="mode='INVERT'", corner='all')
+
+
+    redraw_regions()
+#bpy.ops.paint.mask_flood_fill(mode='INVERT')
+#bpy.ops.sculpt.face_sets_init(mode='LOOSE_PARTS')
+#bpy.ops.sculpt.dynamic_topology_toggle()
+#bpy.ops.sculpt.face_sets_create(mode='SELECTION')
+
+def rel_mouse():
+
+    menu_pos = bpy.types.WindowManager.menu_pos
+    menu_x = menu_pos[0]
+    menu_y = menu_pos[1]
+
+    abs_pos = get_mouse_position()
+    abs_x = abs_pos[0]
+    abs_y = screensize[1] - abs_pos[1]
+
+    offset_pos = bpy.types.WindowManager.offset_pos
+    offset_x = offset_pos[0]
+    offset_y = offset_pos[1]
+
+    mouse_pos = abs_x - offset_x, abs_y - offset_y
+    #print({'INFO'}, "Offset  %d %d" % (mouse_pos[0], mouse_pos[1]))
+    return mouse_pos
 
 # UI FUNCTIONS ---------------------------------------------------------------------------------------
 
@@ -117,14 +226,12 @@ class Button(bpy.types.Operator):
     bl_label = "Button"
     #bl_options = {'REGISTER'}
 
+    item_pos: bpy.props.IntVectorProperty(size=2)
+
     x: bpy.props.IntProperty()
     y: bpy.props.IntProperty()
     w: bpy.props.IntProperty()
     h: bpy.props.IntProperty()
-
-    menu_pos: bpy.props.IntVectorProperty(size=2)
-    mouse_pos: bpy.props.IntVectorProperty(size=2)
-    item_pos: bpy.props.IntVectorProperty(size=2)
 
     text: bpy.props.StringProperty()
     icon: bpy.props.StringProperty()
@@ -142,17 +249,20 @@ class Button(bpy.types.Operator):
 
         context = bpy.context
 
-        menu_x = self.menu_pos[0]
-        menu_y = self.menu_pos[1]
+        mouse_pos = rel_mouse()
+        mouse_x = mouse_pos[0]
+        mouse_y = mouse_pos[1]
 
-        mouse_x = self.mouse_pos[0]
-        mouse_y = self.mouse_pos[1]
+        menu_pos = bpy.types.WindowManager.menu_pos
+        menu_x = menu_pos[0]
+        menu_y = menu_pos[1]
 
 
-        left = self.menu_pos[0] + self.x 
-        right = self.menu_pos[0] + self.x  + self.w
-        top =  self.menu_pos[1] - self.y 
-        bottom = self.menu_pos[1] - self.y - self.h
+
+        left = menu_x + self.x 
+        right = menu_x + self.x  + self.w
+        top =  menu_y - self.y 
+        bottom = menu_y - self.y - self.h
 
         pos = left, bottom
         center = left + self.w/2, top - self.h/2,
@@ -167,7 +277,8 @@ class Button(bpy.types.Operator):
             Tool = Tools[self.tool][1]
 
             if self.is_hovered == True:
-                if bpy.types.WindowManager.leftclick == True:
+                click = detect_click(button='LEFT', watchtime = 5)
+                if click == True:
 
                     bpy.ops.wm.tool_set_by_id(name=Tool)
                     #update_toolset()
@@ -178,7 +289,8 @@ class Button(bpy.types.Operator):
 
         if self.op:
             if self.is_hovered == True:
-                if bpy.types.WindowManager.leftclick == True:
+                click = detect_click(button='LEFT', watchtime = 5)
+                if click == True:
 
                     operator = 'bpy.ops.'
                     operator += self.op
@@ -190,18 +302,18 @@ class Button(bpy.types.Operator):
                     eval(operator)
 
         if self.bt_state == True:
-            Rectangle(self.x, self.y, self.w, self.h, [0.2, 0.5, 0.8, 1.0], corner=self.corner, menu_pos=self.menu_pos)
+            Rectangle(self.x, self.y, self.w, self.h, [0.2, 0.5, 0.8, 1.0], corner=self.corner, menu_pos=menu_pos)
         else:
-            Rectangle(self.x, self.y, self.w, self.h, [0.35, 0.35, 0.35, 1.0], corner=self.corner, menu_pos=self.menu_pos)
+            Rectangle(self.x, self.y, self.w, self.h, [0.35, 0.35, 0.35, 1.0], corner=self.corner, menu_pos=menu_pos)
 
         if self.text != '':
-            Draw_Text(self.x, self.y, self.text, 12, font_id=0, color=[0.9, 0.9, 0.9, 1], menu_pos=self.menu_pos)
+            Draw_Text(self.x, self.y, self.text, 12, font_id=0, color=[0.9, 0.9, 0.9, 1], menu_pos=menu_pos)
 
         if self.icon != '':
             draw_icon(icon=self.icon, item_pos=center)
 
         if self.is_hovered == True:
-            Rectangle(self.x, self.y, self.w, self.h, [1, 1, 1, 0.1], corner=self.corner, menu_pos=self.menu_pos)
+            Rectangle(self.x, self.y, self.w, self.h, [1, 1, 1, 0.1], corner=self.corner, menu_pos=menu_pos)
 
         redraw_regions()
 
@@ -215,7 +327,7 @@ class Button(bpy.types.Operator):
 
 def Draw_Text(x, y, text, size, font_id=0, color=[1, 1, 1, 1], menu_pos=[0, 0]):
 
-    left = menu_pos[0]  + x + 4
+    left = menu_pos[0] + x + 4
     top = menu_pos[1] - y + 1
 
     blf.color(font_id, color[0], color[1], color[2], color[3])
@@ -482,117 +594,12 @@ def icon_04(color=(1, 0.5, 0.4, 1), shader=shader_1, item_pos=[0, 0]):
     batch = batch_for_shader(shader, 'LINES', {"pos": coords})
     batch.draw(shader)
 
-def icon_05(color=(0.4, 0.4, 0.4, 1), shader=shader_1, item_pos=[0, 0]):
-
-    x = item_pos[0]
-    y = item_pos[1]
-
-    pos = x,y
-
-    draw_circle_2d(pos, color, 8, segments=7)
-    coords=[(x, y), (x+10, y+5)]
-
-    shader.bind()
-    shader.uniform_float("color", color)
-    batch = batch_for_shader(shader, 'LINES', {"pos": coords})
-    batch.draw(shader)
 
 
 
 #-- MODAL -----------------------------------------------------------------------------------------
 
-class ToolHUD(bpy.types.Operator):
-    bl_idname = "xm.toolhud"
-    bl_label = "HUD"
 
-    bpy.types.WindowManager.toolhud_state = bpy.props.BoolProperty(default = False)
-    bpy.types.WindowManager.leftclick = bpy.props.BoolProperty(default = False)
-    bpy.types.WindowManager.menu_move = bpy.props.BoolProperty(default = False)
-
-    mouse_pos: bpy.props.IntVectorProperty(size=2)
-    menu_pos: bpy.props.IntVectorProperty(size=2)
-    offset: bpy.props.IntVectorProperty(size=2)
-
-    left: bpy.props.IntProperty()
-    right: bpy.props.IntProperty()
-    top: bpy.props.IntProperty()
-    bottom: bpy.props.IntProperty()
-
-    def modal(self, context, event):
-
-        self.mouse_pos = event.mouse_region_x, event.mouse_region_y
-
-        mouse_x = self.mouse_pos[0]
-        mouse_y = self.mouse_pos[1]
-
-        menu_x = self.menu_pos[0]
-        menu_y = self.menu_pos[1]
-
-        self.left = menu_x
-        self.right = self.left + 210
-        self.top = menu_y
-        self.bottom = self.top - 210
-
-        if bpy.types.WindowManager.toolhud_state == True:
-            if mouse_x > self.left and mouse_x < self.right and mouse_y < self.top and mouse_y > self.bottom :
-                if event.type == 'LEFTMOUSE':
-                    if event.value == 'PRESS':
-                        bpy.types.WindowManager.leftclick = True
-                        if mouse_x > self.left+2 and mouse_x < self.left+20 and mouse_y < self.top and mouse_y > self.top-12 :
-                            bpy.types.WindowManager.menu_move = True
-                            self.offset = mouse_x - menu_x, mouse_y - menu_y
-
-                    elif event.value == 'RELEASE':
-                        bpy.types.WindowManager.leftclick = False
-                        if bpy.types.WindowManager.menu_move == True:
-                            bpy.types.WindowManager.menu_move = False
-
-                return {'RUNNING_MODAL'}
-
-            elif bpy.types.WindowManager.menu_move == True:
-                if event.type == 'LEFTMOUSE':
-                    if event.value == 'RELEASE':
-                        self.menu_pos = self.mouse_pos
-                        bpy.types.WindowManager.menu_move = False
-
-                return {'RUNNING_MODAL'} 
-
-            else:
-                return {'PASS_THROUGH'}
-        else:
-            self.report({'INFO'}, "MODAL OFF")
-            return {'FINISHED'}
-
-    def invoke(self, context, event):
-
-        self.menu_pos = event.mouse_x, event.mouse_y - 100
-
-        self.execute(context)
-        context.window_manager.modal_handler_add(self)
-        self.report({'INFO'}, "MODAL ON")
-        return {'RUNNING_MODAL'}
-
-    def execute(self, context):
-
-        handler = bpy.app.driver_namespace.get('draw')
-
-
-        if bpy.types.WindowManager.toolhud_state == False:
-            bpy.types.WindowManager.toolhud_state = True
-
-            handler = bpy.types.SpaceView3D.draw_handler_add(
-                draw_callback, (None, None, self.menu_pos, self.mouse_pos, self.offset), 'WINDOW', 'POST_PIXEL')
-
-            dns = bpy.app.driver_namespace
-            dns['draw'] = handler
-
-        else:
-            bpy.types.WindowManager.toolhud_state = False
-            remove_draw()
-
-        redraw_regions()
-
-        return {'FINISHED'}
 
 def remove_draw():
     handler = bpy.app.driver_namespace.get('draw')

@@ -1839,6 +1839,8 @@ class VIEW3D_MT_remesh(bpy.types.Menu):
         col = layout.column(align=True)
         col.ui_units_x = 6
 
+        col.operator("object.voxel_remesh", text="REMESH")
+
         row = col.row(align=True)
         row.prop(mesh, "remesh_voxel_size", text="")
         op = row.operator("sculpt.sample_detail_size", text="", icon='EYEDROPPER')
@@ -1881,7 +1883,6 @@ class VIEW3D_MT_remesh(bpy.types.Menu):
         if context.preferences.experimental.use_sculpt_vertex_colors:
             grid.prop(mesh, "use_remesh_preserve_vertex_colors", text="VertCol", toggle=True)
         '''
-        col.operator("object.voxel_remesh", text="REMESH")
 
 
 #GP ----------------------------------------------------------------------------------------------

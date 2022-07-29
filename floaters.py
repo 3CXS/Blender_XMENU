@@ -1,25 +1,21 @@
 import bpy
 import os, platform
 
-
 from mathutils import Vector
-from time import sleep
-
+import time
 from bpy.types import AddonPreferences
 
-#Ctypes/Win32 globals
+
+#Ctypes-------------------------------------------------------------------
+#https://docs.microsoft.com/en-us/windows/win32/api/winuser/
+
+#globals
 active_process_id = os.getpid()
 
 import ctypes 
 from ctypes import wintypes
 from ctypes import byref
 from ctypes import c_int, c_double, c_byte, c_char_p, c_long, Structure
-
-#https://docs.microsoft.com/en-us/windows/win32/api/winuser/
-
-#-----------------------------------------------------------------------------------------------------------------------
-
-#RGB window class also known as COLORREF DWORD
 
 def RGB(r, g, b):
     r = r & 0xFF
@@ -30,24 +26,20 @@ def RGB(r, g, b):
 class POINT(Structure):
     _fields_ = [("x", c_long), ("y", c_long)]
 
-#User32
 
 user32 = ctypes.WinDLL('user32', use_last_error=True)
 screensize = user32.GetSystemMetrics(0), user32.GetSystemMetrics(1)
 
-#Function
 
 if not hasattr(wintypes, 'LPDWORD'): # PY2
     wintypes.LPDWORD = ctypes.POINTER(wintypes.DWORD)
  
-
 WNDENUMPROC = ctypes.WINFUNCTYPE(
     wintypes.BOOL,
     wintypes.HWND,
     wintypes.LPARAM,)
 
-#Flags
-
+#flags
 NULL            = 0x05
 SWP_NOSIZE      = 0x0001
 SWP_NOMOVE      = 0x0002
@@ -60,7 +52,8 @@ LWA_COLORKEY    = 0x00000001
 SW_MINIMIZE     = 6
 SW_RESTORE      = 9
 SW_HIDE         = 0
-#-----------------------------------------------------------------------------------------------------------------------
+
+#funcctions---------------------------------------------------------------------------------------------------------------
 
 def get_mouse_position():
     pos = POINT()
@@ -68,72 +61,31 @@ def get_mouse_position():
 
     return pos.x , pos.y
 
+
+def detect_click(button, watchtime = 5):
+    '''Waits watchtime seconds. Returns True on click, False otherwise'''
+    if button in (1, '1', 'l', 'L', 'left', 'Left', 'LEFT'):
+        bnum = 0x01
+    elif button in (2, '2', 'r', 'R', 'right', 'Right', 'RIGHT'):
+        bnum = 0x02
+
+
+    while 1:
+        if ctypes.windll.user32.GetKeyState(bnum) not in [0, 1]:
+            # ^ this returns either 0 or 1 when button is not being held down
+            return True
+
+    return False
+
+
 def show_win(hWnd, show=True,):
     user32.ShowWindow(hWnd, SW_RESTORE if show else SW_HIDE)
     
     return None
 
-def is_win_visible(hWnd):
-    """check if window is visible"""
-    
-    return user32.IsWindowVisible(hWnd)
-
-
-#Windows Managers
-
 def get_active_win():
 
     return user32.GetActiveWindow()
-
-def get_all_computer_win(filter_process_id=None):
-
-    handles = []
-    
-    def fct(hWnd, lParam):
-        if filter_process_id is None:
-            handles.append(hWnd)
-        else:
-             if get_win_process_id(hWnd,) == filter_process_id:
-                 handles.append(hWnd)
-        return True
-         
-    cb_worker = WNDENUMPROC(fct)
-    user32.EnumWindows(cb_worker, 0)
-    
-    return handles
-
-def get_blender_win():
-   
-    blender_wins = [ hWnd for hWnd in get_all_computer_win(filter_process_id=active_process_id) if is_win_visible(hWnd) and not get_win_text(hWnd,).startswith("blender.exe")] 
-      
-    return blender_wins
-
-
-def get_blender_console():
-
-    return [ hWnd for hWnd in get_all_computer_win(filter_process_id=active_process_id) if get_win_text(hWnd,).startswith("blender.exe")][0]
-
-def get_all_process_info():
-    """return dict of key pid and value process name"""
-
-    proc = os.popen('wmic process get description, processid').read()
-    proc = proc.split()
-    proc = { int(proc[i]) : proc[i-1] for i,e in enumerate(proc) if e.isdigit() }
-    
-    return proc
- 
- 
-def get_win_process_id(hWnd,):
-    """get given window process id"""
-    
-    pid = wintypes.DWORD()
-    tid = user32.GetWindowThreadProcessId(hWnd, byref(pid))
-    
-    return pid.value
-
-
-#Window Text
-
 
 def set_win_text(hWnd, text,): #Well, it's useless, on each save status the title will update with asterix char
     """give the given window a title"""
@@ -142,29 +94,6 @@ def set_win_text(hWnd, text,): #Well, it's useless, on each save status the titl
     #user32.SetWindowLongA(hWnd, GWL_EXSTYLE, 0 )
     
     return None
-
-
-def get_win_text(hWnd,):
-    """get given window title"""
-
-    length = user32.GetWindowTextLengthW(hWnd) + 1
-    buffer = ctypes.create_unicode_buffer(length)
-    user32.GetWindowTextW(hWnd, buffer, length)
-
-    return buffer.value
-
-#Close
-def shut_window(hWnd):
-    bpy.ops.wm.window_close()
-    return None
-
-def close_win(hWnd,):   
-    #user32.CloseWindow(hWnd,)
-    user32.DestroyWindow(hWnd,)
-    return None 
-
-
-#Transforms 
 
 def set_win_transforms(hWnd, location=(0,0), size=(500,500), ):
 
@@ -188,12 +117,6 @@ def set_win_transforms(hWnd, location=(0,0), size=(500,500), ):
     user32.SetWindowPos(hWnd,0,X,Y,cx,cy,flags )
     
     return None
-
-
-def get_win_transforms(hWnd,):
-  
-    return tuple 
-
 
 def set_win_transparency(hWnd, percentage=50, ):
 
@@ -235,7 +158,6 @@ def gen_C_dict(context, window, area_type='VIEW_3D'):
         if area.type == area_type:
             for region in area.regions:
                 if region.type == 'WINDOW':
-                    #print("found region")
                     break
             for space in area.spaces:
                 if space.type == area_type:
