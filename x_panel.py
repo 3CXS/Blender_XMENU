@@ -224,9 +224,7 @@ class XPanel(bpy.types.Panel):
             sub.ui_units_x = 8
             ToolOptions(self, context, layout=sub)
 
-            empty = row.column()
-            empty.ui_units_x = 4
-            empty.separator()
+            insert_space(row, space=4)
 
             # annotate & measure:
             tool_bt(layout=row, cmd=10, w=1.2, h=1, text=False, icon='OUTLINER_DATA_GP_LAYER')
@@ -247,10 +245,7 @@ class XPanel(bpy.types.Panel):
             sub.ui_units_x = 4
             sub.menu_contents("OBJECT_MT_import_menu")
 
-            # empty:
-            empty = row.column(align=True)
-            empty.ui_units_x = 16
-            empty.separator()
+            insert_space(row, space=16)
 
     #MAIN-MID-------------------------------------------------------------------------------
 
@@ -264,9 +259,8 @@ class XPanel(bpy.types.Panel):
             subsub.scale_y = 1.2
             subsub.operator("xm.override", icon='ADD', text="").cmd='mesh.uv_texture_add'
             subsub.operator("xm.override", icon='REMOVE', text="").cmd='mesh.uv_texture_remove'
-            empty = subsub.column()
-            empty.ui_units_x = 3
-            empty.separator()
+
+            insert_space(subsub, space=3)
 
             subsub.operator("xm.override", text="NEW").cmd='material.new'
             subsub.menu("MATERIAL_MT_context_menu", text="",icon='DOWNARROW_HLT')
@@ -406,9 +400,7 @@ class XPanel(bpy.types.Panel):
             # normal shading:
             Normals(self, context, layout=row)
 
-            empty = row.column()
-            empty.ui_units_x = 6
-            empty.separator()
+            insert_space(row, space=6)
 
             # annotate & measure:
             tool_bt(layout=row, cmd=10, w=1.2, h=1, text=False, icon='OUTLINER_DATA_GP_LAYER')
@@ -419,8 +411,7 @@ class XPanel(bpy.types.Panel):
 
             row = main_leftrow.row()
 
-            empty = row.column()
-            empty.separator()
+            insert_space(row, space=1)
 
     #MAIN-MID-----------------------------------------------------------------------------
 
@@ -434,9 +425,8 @@ class XPanel(bpy.types.Panel):
             subsub.scale_y = 1.2
             subsub.operator("xm.override", icon='ADD', text="").cmd='mesh.uv_texture_add'
             subsub.operator("xm.override", icon='REMOVE', text="").cmd='mesh.uv_texture_remove'
-            empty = subsub.column()
-            empty.ui_units_x = 3
-            empty.separator()
+
+            insert_space(subsub, space=3)
 
             subsub.operator("xm.override", text="NEW").cmd='material.new'
             subsub.menu("MATERIAL_MT_context_menu", text="",icon='DOWNARROW_HLT')
@@ -627,9 +617,9 @@ class XPanel(bpy.types.Panel):
 
             # extra
             subsub = sub.row(align=True)
-            empty = subsub.column()
-            empty.ui_units_x = 3.5
-            empty.separator()
+
+            insert_space(subsub, space=3)
+
             tool_bt(layout=subsub, cmd=21, w=1.2, h=1, text=False, icon='CUSTOM')
             tool_bt(layout=subsub, cmd=26, w=1.2, h=1, text=False, icon='CUSTOM')
             tool_bt(layout=subsub, cmd=27, w=1.2, h=1, text=False, icon='CUSTOM')
@@ -793,8 +783,7 @@ class XPanel(bpy.types.Panel):
 
             row = top_right.row(align=True)
 
-            empty = row.column()
-            empty.separator()
+            insert_space(row, space=1)
 
 
 #PAINT_TEXTURE----------------------------------------------------------------------------------------
@@ -1082,8 +1071,7 @@ class XPanel(bpy.types.Panel):
 
             row = top_right.row(align=True)
 
-            empty = row.column()
-            empty.separator()
+            insert_space(row, space=1)
 
 
 
@@ -1138,8 +1126,7 @@ class XPanel(bpy.types.Panel):
 
             row = top_right.row(align=True)
 
-            empty = row.column()
-            empty.separator()
+            insert_space(row, space=1)
 
             '''
             elif tool_mode == 'WEIGHT_GPENCIL':
@@ -1163,8 +1150,7 @@ class XPanel(bpy.types.Panel):
 
             row = top_left.row(align=True)
 
-            empty = row.column()
-            empty.separator()
+            insert_space(row, space=1)
 
     #TOP-MID---------------------------------------------------------------------------------
             row = top_mid.row(align=True)
@@ -1176,8 +1162,7 @@ class XPanel(bpy.types.Panel):
 
             row = top_right.row(align=True)
 
-            empty = row.column()
-            empty.separator()
+            insert_space(row, space=1)
 
 
         redraw_regions()

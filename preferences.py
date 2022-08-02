@@ -102,18 +102,27 @@ class XPrefs(bpy.types.AddonPreferences):
     floater_10_pos  : bpy.props.FloatVectorProperty(name="Pos", size=2, default=(100,300),precision=0)
     floater_10_alpha: IntProperty(name="FLOAT ALPHA", default=70)
 
-    floater_11_name : bpy.props.StringProperty(default="11", name="Name",)
-    floater_11_type : bpy.props.StringProperty(default='PROPERTIES')
-    floater_11_size : bpy.props.FloatVectorProperty(name="Size", size=2, default=(300,500),precision=0)
-    #floater_11_pos  : bpy.props.FloatVectorProperty(name="Pos", size=2, default=(100,300),precision=0)
-    floater_11_alpha: IntProperty(name="FLOAT ALPHA", default=100)
+
+    key_00: StringProperty(default="TAB")
+    key_01: StringProperty(default="SPACE")
+    key_02: StringProperty(default="D")
+    key_03: StringProperty(default="A")
+    key_04: StringProperty(default="FOUR")
+    key_05: StringProperty(default="FIVE")
+    key_06: StringProperty(default="SIX")
+    key_07: StringProperty(default="SEVEN")
+    key_08: StringProperty(default="EIGHT")
+    key_09: StringProperty(default="NINE")
+    key_10: StringProperty(default="ZERO")
+
 
     floaters : bpy.props.EnumProperty(default="01",items=[("01","Outliner",""),("02","Properties",""),("03","Modifiers",""),("04","Shader",""),
                                                             ("05","UV",""),("06","Image",""),("07","GeoNode",""),("08","Cam",""),("09","BakeTree",""),
-                                                            ("10","Compositor",""), ("11","Tools","")])
+                                                            ("10","Compositor","")])
 
     hud_items : bpy.props.EnumProperty(default="01",items=[("01","MODE",""),("02","TOOL",""),("03","DATA","")])
-    prefs_tabs : EnumProperty(default='info', items=[('info', "Info", "INFO"),('options', "Options", "OPTIONS"),('floaters', "Floaters", "FLOATERS")])
+
+    prefs_tabs : EnumProperty(default='info', items=[('info', "Info", "INFO"),('options', "Options", "OPTIONS"),('floaters', "Floaters", "FLOATERS"), ('keymaps', "Keymaps", "KEYMAPS")])
 
 
     #MENU---------------------------------------------------------------------------------
@@ -196,13 +205,92 @@ class XPrefs(bpy.types.AddonPreferences):
             propcol.prop(self,f"floater_{istr}_alpha",)
             propcol.separator()
 
+        if self.prefs_tabs == 'keymaps':
+            col = layout.column()
+            col.label(text="KEYMAPS:")
+
+            sub = col.column()
+
+            slots = sub.column()
+            slots.scale_y = 1.2
+            slots.prop(self,"key_00", text='MODES PIE', expand=True)
+            slots.prop(self,"key_01", text='TOOL MENU', expand=True)
+            slots.prop(self,"key_02", text='PROP MENU', expand=True)
+            slots.prop(self,"key_03", text='TOOLSET', expand=True)
+            slots.prop(self,"key_04", text='FLOATER OUTLINER', expand=True)
+            slots.prop(self,"key_05", text='FLOATER PROPS', expand=True)
+            slots.prop(self,"key_06", text='FLOATER SHADER', expand=True)
+            slots.prop(self,"key_07", text='FLOATER UV', expand=True)
+            slots.prop(self,"key_08", text='FLOATER IMAGE', expand=True)
+            slots.prop(self,"key_09", text='FLOATER GEO', expand=True)
+            slots.prop(self,"key_10", text='FLOATER BAKE', expand=True)
+
+#KEY MAPS-----------------------------------------------------------------------------------------------------------------------
+
+def register_keymaps():
+
+    wm = bpy.context.window_manager
+    kc = wm.keyconfigs.addon
+    if kc:
+
+    # 3D VIEW
+        km = wm.keyconfigs.addon.keymaps.new(name='3D View', space_type='VIEW_3D')
+
+        # modes pie
+        kmi = km.keymap_items.new('wm.call_menu_pie', bpy.context.preferences.addons[__package__].preferences.key_00, 'PRESS', ctrl=False, shift=False, alt=False)
+        kmi.properties.name = "OBJECT_MT_modes_menu"
+        addon_keymaps.append((km, kmi))
+
+        # tools panel
+        kmi = km.keymap_items.new('wm.call_panel', bpy.context.preferences.addons[__package__].preferences.key_01, 'PRESS', ctrl=False, shift=False, alt=False)
+        kmi.properties.name = "OBJECT_PT_tool_menu"
+        kmi.properties.keep_open = True
+        addon_keymaps.append((km, kmi))
+
+        # toolset hud
+        kmi = km.keymap_items.new('xm.toolset', bpy.context.preferences.addons[__package__].preferences.key_03, 'PRESS', ctrl=False, shift=False, alt=False)
+        addon_keymaps.append((km, kmi))
+
+    # WINDOW
+        km = wm.keyconfigs.addon.keymaps.new(name='Window', space_type='EMPTY')
+
+        # tools panel
+        kmi = km.keymap_items.new('wm.call_panel', bpy.context.preferences.addons[__package__].preferences.key_02, 'PRESS', ctrl=False, shift=False, alt=False)
+        kmi.properties.name = "OBJECT_PT_prop_menu"
+        addon_keymaps.append((km, kmi))
+
+        # floaters
+        kmi = km.keymap_items.new('xm.floater_01', bpy.context.preferences.addons[__package__].preferences.key_04, 'PRESS', ctrl=False, shift=False, alt=False)
+        addon_keymaps.append((km, kmi))
+        kmi = km.keymap_items.new('xm.floater_02', bpy.context.preferences.addons[__package__].preferences.key_05, 'PRESS', ctrl=False, shift=False, alt=False)
+        addon_keymaps.append((km, kmi))
+        kmi = km.keymap_items.new('xm.floater_03', bpy.context.preferences.addons[__package__].preferences.key_06, 'PRESS', ctrl=False, shift=False, alt=False)
+        addon_keymaps.append((km, kmi))
+        kmi = km.keymap_items.new('xm.floater_04', bpy.context.preferences.addons[__package__].preferences.key_07, 'PRESS', ctrl=False, shift=False, alt=False)
+        addon_keymaps.append((km, kmi))
+        kmi = km.keymap_items.new('xm.floater_05', bpy.context.preferences.addons[__package__].preferences.key_08, 'PRESS', ctrl=False, shift=False, alt=False)
+        addon_keymaps.append((km, kmi))
+        kmi = km.keymap_items.new('xm.floater_06', bpy.context.preferences.addons[__package__].preferences.key_09, 'PRESS', ctrl=False, shift=False, alt=False)
+        addon_keymaps.append((km, kmi))
+        kmi = km.keymap_items.new('xm.floater_07', bpy.context.preferences.addons[__package__].preferences.key_10, 'PRESS', ctrl=False, shift=False, alt=False)
+        addon_keymaps.append((km, kmi))
+
+
+def unregister_keymaps():
+
+    for km, kmi in addon_keymaps:
+        km.keymap_items.remove(kmi)
+    addon_keymaps.clear()
 
 #-----------------------------------------------------------------------------------------------------------------------
+addon_keymaps = []
 
 def register() :
     bpy.utils.register_class(XPrefs)
+    register_keymaps()
 
 def unregister() :
     bpy.utils.unregister_class(XPrefs)
+    unregister_keymaps()
 
 

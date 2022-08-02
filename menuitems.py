@@ -21,6 +21,16 @@ def HeaderInset(self, context):
     row.ui_units_x = inset
     row.label(text=' ')
 
+def insert_space(layout, space=0):
+    col = layout.column()
+    col.ui_units_x = space
+    col.separator()
+
+def insert_line(layout):
+    row = layout.row(align=True)
+    row.scale_y = 0.6
+    row.alignment = 'CENTER'
+    row.label(text='-----------------------------------------------------')
 
 #HUD-----------------------------------------------------------------------------------------------
 
@@ -88,7 +98,6 @@ def ModeSelector(self, context, layout):
             subsub = sub.box()
             #subsub.ui_units_x = 1
             subsub.label(text=' GP ')
-            subsub.label(text="NONE")
             sub.active = False if context.mode == "WEIGHT_GPENCIL" else True
             sub.operator("object.mode_set", text="", icon="WPAINT_HLT").mode = 'WEIGHT_GPENCIL'
             sub = row.row(align=True)
@@ -118,26 +127,26 @@ def PaintHud(layout, brush, self, context):
     ptr = ups if ups.use_unified_size else paint_settings(context).brush
     pts = ups if ups.use_unified_strength else paint_settings(context).brush
 
-    sub = layout.row(align=True)
-    sub.scale_x = 1.2
-    sub.operator("brush.scale_size", icon='TRIA_LEFT', text="").scalar=0.8
+    row = layout.row(align=True)
+    row.scale_x = 1.2
+    row.operator("brush.scale_size", icon='TRIA_LEFT', text="").scalar=0.8
 
-    sub = layout.row(align=True)
-    sub.ui_units_x = 6
-    sub.prop(ptr, "size", slider=True)
-    sub.prop(brush, "use_pressure_size", slider=True, text="")
+    row = layout.row(align=True)
+    row.ui_units_x = 6
+    row.prop(ptr, "size", slider=True)
+    row.prop(brush, "use_pressure_size", slider=True, text="")
 
-    sub = layout.row(align=True)
-    sub.scale_x = 1.2
-    sub.operator("brush.scale_size", icon='TRIA_RIGHT', text="").scalar=1.2
+    row = layout.row(align=True)
+    row.scale_x = 1.2
+    row.operator("brush.scale_size", icon='TRIA_RIGHT', text="").scalar=1.2
 
     layout.separator(factor = 1)
 
-    sub = layout.row(align=True)
-    sub.separator(factor = 0.4)
-    sub.ui_units_x = 6
-    sub.prop(pts, "strength", slider=True)
-    sub.prop(brush, "use_pressure_strength", slider=True, text="")
+    row = layout.row(align=True)
+    row.separator(factor = 0.4)
+    row.ui_units_x = 6
+    row.prop(pts, "strength", slider=True)
+    row.prop(brush, "use_pressure_strength", slider=True, text="")
 
 
 def GPPaintHud(layout, context, brush, *, compact=True):
