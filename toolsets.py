@@ -160,7 +160,7 @@ Tools_Weight= [
                 ]
 Tools_GP_Draw= [
                 ('',                    '',                                 '',             '',                                 ''),
-                ('PEN',                 'builtin_brush.Draw',               '',             'brush.gpencil_draw.draw',          ''),
+                ('PEN',                 'builtin_brush.Draw',               'Pen',             'brush.gpencil_draw.draw',          ''),
                 ('FILL',                'builtin_brush.Fill',               '',             'brush.gpencil_draw.fill',          ''),
                 ('ERASE',               'builtin_brush.Erase',              '',             'brush.gpencil_draw.erase',         ''),
                 ('TINT',                'builtin_brush.Tint',               '',             'brush.gpencil_draw.tint',          ''),
@@ -173,6 +173,12 @@ Tools_GP_Draw= [
                 ('BOX',                 'builtin.box',                      '',             'ops.gpencil.primitive_box',        ''),
                 ('CIRCLE',              'builtin.circle',                   '',             'ops.gpencil.primitive_circle',     ''),
                 ('INTERPOLATE',         'builtin.interpolate',              '',             'ops.gpencil.primitive_line',       ''),
+                ('INK',                 'builtin_brush.Draw',               'Ink Pen',             'brush.gpencil_draw.draw',          ''),
+                ('PNCIL F',                 'builtin_brush.Draw',               'Pencil',             'brush.gpencil_draw.draw',          ''),
+                ('PNCIL H',                 'builtin_brush.Draw',               'Pencil Soft',             'brush.gpencil_draw.draw',          ''),
+                ('MRK 1',                 'builtin_brush.Draw',               'Marker Chisel',             'brush.gpencil_draw.draw',          ''),
+                ('MRK 2',                 'builtin_brush.Draw',               'Marker Bold',             'brush.gpencil_draw.draw',          ''),
+                ('AIRB',                 'builtin_brush.Draw',               'Airbrush',             'brush.gpencil_draw.draw',          ''),
                 ]
 
 Tools_GP_Edit= [
@@ -216,4 +222,4 @@ Tools_GP_Weight= [
 #bpy.context.workspace.tools.from_space_view3d_mode(bpy.context.mode).idname
 #bpy.context.tool_settings.sculpt.brush
 
-
+#bpy.data.brushes["Pencil Soft"].name = "Pencil Soft"

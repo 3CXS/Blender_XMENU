@@ -51,9 +51,10 @@ def draw(self, context):
     left.separator(factor = 4.7)
 
     sub = left.row(align=True)
-    subsub = sub.row(align=True)
-    subsub.scale_x = 0.8
-    subsub.popover("OBJECT_PT_viewcam", text='', icon="CAMERA_DATA")
+    funct_bt(layout=sub, cmd='viewcam', tog=True, w=1.8, h=1, label='', icon="CAMERA_DATA")
+    funct_bt(layout=sub, cmd='lockcam', tog=True, w=1.2, h=1, label='', icon="LOCKED")
+    sub.popover("OBJECT_PT_viewcam", text='', icon="SETTINGS")
+    sub.separator(factor = 1)
     funct_bt(layout=sub, cmd='framea', w=2, h=1, label='ALL', icon="NONE")
     funct_bt(layout=sub, cmd='frames', w=2, h=1, label='SEL', icon="NONE")
     funct_bt(layout=sub, cmd='localview',tog=True, w=2, h=1, label='ISO', icon="NONE")
@@ -147,17 +148,6 @@ def draw(self, context):
         brush = context.tool_settings.sculpt.brush
         ColorHud(self, context, layout=mid)
         PaintHud(mid, brush, self, context)
-        mid.separator(factor = 2)
-
-        sub = mid.row(align=True)
-        sub.ui_units_x = 2.5
-        sub.operator("sculpt.dynamic_topology_toggle",
-            depress=True if context.sculpt_object.use_dynamic_topology_sculpting else False,
-            text="DYNA",emboss=True,)
-
-        sub = mid.row(align=True)
-        sub.ui_units_x = 2.5
-        sub.operator('object.voxel_remesh', text="RMESH")
         mid.separator(factor = 2)
 
         sub = mid.row()

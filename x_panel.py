@@ -35,6 +35,7 @@ class XPanel(bpy.types.Panel):
 #LAYOUT-STRUCTURE-----------------------------------------------------------------------------------------
 
         top_row = layout.row()
+
         top_row.alignment = 'CENTER'
 
 
@@ -945,13 +946,24 @@ class XPanel(bpy.types.Panel):
             row.separator()
 
             # toolset:
-            tool_bt(layout=row, cmd=1, w=2.4, h=1.4, text=False, icon='LARGE')
+            sub = row.column(align=True)
+            tool_bt(layout=sub, cmd=1, w=2.4, h=0.7, text=False, icon='OFF')
+            tool_bt(layout=sub, cmd=14, w=2.4, h=0.7, text=False, icon='OFF')
+            sub = row.column(align=True)
+            tool_bt(layout=sub, cmd=15, w=2.7, h=0.7, text=False, icon='OFF')
+            tool_bt(layout=sub, cmd=16, w=2.7, h=0.7, text=False, icon='OFF')
+            sub = row.column(align=True)
+            tool_bt(layout=sub, cmd=17, w=2.7, h=0.7, text=False, icon='OFF')
+            tool_bt(layout=sub, cmd=18, w=2.7, h=0.7, text=False, icon='OFF')
+            sub = row.column(align=True)
+            tool_bt(layout=sub, cmd=19, w=2.4, h=1.4, text=False, icon='OFF')
+
             row.separator()
-            tool_bt(layout=row, cmd=2, w=2.4, h=1.4, text=False, icon='LARGE')
-            tool_bt(layout=row, cmd=3, w=2.4, h=1.4, text=False, icon='LARGE')
-            tool_bt(layout=row, cmd=4, w=2.4, h=1.4, text=False, icon='LARGE')
-            tool_bt(layout=row, cmd=5, w=2.4, h=1.4, text=False, icon='LARGE')
-            tool_bt(layout=row, cmd=6, w=2.4, h=1.4, text=False, icon='LARGE')
+            tool_bt(layout=row, cmd=2, w=2, h=1.4, text=False, icon='LARGE')
+            tool_bt(layout=row, cmd=3, w=2, h=1.4, text=False, icon='LARGE')
+            tool_bt(layout=row, cmd=4, w=2, h=1.4, text=False, icon='LARGE')
+            tool_bt(layout=row, cmd=5, w=2, h=1.4, text=False, icon='LARGE')
+            tool_bt(layout=row, cmd=6, w=2, h=1.4, text=False, icon='LARGE')
             row.separator()
             tool_bt(layout=row, cmd=7, w=1.2, h=1, text=False, icon='IPO_LINEAR')
             tool_bt(layout=row, cmd=8, w=1.2, h=1, text=False, icon='IPO_CONSTANT')
@@ -986,7 +998,58 @@ class XPanel(bpy.types.Panel):
             sub.scale_y = 1
             sub.popover("VIEW3D_PT_tools_grease_pencil_brush_advanced")
 
+    #MAIN-LEFT-------------------------------------------------------------------------------
+            #GPLayers(self, context, layout=col)
+            #col.menu_contents("VIEW3D_MT_Material")
+            #col.menu("GPENCIL_MT_material_context_menu")
+            #col.menu_contents("VIEW3D_MT_GPStroke")
+            #col.menu_contents("VIEW3D_MT_GPFill")
 
+            row = main_leftrow.row()
+
+            # 
+            sub = row.column(align=True)
+            sub.ui_units_x = 10
+            ColorPalette(self, context, layout=sub)
+            #insert_space(row, space=16)
+
+    #MAIN-MID-------------------------------------------------------------------------------
+
+            row = main_midrow.row()
+
+            # 
+            sub = row.column()
+            sub.ui_units_x = 12
+
+            GPLayersWide(self, context, layout=sub) 
+
+            # 
+            sub = row.column()
+            sub.ui_units_x = 8
+            sub.menu_contents("VIEW3D_MT_Material")
+
+
+
+
+
+    #MAIN-RIGHT------------------------------------------------------------------------------
+
+            row = main_rightrow.row()
+
+            # 
+            sub = row.column()
+            sub.ui_units_x = 6
+            sub.menu_contents("VIEW3D_MT_GPStroke")
+
+            # 
+            sub = row.column()
+            sub.ui_units_x = 6
+            sub.menu_contents("VIEW3D_MT_GPFill")
+
+            # 
+            sub = row.column()
+            sub.ui_units_x = 6
+            sub.menu("GPENCIL_MT_material_context_menu")
 #EDIT_GPENCIL----------------------------------------------------------------------------------------
 
         if context.mode == 'EDIT_GPENCIL':

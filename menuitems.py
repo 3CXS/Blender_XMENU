@@ -646,18 +646,17 @@ class ViewCamPanel(bpy.types.Panel):
         active_cam = bpy.context.scene.camera.name
         cam = bpy.data.cameras[active_cam]
 
+        col = layout.column(align=True)
         if bpy.types.WindowManager.viewcam_state == False:
-            col = layout.column(align=True)
             col.prop(view, "lens", text="F")    
             col.prop(view, "clip_start", text="Clip")
             col.prop(view, "clip_end", text="End")
         else:
-            col = layout.column(align=True)
             col.prop(cam, "lens", text="F")    
             col.prop(cam, "clip_start", text="Clip")
             col.prop(cam, "clip_end", text="End")
 
-        row = layout.row(align=True)     
+        row = layout.row(align=True)
         funct_bt(layout=row, cmd='viewcam', tog=True, w=2.4, h=1, label='CAM', icon="NONE")
         funct_bt(layout=row, cmd='lockcam', tog=True, w=1.2, h=1, label='', icon="LOCKED")
         funct_bt(layout=row, cmd='setactive', tog=False, w=1.6, h=1, label='SET', icon="NONE")
@@ -902,13 +901,36 @@ def GPLayers(self, context, layout):
 
         row = layout.row()
         row.ui_units_x = 11
-        layer_rows = 4
+        layer_rows = 3
 
         col = row.column()
         col.template_list("GPENCIL_UL_layer", "", gpd, "layers", gpd.layers, "active_index",
                         rows=layer_rows, sort_reverse=True, sort_lock=True)
         if gpl:
             sub = col.column(align=True)
+            sub.prop(gpl, "blend_mode", text="Blend")
+            sub.prop(gpl, "opacity", text="Opacity", slider=True)
+            sub.prop(gpl, "use_lights")
+
+        col = row.column()
+        sub = col.column(align=True)
+        sub.operator("gpencil.layer_add", icon='ADD', text="")
+        sub.operator("gpencil.layer_remove", icon='REMOVE', text="")
+
+def GPLayersWide(self, context, layout):
+    if context.active_object.type == "GPENCIL":
+        gpd = context.active_object.data
+        gpl = gpd.layers.active
+
+        row = layout.row()
+        row.ui_units_x = 11
+        layer_rows = 3
+
+        row = row.row()
+        row.template_list("GPENCIL_UL_layer", "", gpd, "layers", gpd.layers, "active_index",
+                        rows=layer_rows, sort_reverse=True, sort_lock=True)
+        if gpl:
+            sub = row.column(align=True)
             sub.prop(gpl, "blend_mode", text="Blend")
             sub.prop(gpl, "opacity", text="Opacity", slider=True)
             sub.prop(gpl, "use_lights")
@@ -1857,6 +1879,8 @@ class VIEW3D_MT_remesh(bpy.types.Menu):
 
         sub = col.row(align=True)
         sub.scale_y = 1
+
+
         sub.operator('xm.voxelsize', text='S').size=0.01
         sub.operator('xm.voxelsize', text='M').size=0.02
         sub.operator('xm.voxelsize', text='L').size=0.05

@@ -178,6 +178,7 @@ class SetTool(bpy.types.Operator):
         scene = bpy.context.scene
         space_data = area.spaces.active
         ob = context.active_object
+        mode = context.active_object.mode
 
         if Brush == '':
             with context.temp_override(area=area, region=region, object=ob):
@@ -187,7 +188,7 @@ class SetTool(bpy.types.Operator):
             with context.temp_override(area=area, region=region, object=ob):
                 bpy.ops.wm.tool_set_by_id(name=Tool)
 
-            mode = context.active_object.mode
+
             if mode == 'TEXTURE_PAINT':
                 context.tool_settings.image_paint.brush = bpy.data.brushes[Brush]
             if mode == 'SCULPT':
@@ -201,9 +202,9 @@ class SetTool(bpy.types.Operator):
 
 
         brush = get_brush_mode(self, context)
-
-        if brush != None:
-            brush.xm_brush_texture = brush.xm_brush_texture
+        if mode != 'PAINT_GPENCIL':
+            if brush != None:
+                brush.xm_brush_texture = brush.xm_brush_texture
 
         return {'FINISHED'}
 
@@ -287,7 +288,7 @@ class NormalShading(bpy.types.Operator):
             for area in screen.areas:
                 if area.type == 'VIEW_3D':
                     for polygons in ob.data.polygons:
-                        polygons.use_smooth  = not polygons.use_smooth
+                        polygons.use_smooth = not polygons.use_smooth
         return {'FINISHED'}
 
 class Detailsize(bpy.types.Operator):
@@ -297,21 +298,39 @@ class Detailsize(bpy.types.Operator):
     size: bpy.props.FloatProperty()
 
     def execute(self, context):
-
         context.scene.tool_settings.sculpt.detail_size = self.size
-
         return {'FINISHED'}
+
+class Dyna(bpy.types.Operator):
+    bl_idname = "xm.dyna"
+    bl_label = "DYNA"
+    bpy.types.WindowManager.dyna_state = bpy.props.BoolProperty(default = False)        
+    def execute(self, context):
+        for window in bpy.context.window_manager.windows:
+            screen = window.screen
+            for area in screen.areas:
+                if area.type == 'VIEW_3D':
+                    obj = context.object
+                    bpy.ops.sculpt.dynamic_topology_toggle()
+                    bpy.types.WindowManager.dyna_state = obj.use_dynamic_topology_sculpting
+                    break
+        return {'FINISHED'} 
+
+
 
 class Voxelsize(bpy.types.Operator):
     bl_idname = "xm.voxelsize"
     bl_label = ""
 
     size: bpy.props.FloatProperty()
+    bpy.types.WindowManager.voxelsize_state = bpy.props.BoolProperty(default = False)
 
     def execute(self, context):
         mesh = context.active_object.data
         mesh.remesh_voxel_size = self.size
-        return {'FINISHED'}
+
+        return {'FINISHED'} 
+
 
 class Hide(bpy.types.Operator):
     bl_idname = "xm.hide"
@@ -542,37 +561,6 @@ class MaxArea(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class MoveArea(bpy.types.Operator):
-    bl_idname = "xm.move_area"
-    bl_label = "MoveArea"
-    bpy.types.WindowManager.move_area_state = bpy.props.BoolProperty(default = False)      
-    def execute(self, context):
-
-        for screen in bpy.data.screens:
-            for area in (a for a in screen.areas if a.type == 'VIEW_3D'):
-                region = next((region for region in area.regions if region.type == 'WINDOW'), None)
-                if region is not None:
-                    area = area
-
-        window = bpy.context.window
-        screen =  bpy.context.screen
-        region = area.regions[-1]
-        scene = bpy.context.scene
-        space_data = area.spaces.active
-
-
-        with context.temp_override(area=area, region=region):
-
-            bpy.ops.screen.area_move(x=0, y=0, delta=-100)
-
-
-        bpy.types.WindowManager.move_area_state = not bpy.types.WindowManager.move_area_state
-
-        return {'FINISHED'}
-
-
-
-
 class SetActive(bpy.types.Operator):
     bl_idname = "xm.setactive"
     bl_label = "SetActiveCam"
@@ -708,7 +696,7 @@ class SurfaceDrawMode(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def invoke(self, context, event):
-        # forcing object mode at the beginning, avoids issues when calling this tool from PAINT_WEIGHT mode
+
         bpy.ops.object.mode_set(mode='OBJECT')
 
         scene = context.scene
@@ -756,8 +744,8 @@ class SurfaceDrawMode(bpy.types.Operator):
 
 #-----------------------------------------------------------------------------------------------------------------------
 
-classes = (XRay, ViewCam, Grid, Axis, FrameS, FrameA, LocalView, MaxArea, MoveArea, Persp, LockCam, SetTool, Wire, Hide, 
-           SetActive, Detailsize, Voxelsize, SurfaceDrawMode, FaceOrient, Override, Override1, Override2, NormalShading
+classes = (XRay, ViewCam, Grid, Axis, FrameS, FrameA, LocalView, MaxArea, Persp, LockCam, SetTool, Wire, Hide, 
+           SetActive, Detailsize, Voxelsize, Dyna, SurfaceDrawMode, FaceOrient, Override, Override1, Override2, NormalShading
           )
 
 def register():

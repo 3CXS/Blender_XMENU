@@ -250,6 +250,21 @@ def register_keymaps():
         # toolset hud
         kmi = km.keymap_items.new('xm.toolset', bpy.context.preferences.addons[__package__].preferences.key_03, 'PRESS', ctrl=False, shift=False, alt=False)
         addon_keymaps.append((km, kmi))
+        kmi = km.keymap_items.new('xm.dyna', 'ONE', 'PRESS', ctrl=False, shift=False, alt=True)
+        addon_keymaps.append((km, kmi))
+        kmi = km.keymap_items.new('xm.voxelsize', 'TWO', 'PRESS', ctrl=False, shift=False, alt=True)
+        kmi.properties.size = 0.01
+        addon_keymaps.append((km, kmi))
+        kmi = km.keymap_items.new('xm.voxelsize', 'THREE', 'PRESS', ctrl=False, shift=False, alt=True)
+        kmi.properties.size = 0.02
+        addon_keymaps.append((km, kmi))
+        kmi = km.keymap_items.new('xm.voxelsize', 'FOUR', 'PRESS', ctrl=False, shift=False, alt=True)
+        kmi.properties.size = 0.05
+        addon_keymaps.append((km, kmi))
+
+        kmi = km.keymap_items.new('xm.settool', 'FIVE', 'PRESS', ctrl=False, shift=False, alt=True)
+        kmi.properties.tool_index = 14
+        addon_keymaps.append((km, kmi))
 
     # WINDOW
         km = wm.keyconfigs.addon.keymaps.new(name='Window', space_type='EMPTY')
