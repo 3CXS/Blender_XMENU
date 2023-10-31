@@ -1074,14 +1074,16 @@ def register():
     bpy.types.WindowManager.togxheader_state = True
     bpy.types.VIEW3D_HT_tool_header.prepend(draw_3d_toolsettings)
     bpy.types.VIEW3D_HT_header.prepend(VIEW3D_HT_x_header.draw)
-    bpy.types.IMAGE_HT_header.append(draw_image_header)
     bpy.types.NODE_HT_header.prepend(draw_node_header)
-    
+    bpy.types.IMAGE_HT_header.append(draw_image_header)
+    bpy.types.TEXT_HT_header.append(draw_image_header)
+
 def unregister():
     bpy.types.VIEW3D_HT_tool_header.remove(draw_3d_toolsettings)
     bpy.types.VIEW3D_HT_header.remove(VIEW3D_HT_x_header.draw)
-    bpy.types.TEXT_HT_header.remove(draw_image_header)
     bpy.types.NODE_HT_header.remove(draw_node_header)
+    bpy.types.IMAGE_HT_header.remove(draw_image_header)
+    bpy.types.TEXT_HT_header.remove(draw_image_header)
 
     for cls in classes:
         bpy.utils.unregister_class(cls)

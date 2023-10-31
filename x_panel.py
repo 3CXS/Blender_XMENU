@@ -211,7 +211,8 @@ class XPanel(bpy.types.Panel):
             #Import
             sub = row.column(align=True)
             sub.ui_units_x = 4
-            sub.menu_contents("OBJECT_MT_io_menu")
+            sub.popover("OBJECT_PT_import_panel", text="IMPORT")
+            sub.popover("OBJECT_PT_export_panel", text="EXPORT")
             InsertSpace(row, space=11)
 
             #Selection

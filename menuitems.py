@@ -502,7 +502,7 @@ class IOMenu(bpy.types.Menu):
         layout = self.layout
         layout.use_property_split = False
         layout.use_property_decorate = False
-        file_path = bpy.context.preferences.addons[__package__].preferences.file_path
+        #file_path = bpy.context.preferences.addons[__package__].preferences.file_path
         scene = context.scene
         col = layout.column(align=True)
         col.ui_units_x = 3

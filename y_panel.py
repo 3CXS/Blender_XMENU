@@ -142,13 +142,13 @@ class YPanel(bpy.types.Panel):
             #sub = col.row(align=True)
             #sub.operator_menu_enum("object.modifier_add", "type", text='MODIFIER')
             sub = col.row(align=True)
-            sub.operator("object.modifier_add", text="BVL", icon="NONE").type='BEVEL'
-            sub.operator("object.modifier_add", text="SLD", icon="NONE").type='SOLIDIFY'
-            sub.operator("object.modifier_add", text="SUBD", icon="NONE").type='SUBSURF'
+            #sub.operator("object.modifier_add", text="BVL", icon="NONE").type='BEVEL'
+            #sub.operator("object.modifier_add", text="SLD", icon="NONE").type='SOLIDIFY'
+            #sub.operator("object.modifier_add", text="SUBD", icon="NONE").type='SUBSURF'
             sub = col.row(align=True)
-            sub.operator("object.modifier_add", text="SYM", icon="NONE").type='MIRROR'
-            sub.operator("object.modifier_add", text="RMSH", icon="NONE").type='REMESH'
-            sub.operator("object.modifier_add", text="DEC", icon="NONE").type='DECIMATE'
+            #sub.operator("object.modifier_add", text="SYM", icon="NONE").type='MIRROR'
+            #sub.operator("object.modifier_add", text="RMSH", icon="NONE").type='REMESH'
+            #sub.operator("object.modifier_add", text="DEC", icon="NONE").type='DECIMATE'
 
             # MOD-Window
             sub = col.row(align=True)
