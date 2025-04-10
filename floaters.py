@@ -390,61 +390,6 @@ class Floater_02(bpy.types.Operator):
 
         return {'FINISHED'}
 
-class Floater_03(bpy.types.Operator):
-    bl_idname = "xm.floater_03"
-    bl_label = "MODIFIER"
-
-    bpy.types.WindowManager.floater_03_init = bpy.props.BoolProperty(default = False) 
-    bpy.types.WindowManager.floater_03_state = bpy.props.BoolProperty(default = False)  
-    bpy.types.WindowManager.FloaterWindow_03 = bpy.props.StringProperty()
-
-    def execute(self, context):
-        if bpy.types.WindowManager.floater_03_init == False:
-
-            label = bpy.context.preferences.addons[__package__].preferences.floater_03_name
-            ui_type = bpy.context.preferences.addons[__package__].preferences.floater_03_type
-            loc = bpy.context.preferences.addons[__package__].preferences.floater_03_pos
-            size = bpy.context.preferences.addons[__package__].preferences.floater_03_size
-            alpha = bpy.context.preferences.addons[__package__].preferences.floater_03_alpha
-
-            bpy.ops.screen.area_dupli('INVOKE_DEFAULT')
-            new_window = bpy.context.window_manager.windows[-1]
-            area = new_window.screen.areas[-1]
-
-            space_data = bpy.context.space_data
-            C_dict = gen_C_dict(bpy.context, new_window, area_type='VIEW_3D')
-            C_dict.update(space_data=space_data)
-
-            FloaterWindow = get_active_win()
-            bpy.types.WindowManager.FloaterWindow_03 = FloaterWindow
-
-            set_win_transforms(FloaterWindow, location=loc, size=size, )
-            set_win_text(FloaterWindow, label,)
-            if (alpha!=100):
-                set_win_transparency(FloaterWindow, percentage=alpha, )
-
-            area.ui_type = ui_type
-            UISpace = area.spaces.active
-            UISpace.show_region_header = False
-
-            with context.temp_override(window=new_window, area=area, region = area.regions[0]):
-                bpy.ops.screen.region_toggle(region_type='NAVIGATION_BAR')
-                bpy.context.space_data.context = 'MODIFIER' 
-
-            bpy.types.WindowManager.floater_03_init = True
-            bpy.types.WindowManager.floater_03_state = True
-
-        else:
-            if bpy.types.WindowManager.floater_03_state == True:
-                FloaterWindow = bpy.types.WindowManager.FloaterWindow_03
-                show_win(FloaterWindow, show=False)
-                bpy.types.WindowManager.floater_03_state = False
-            else:
-                FloaterWindow = bpy.types.WindowManager.FloaterWindow_03
-                show_win(FloaterWindow, show=True)
-                bpy.types.WindowManager.floater_03_state = True
-
-        return {'FINISHED'}
 
 class Floater_04(bpy.types.Operator):
     bl_idname = "xm.floater_04"
@@ -630,7 +575,7 @@ class Floater_06(bpy.types.Operator):
 
 #-----------------------------------------------------------------------------------------------------------------------#
 
-classes = (Floater_00, Floater_01, Floater_02, Floater_03, Floater_04, Floater_05, Floater_06, 
+classes = (Floater_00, Floater_01, Floater_02, Floater_04, Floater_05, Floater_06, 
             SetUI_UV, SetUI_Image, SetUI_Text, SetUI_Material, SetUI_Bake, SetUI_Geo, SetUI_Tex, SetUI_Comp)
 
 def register():

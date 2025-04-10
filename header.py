@@ -467,7 +467,6 @@ def draw_3d_toolsettings(self, context):
     else:
         funct_bt(layout=sub, cmd='floater_01', tog=True, w=2, h=1, label='', icon="OUTLINER")
         funct_bt(layout=sub, cmd='floater_02', tog=True, w=2, h=1, label='', icon="PROPERTIES")
-        funct_bt(layout=sub, cmd='floater_03', tog=True, w=2, h=1, label='', icon="MODIFIER")
         funct_bt(layout=sub, cmd='floater_04', tog=True, w=2, h=1, label='', icon="NODE_MATERIAL")
         funct_bt(layout=sub, cmd='floater_05', tog=True, w=2, h=1, label='', icon="IMAGE")
     row.separator(factor = 2)

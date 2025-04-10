@@ -47,12 +47,6 @@ class XPrefs(bpy.types.AddonPreferences):
     floater_02_pos  : bpy.props.FloatVectorProperty(name="Pos", size=2, default=(1960,250),precision=0)
     floater_02_alpha: IntProperty(name="FLOAT ALPHA", default=100)
 
-    floater_03_name : bpy.props.StringProperty(default="3", name="Name",)
-    floater_03_type : bpy.props.StringProperty(default='PROPERTIES')
-    floater_03_size : bpy.props.FloatVectorProperty(name="Size", size=2, default=(500,800),precision=0)
-    floater_03_pos  : bpy.props.FloatVectorProperty(name="Pos", size=2, default=(1960,250),precision=0)
-    floater_03_alpha: IntProperty(name="FLOAT ALPHA", default=100)
-
     floater_04_name : bpy.props.StringProperty(default="4", name="Name",)
     floater_04_type : bpy.props.StringProperty(default='ShaderNodeTree')
     floater_04_size : bpy.props.FloatVectorProperty(name="Size", size=2, default=(900,620),precision=0)
@@ -297,18 +291,6 @@ class XPrefs(bpy.types.AddonPreferences):
             box = col.box()
             kc = wm.keyconfigs.addon
             km = kc.keymaps['Window']
-            kmi = get_hotkey_entry_item(km, 'xm.floater_03')
-            if kmi:
-                box.context_pointer_set("keymap", km)
-                rna_keymap_ui.draw_kmi([], kc, km, kmi, box, 0)
-            else:
-                box.label(text="No hotkey entry found")
-                op = box.operator(Template_Add_Hotkey.bl_idname, text = "Add hotkey entry", icon = 'NONE')
-                op.cmd = 'floater_03'
-
-            box = col.box()
-            kc = wm.keyconfigs.addon
-            km = kc.keymaps['Window']
             kmi = get_hotkey_entry_item(km, 'xm.floater_04')
             if kmi:
                 box.context_pointer_set("keymap", km)
@@ -374,11 +356,6 @@ def add_hotkey(cmd):
             kmi = km.keymap_items.new('xm.floater_02', 'SEVEN', 'PRESS', ctrl=False, shift=False, alt=False)
             kmi.active = True
             addon_keymaps.append((km, kmi))
-        if cmd == 'floater_03':
-            km = wm.keyconfigs.addon.keymaps.new(name='Window', space_type='EMPTY')
-            kmi = km.keymap_items.new('xm.floater_03', 'EIGHT', 'PRESS', ctrl=False, shift=False, alt=False)
-            kmi.active = True
-            addon_keymaps.append((km, kmi))
         if cmd == 'floater_04':
             km = wm.keyconfigs.addon.keymaps.new(name='Window', space_type='EMPTY')
             kmi = km.keymap_items.new('xm.floater_04', 'NINE', 'PRESS', ctrl=False, shift=False, alt=False)
@@ -389,11 +366,6 @@ def add_hotkey(cmd):
             kmi = km.keymap_items.new('xm.floater_05', 'ZERO', 'PRESS', ctrl=False, shift=False, alt=False)
             kmi.active = True
             addon_keymaps.append((km, kmi))
-
-        #Menu
-        #kmi = km.keymap_items.new('wm.call_panel', 'SPACE', 'PRESS', ctrl=True, shift=False, alt=False)
-        #kmi.properties.name = "OBJECT_PT_***_menu"
-        #kmi.properties.keep_open = True
 
 
 class Template_Add_Hotkey(bpy.types.Operator):
@@ -437,7 +409,6 @@ def register():
     add_hotkey(cmd='floater_00')
     add_hotkey(cmd='floater_01')
     add_hotkey(cmd='floater_02')
-    add_hotkey(cmd='floater_03')
     add_hotkey(cmd='floater_04')
     add_hotkey(cmd='floater_05')
     add_hotkey(cmd='floater_06')

@@ -45,11 +45,11 @@ class XPanel(bpy.types.Panel):
         top_row.alignment = 'CENTER'
         # Left-Outer
         top_left_outer = top_row.row()
-        top_left_outer.ui_units_x = 5
+        top_left_outer.ui_units_x = 0
         top_left_outer.alignment = 'LEFT'
         # Left
         top_left = top_row.row(align=True)
-        top_left.ui_units_x = 19
+        top_left.ui_units_x = 24
         top_left.alignment = 'RIGHT'
         # Mid
         top_mid = top_row.row()
@@ -57,11 +57,11 @@ class XPanel(bpy.types.Panel):
         top_mid.ui_units_x = 36
         # Right
         top_right = top_row.row(align=True)
-        top_right.ui_units_x = 19
+        top_right.ui_units_x = 24
         top_right.alignment = 'LEFT'
         # Right-Outer
         top_right_outer = top_row.row()
-        top_right_outer.ui_units_x = 5
+        top_right_outer.ui_units_x = 0
         top_right_outer.alignment = 'RIGHT'
     # Main-Row
         main_row = layout.row()
@@ -112,6 +112,17 @@ class XPanel(bpy.types.Panel):
 
         #TOP-LEFT---------------------------------------------------------------------------------
             row = top_left.row(align=True)
+
+            #Houdini IO
+            sub = row.row(align=True)
+            sub.ui_units_x = 6
+            sub.prop(context.scene, "version_number", text="HOU")
+            sub = row.row(align=True)
+            sub.ui_units_x = 8
+            sub.operator("hb.export_to_houdini", text="SEND")
+            sub.operator("hb.refresh_from_houdini", text="REFRESH")
+
+            row.separator(factor = 2)
 
             #Tools
             tool_bt(layout=row, cmd=6, w=1.2, h=1, text=False, icon='CUSTOM')

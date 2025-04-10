@@ -17,7 +17,6 @@ import numpy as np
 
 def redraw_regions():
     for area in bpy.context.window.screen.areas:
-        #if area.type == 'VIEW_3D':
         for region in area.regions:
             if region.type == 'WINDOW':
                 region.tag_redraw()
@@ -125,24 +124,6 @@ def tool_bt(layout, cmd ,w=1, h=1, text=False, icon="NONE"):
             subcol.scale_y = 0.6
             subcol.label(text=Tools[cmd][0])
 
-
-'''
-override_context = bpy.context.copy() 
-area = [area for area in bpy.context.screen.areas if area.type == "NODE_EDITOR"][-1]
-override_context['window'] = bpy.context.window
-override_context['screen'] = bpy.context.screen
-override_context['area'] = area
-override_context['region'] = area.regions[-1]
-override_context['scene'] = bpy.context.scene
-
-
-areas = [area for area in bpy.context.screen.areas if area.type == "NODE_EDITOR"]
-
-
-for area in areas:
-    bpy.ops.screen.area_close(override_context)
-
-'''
 
 class SetTool(bpy.types.Operator):
     bl_idname = "xm.settool"
@@ -815,10 +796,85 @@ class SurfaceDrawMode(bpy.types.Operator):
         '''
         return {'FINISHED'}
 
+
+# HOUDINI BRIDGE -----------------------------------------------------------------------------------------
+
+def get_geo_base_path():
+    possible_path = os.path.expanduser(os.path.join(os.getenv("JOB", ""), "GEO/",))
+    if os.path.exists(possible_path):
+        return os.path.dirname(possible_path)
+    else:
+        return None
+
+def get_versioned_path(version_number):
+    base = get_geo_base_path()
+    if base:
+        export_path = os.path.join(base, f"Edit_{str(version_number).zfill(2)}_Return.obj")
+        return export_path
+    else:
+        return None
+
+def get_import_path(version_number):
+    base = get_geo_base_path()
+    if base:
+        import_path = os.path.join(base, f"Edit_{str(version_number).zfill(2)}.obj")
+        return import_path
+    else:
+        return None
+
+class Export_to_houdini(bpy.types.Operator):
+    bl_idname = "xm.export_to_houdini"
+    bl_label = "Export to Houdini"
+    bl_description = "Export selected geometry to Houdini as versioned OBJ"
+
+    def execute(self, context):
+        version_number = context.scene.version_number
+        export_path = get_versioned_path(version_number)
+
+        if export_path:
+            os.makedirs(os.path.dirname(export_path), exist_ok=True)
+
+            bpy.ops.export_scene.obj(
+                filepath=export_path,
+                use_selection=True,
+                axis_forward='-Y',
+                axis_up='Z',
+                use_materials=False,
+                use_mesh_modifiers=True
+            )
+            self.report({'INFO'}, f"Exported to {export_path}")
+        else:
+            self.report({'ERROR'}, "Could not determine export path")
+
+        return {'FINISHED'}
+
+class Refresh_from_houdini(bpy.types.Operator):
+    bl_idname = "xm.refresh_from_houdini"
+    bl_label = "Refresh From Houdini"
+    bl_description = "Import versioned OBJ from Houdini"
+
+    def execute(self, context):
+        version_number = context.scene.version_number
+        import_path = get_import_path(version_number)
+
+        if import_path and os.path.exists(import_path):
+            bpy.ops.import_scene.obj(
+                filepath=import_path,
+                axis_forward='-Y',
+                axis_up='Z',
+                use_split_objects=True,
+                use_split_groups=True
+            )
+            self.report({'INFO'}, f"Imported from {import_path}")
+        else:
+            self.report({'ERROR'}, "OBJ not found")
+
+        return {'FINISHED'}
+
 #-----------------------------------------------------------------------------------------------------------------------
 
 classes = (ColorPicker, Floor, ClearScreens, ViewClip, XRay, ViewCam, Grid, Axis, FrameS, FrameA, NewMat, LocalView, MaxArea, Persp, LockCam, SetTool, Wire, Hide, 
-           SetActive, Detailsize, Voxelsize, Dyna, SurfaceDrawMode, FaceOrient, Override, Override1, Override2, NormalShading
+           SetActive, Detailsize, Voxelsize, Dyna, SurfaceDrawMode, FaceOrient, Override, Override1, Override2, NormalShading, Export_to_houdini, Refresh_from_houdini,
           )
 
 def register():

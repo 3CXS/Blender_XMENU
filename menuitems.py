@@ -68,14 +68,23 @@ class ModesMenu(bpy.types.Menu):
 
         #shading
         col = pie.column()
+        col.ui_units_x = 5.8
+        #col.scale_x = 1.5
         col.label(text='')
         col.scale_y = 1.2
         ShadingMode(self, context, col)
         col.label(text='')
         sub = col.row()
         sub.operator("screen.screenshot_area", text="SCREEN")
-        sub.separator(factor=2)
-        sub.label(text='')
+        #sub.label(text='')
+        col.label(text='')
+        sub = col.row()
+        sub.prop(context.scene, "version_number", text="HOU")
+        #sub.label(text='')
+        sub = col.row(align=True)
+        sub.operator("hb.export_to_houdini", text="SEND")
+        sub.operator("hb.refresh_from_houdini", text="REFRESH")
+        #sub.label(text='')
 
         #empty
         col = pie.column()
